@@ -1,0 +1,31 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder", "relationJoins", "tracing"]
+}
+
+generator dbml {
+  provider = "prisma-dbml-generator"
+  output   = "../dbml"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DB_URL")
+}
+
+model Code {
+  code        String     @unique @db.VarChar(20)
+  type        String     @db.VarChar(100)
+  name        String     @db.VarChar(100)
+  description String?
+  createdAt   DateTime?  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt   DateTime?  @updatedAt @map("updated_at") @db.Timestamp(6)
+  deletedAt   DateTime?  @map("deleted_at") @db.Timestamp(6)
+  users       User[]
+  identities  Identity[]
+
+  @@map("codes")
+}

@@ -1,0 +1,168 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table codes {
+  code String [unique, not null]
+  type String [not null]
+  name String [not null]
+  description String
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+  deletedAt DateTime
+  users users [not null]
+  identities identities [not null]
+}
+
+Table stg_directories {
+  id Int [pk, increment]
+  parentId Int
+  name String [not null]
+  path String [unique, not null]
+  totalFiles Decimal [not null, default: 0]
+  totalSize Decimal [not null, default: 0]
+  starred Boolean [not null, default: false]
+  editable Boolean [not null, default: true]
+  removable Boolean [not null, default: true]
+  description String
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+  deletedAt DateTime
+  parent stg_directories
+  children stg_directories [not null]
+  fileDirectories stg_file_directories [not null]
+}
+
+Table stg_files {
+  id Int [pk, increment]
+  fileType String [not null]
+  originalName String [not null]
+  name String [not null]
+  path String [unique, not null]
+  ext String [not null]
+  size Int [not null]
+  attributes Json
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+  deletedAt DateTime
+  fileDirectories stg_file_directories [not null]
+}
+
+Table stg_file_directories {
+  id Int [pk, increment]
+  directoryId Int [not null]
+  fileId Int [not null]
+  dirName String [not null]
+  dirPath String [not null]
+  fileOriginalName String [not null]
+  fileName String [not null]
+  filePath String [not null]
+  ext String [not null]
+  size Int [not null]
+  attributes Json
+  starred Boolean [not null, default: false]
+  editable Boolean [not null, default: true]
+  removable Boolean [not null, default: true]
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+  deletedAt DateTime
+  directory stg_directories
+  file stg_files
+  users users [not null]
+}
+
+Table roles {
+  id Int [pk, increment]
+  name String [not null]
+  slug String [not null]
+  visible Boolean [not null, default: true]
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+  deletedAt DateTime
+  identities identities [not null]
+  permissionsOnRoles permissions_on_roles [not null]
+}
+
+Table permissions {
+  id Int [pk, increment]
+  module String [not null]
+  action String [not null]
+  slug String [not null]
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+  deletedAt DateTime
+  permissionsOnIdentities permissions_on_identities [not null]
+  permissionsOnRoles permissions_on_roles [not null]
+}
+
+Table permissions_on_roles {
+  id Int [pk, increment]
+  roleId Int [not null]
+  permissionId Int [not null]
+  assignedAt DateTime [default: `now()`, not null]
+  permission permissions [not null]
+  role roles [not null]
+}
+
+Table permissions_on_identities {
+  id Int [pk, increment]
+  identityId String [not null]
+  permissionId Int [not null]
+  assignedAt DateTime [default: `now()`, not null]
+  identity identities [not null]
+  permission permissions [not null]
+}
+
+Table identities {
+  id String [pk]
+  roleId Int [not null]
+  username String [not null]
+  password String [not null]
+  status String [not null]
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+  deletedAt DateTime
+  disabledAt DateTime
+  role roles [not null]
+  user users [not null]
+  code codes [not null]
+  permissionsOnIdentities permissions_on_identities [not null]
+}
+
+Table users {
+  id String [pk]
+  type String [not null]
+  name String [not null]
+  email String
+  pictureId Int
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+  deletedAt DateTime
+  identity identities
+  code codes [not null]
+  picture stg_file_directories
+}
+
+Ref: stg_directories.parentId - stg_directories.id
+
+Ref: stg_file_directories.directoryId > stg_directories.id
+
+Ref: stg_file_directories.fileId > stg_files.id
+
+Ref: permissions_on_roles.permissionId > permissions.id
+
+Ref: permissions_on_roles.roleId > roles.id
+
+Ref: permissions_on_identities.identityId > identities.id
+
+Ref: permissions_on_identities.permissionId > permissions.id
+
+Ref: identities.roleId > roles.id
+
+Ref: identities.id - users.id
+
+Ref: identities.status > codes.code
+
+Ref: users.type > codes.code
+
+Ref: users.pictureId > stg_file_directories.id

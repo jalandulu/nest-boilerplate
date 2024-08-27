@@ -1,0 +1,83 @@
+model Role {
+  id                 Int                  @id @default(autoincrement())
+  name               String               @db.VarChar(50)
+  slug               String               @db.VarChar(50)
+  visible            Boolean              @default(true)
+  createdAt          DateTime?            @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt          DateTime?            @updatedAt @map("updated_at") @db.Timestamp(6)
+  deletedAt          DateTime?            @map("deleted_at") @db.Timestamp(6)
+  identities         Identity[]
+  permissionsOnRoles PermissionsOnRoles[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id                      Int                       @id @default(autoincrement())
+  module                  String                    @db.VarChar(50)
+  action                  String                    @db.VarChar(50)
+  slug                    String                    @db.VarChar(100)
+  createdAt               DateTime?                 @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt               DateTime?                 @updatedAt @map("updated_at") @db.Timestamp(6)
+  deletedAt               DateTime?                 @map("deleted_at") @db.Timestamp(6)
+  permissionsOnIdentities PermissionsOnIdentities[]
+  permissionsOnRoles      PermissionsOnRoles[]
+
+  @@map("permissions")
+}
+
+model PermissionsOnRoles {
+  id           Int        @id @default(autoincrement())
+  roleId       Int        @map("role_id")
+  permissionId Int        @map("permission_id")
+  assignedAt   DateTime   @default(now())
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  role         Role       @relation(fields: [roleId], references: [id])
+
+  @@map("permissions_on_roles")
+}
+
+model PermissionsOnIdentities {
+  id           Int        @id @default(autoincrement())
+  identityId   String     @map("identity_id")
+  permissionId Int        @map("permission_id")
+  assignedAt   DateTime   @default(now()) @map("assigned_at")
+  identity     Identity   @relation(fields: [identityId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@map("permissions_on_identities")
+}
+
+model Identity {
+  id                      String                    @id @default(uuid())
+  roleId                  Int                       @map("role_id")
+  username                String                    @db.VarChar(255)
+  password                String                    @db.VarChar(255)
+  status                  String                    @db.VarChar(20)
+  createdAt               DateTime?                 @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt               DateTime?                 @updatedAt @map("updated_at") @db.Timestamp(6)
+  deletedAt               DateTime?                 @map("deleted_at") @db.Timestamp(6)
+  disabledAt              DateTime?                 @db.Timestamp(6)
+  role                    Role                      @relation(fields: [roleId], references: [id])
+  user                    User                      @relation(fields: [id], references: [id])
+  code                    Code                      @relation(fields: [status], references: [code])
+  permissionsOnIdentities PermissionsOnIdentities[]
+
+  @@map("identities")
+}
+
+model User {
+  id        String            @id @default(uuid())
+  type      String            @db.VarChar(20)
+  name      String            @db.VarChar(255)
+  email     String?           @db.VarChar(255)
+  pictureId Int?
+  createdAt DateTime?         @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime?         @updatedAt @map("updated_at") @db.Timestamp(6)
+  deletedAt DateTime?         @map("deleted_at") @db.Timestamp(6)
+  identity  Identity?
+  code      Code              @relation(fields: [type], references: [code])
+  picture   StgFileDirectory? @relation(fields: [pictureId], references: [id])
+
+  @@map("users")
+}
