@@ -109,7 +109,7 @@ export class FileDirectoryService {
         name: directory.name,
         path: directory.path,
         totalSize: directory.totalSize.toNumber(),
-        totalFiles: directory.totalFiles.toNumber(),
+        totalFiles: directory.totalFiles,
       },
     });
   }

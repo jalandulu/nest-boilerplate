@@ -1,3 +1,4 @@
+import { ISendMailOptions } from '@nestjs-modules/mailer';
 import { Process, Processor } from '@nestjs/bull';
 import { Injectable, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
@@ -12,21 +13,11 @@ export class SendEmailProcessor {
   constructor(private readonly mailer: IMailerServiceProvider) {}
 
   @Process(QueueMailerProcessor.SendEmail)
-  async handle(job: Job<{ link?: string }>) {
+  async handle({ data }: Job<ISendMailOptions>) {
     this.logger.verbose(`Queue Start: ${QueueMailerProcessor.SendEmail}`);
 
-    const link = job.data.link ?? 'http://localhost:3000';
-
-    this.logger.verbose(`Queue Data: ${JSON.stringify(job.data)}`);
-
-    await this.mailer.send({
-      to: 'boilerplate@nestjs.com',
-      subject: 'Email',
-      template: 'email',
-      context: {
-        link: link,
-      },
-    });
+    this.logger.verbose(`Queue Data: ${JSON.stringify(data)}`);
+    await this.mailer.send(data);
 
     this.logger.verbose(`Queue Completed: ${QueueMailerProcessor.SendEmail}`);
   }

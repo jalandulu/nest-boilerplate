@@ -1,9 +1,9 @@
 import { Global, Module } from '@nestjs/common';
-import { FirebaseModule } from './firebase/firebase.module';
+import { MqttModule } from './mqtt';
 
 @Global()
 @Module({
-  imports: [FirebaseModule],
-  exports: [FirebaseModule],
+  imports: [MqttModule],
+  exports: [MqttModule],
 })
 export class NotificationServiceModule {}

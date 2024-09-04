@@ -1,6 +1,7 @@
 import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
+import { Message } from 'firebase-admin/lib/messaging/messaging-api';
 import { QueueNotificationProcessor } from 'src/cores/consts';
 import { INotificationServiceProvider } from 'src/cores/contracts';
 
@@ -11,12 +12,12 @@ export class SendNotificationProcessor {
   constructor(private readonly notification: INotificationServiceProvider) {}
 
   @Process(QueueNotificationProcessor.SendNotification)
-  handle(job: Job) {
+  handle({ data }: Job<Message>) {
     this.logger.verbose(
       `Notification Send: ${QueueNotificationProcessor.SendNotification}`,
     );
-    this.logger.verbose(`Notification Data: ${job.data}`);
+    this.logger.verbose(`Notification Data: ${data}`);
 
-    this.notification.send(job.data);
+    this.notification.send(data);
   }
 }

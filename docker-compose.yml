@@ -24,12 +24,12 @@ services:
       - redis_data:/data
 
   smtp:
-    image: haravich/fake-smtp-server
+    image: rnwood/smtp4dev
     container_name: nest_boilerplate_smtp
-    restart: on-failure
+    restart: always
     ports:
-      - "1025:1025"
-      - "1080:1080"
+      - "3030:80"
+      - "2525:25"
 
   mqtt5:
     image: eclipse-mosquitto

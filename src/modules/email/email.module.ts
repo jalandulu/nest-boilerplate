@@ -5,9 +5,12 @@ import { AuthService } from 'src/services';
 import { JwtStrategy } from 'src/middlewares/strategies';
 import { IJwtRepository } from 'src/cores/interfaces';
 import { JwtRepository } from 'src/infrastructures/repositories';
-import { IMailerServiceProvider } from 'src/cores/contracts';
+import {
+  IMailerServiceProvider,
+  IQueueServiceProvider,
+} from 'src/cores/contracts';
 import { NodemailerService } from 'src/infrastructures/mailer';
-import { BullModule } from 'src/infrastructures/queue';
+import { BullModule, BullQueueService } from 'src/infrastructures/queue';
 
 @Module({
   imports: [BullModule],
@@ -18,6 +21,7 @@ import { BullModule } from 'src/infrastructures/queue';
     AuthService,
     { provide: IJwtRepository, useClass: JwtRepository },
     { provide: IMailerServiceProvider, useClass: NodemailerService },
+    { provide: IQueueServiceProvider, useClass: BullQueueService },
   ],
 })
 export class EmailModule {}

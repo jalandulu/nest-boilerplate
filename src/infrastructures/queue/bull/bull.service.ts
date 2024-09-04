@@ -7,16 +7,16 @@ import { IQueueServiceProvider } from 'src/cores/contracts';
 export class BullQueueService
   implements IQueueServiceProvider, OnApplicationBootstrap
 {
-  // notification: Queue<any>;
+  notification: Queue<any>;
   mailer: Queue<any>;
 
   constructor(
-    // @InjectQueue('notification') private readonly notificationQueue: Queue,
+    @InjectQueue('notification') private readonly notificationQueue: Queue,
     @InjectQueue('mailer') private readonly mailerQueue: Queue,
   ) {}
 
   onApplicationBootstrap() {
-    // this.notification = this.notificationQueue;
+    this.notification = this.notificationQueue;
     this.mailer = this.mailerQueue;
   }
 }

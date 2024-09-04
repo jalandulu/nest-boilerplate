@@ -19,7 +19,7 @@ Table stg_directories {
   parentId Int
   name String [not null]
   path String [unique, not null]
-  totalFiles Decimal [not null, default: 0]
+  totalFiles Int [not null, default: 0]
   totalSize Decimal [not null, default: 0]
   starred Boolean [not null, default: false]
   editable Boolean [not null, default: true]
