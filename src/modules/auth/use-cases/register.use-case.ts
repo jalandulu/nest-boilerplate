@@ -3,7 +3,6 @@ import { AuthService, IdentityService, RoleService } from 'src/services';
 import { Transactional } from '@nestjs-cls/transactional';
 import { UserService } from 'src/services/user/user.service';
 import { RegisterRequest } from '../requests';
-import { FileDirectoryService } from 'src/services/storage';
 import { UserType } from 'src/cores/enums';
 import { Prisma } from '@prisma/client';
 
@@ -14,20 +13,10 @@ export class RegisterUseCase {
     private readonly roleService: RoleService,
     private readonly userService: UserService,
     private readonly identityService: IdentityService,
-    private readonly fileDirectoryService: FileDirectoryService,
   ) {}
 
   @Transactional()
   async register(registerRequest: RegisterRequest) {
-    if (registerRequest.pictureId) {
-      const picture = await this.fileDirectoryService.save({
-        dirname: 'user-picture',
-        fileId: registerRequest.pictureId,
-      });
-
-      registerRequest.pictureId = picture.id;
-    }
-
     const role = await this.roleService.findBySlug<
       Prisma.RoleGetPayload<{
         include: {
@@ -57,7 +46,6 @@ export class RegisterUseCase {
         type: UserType.Operator,
         name: registerRequest.name,
         email: registerRequest.email,
-        pictureId: registerRequest.pictureId,
       },
       {
         picture: true,

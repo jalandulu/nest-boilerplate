@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { IsExists, IsUnique } from 'src/middlewares/validators';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsUnique } from 'src/middlewares/validators';
 
 export class RegisterRequest {
   @IsNotEmpty()
@@ -19,9 +19,4 @@ export class RegisterRequest {
   @IsString()
   @ApiProperty()
   password: string;
-
-  @IsOptional()
-  @IsExists('stgFile', 'id')
-  @ApiProperty()
-  pictureId: number;
 }
