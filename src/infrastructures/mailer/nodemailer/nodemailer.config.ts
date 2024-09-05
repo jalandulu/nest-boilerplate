@@ -9,7 +9,7 @@ import { IMailServiceEnv } from 'src/cores/interfaces';
 export class NodemailerConfigService implements MailerOptionsFactory {
   constructor(private readonly configService: ConfigService) {}
 
-  private get _transport() {
+  private get _transport(): MailerOptions['transport'] {
     const smtp = this.configService.get<IMailServiceEnv>('smtp');
 
     return {
@@ -25,10 +25,15 @@ export class NodemailerConfigService implements MailerOptionsFactory {
   }
 
   createMailerOptions(): MailerOptions | Promise<MailerOptions> {
+    const from = this.configService.get<IMailServiceEnv['from']>('smtp.from');
+
     return {
       transport: this._transport,
       defaults: {
-        from: this.configService.get<string>('smtp.from'),
+        from: {
+          name: from.name,
+          address: from.address,
+        },
       },
       template: {
         dir: path.join(

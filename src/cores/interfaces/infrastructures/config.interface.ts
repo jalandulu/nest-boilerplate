@@ -29,7 +29,10 @@ export interface ICacheServiceEnv extends IEnvironment {
 export interface IMailServiceEnv extends IEnvironment {
   username: string;
   password: string;
-  from: string;
+  from?: {
+    name?: string;
+    address?: string;
+  };
   ignoreTLS: boolean;
   secure: boolean;
 }

@@ -57,3 +57,5 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 /docker/mqtt5_data
 ecosystem.config.js
+
+documentation

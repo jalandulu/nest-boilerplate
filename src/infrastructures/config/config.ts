@@ -25,7 +25,10 @@ export default () => {
       port: parseInt(process.env.SMTP_PORT),
       username: process.env.SMTP_USERNAME,
       password: process.env.SMTP_PASSWORD,
-      from: process.env.SMTP_FROM,
+      from: {
+        name: process.env.SMTP_FROM_NAME,
+        address: process.env.SMTP_FROM_ADDRESS,
+      },
       ignoreTLS: process.env.SMTP_IGNORE_TLS === 'true',
       secure: process.env.SMTP_SECURE === 'true',
     },
