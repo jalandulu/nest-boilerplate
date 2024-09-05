@@ -1,10 +1,10 @@
 import { Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/middlewares/guards';
+import { AccessAuthGuard } from 'src/middlewares/guards';
 import { INotificationServiceProvider } from 'src/cores/contracts';
 
 @ApiTags('Notification')
-@UseGuards(JwtAuthGuard)
+@UseGuards(AccessAuthGuard)
 @Controller({
   path: 'notification',
   version: '1.0',

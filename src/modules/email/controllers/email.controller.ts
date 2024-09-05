@@ -1,6 +1,6 @@
 import { Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/middlewares/guards';
+import { AccessAuthGuard } from 'src/middlewares/guards';
 import {
   IMailerServiceProvider,
   IQueueServiceProvider,
@@ -8,7 +8,7 @@ import {
 import { QueueMailerProcessor } from 'src/cores/consts';
 
 @ApiTags('Email')
-@UseGuards(JwtAuthGuard)
+@UseGuards(AccessAuthGuard)
 @Controller({
   path: 'email',
   version: '1.0',

@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { StorageCode } from 'src/cores/enums';
+import { S3 } from 'src/infrastructures/storage/globals';
 import { IsExists } from 'src/middlewares/validators';
 
 export class UploadRequest {

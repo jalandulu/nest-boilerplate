@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { MultipartOptions } from '../interfaces';
 import { MultipartFile } from '@fastify/multipart';
+import { S3 } from '../globals';
 
 export const getFileFromPart = async (
   part: MultipartFile,

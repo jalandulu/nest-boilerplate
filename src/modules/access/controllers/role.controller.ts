@@ -20,11 +20,11 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { RoleMapper } from '../mappers/role.mapper';
 import { RoleUseCase } from '../use-cases';
-import { JwtAuthGuard, PermissionGuard } from 'src/middlewares/guards';
+import { AccessAuthGuard, PermissionGuard } from 'src/middlewares/guards';
 import { Permissions } from 'src/common/decorators';
 
 @ApiTags('Roles')
-@UseGuards(JwtAuthGuard, PermissionGuard)
+@UseGuards(AccessAuthGuard, PermissionGuard)
 @Controller({
   path: 'access/roles',
   version: '1.0',

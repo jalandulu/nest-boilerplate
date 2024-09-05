@@ -1,5 +1,6 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import * as fastify from 'fastify';
+import { S3 } from '../globals';
 
 export const Files = createParamDecorator(
   async (

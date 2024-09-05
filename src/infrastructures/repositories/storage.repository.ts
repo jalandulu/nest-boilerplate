@@ -4,6 +4,7 @@ import { IStorageServiceProvider } from 'src/cores/contracts';
 import { IStorageUploadEntity } from 'src/cores/entities';
 import { IStorageRepository } from 'src/cores/interfaces';
 import * as mime from 'mime-types';
+import { S3 } from '../storage/globals';
 
 @Injectable()
 export class StorageRepository implements IStorageRepository {

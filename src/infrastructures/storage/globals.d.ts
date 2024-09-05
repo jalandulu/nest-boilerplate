@@ -1,4 +1,6 @@
-declare namespace S3 {
+// import { FastifyRequest as OriginalFastifyRequest } from 'fastify';
+
+export declare namespace S3 {
   interface MultipartFile {
     buffer: Buffer;
     filename: string;

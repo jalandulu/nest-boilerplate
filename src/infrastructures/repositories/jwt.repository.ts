@@ -37,7 +37,7 @@ export class JwtRepository implements IJwtRepository {
     return await this.jwt.verifyAsync<JwtEntity>(token);
   }
 
-  private getExpiration({ scope }: { scope: TokenScope }) {
+  getExpiration({ scope }: { scope: TokenScope }) {
     const expirations: Record<TokenScope, number> = {
       access: this.DEFAULT_EXPIRATION,
       refresh: this.DEFAULT_EXPIRATION * 60,

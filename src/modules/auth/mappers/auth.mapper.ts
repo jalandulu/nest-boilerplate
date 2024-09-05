@@ -27,6 +27,7 @@ export class AuthMapper {
       data: {
         profile: await this.profileMap(auth.profile),
         accessToken: auth.accessToken,
+        refreshToken: auth.refreshToken,
         abilities: auth.abilities,
       },
     };

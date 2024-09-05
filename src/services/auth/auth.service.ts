@@ -6,7 +6,7 @@ import { IJwtServiceEnv } from 'src/cores/interfaces';
 import { ICacheServiceProvider } from 'src/cores/contracts';
 import { Hash } from 'src/common/helpers';
 import { LocalAuthEntity } from 'src/cores/entities';
-import { AccountStatus } from 'src/cores/enums';
+import { AccountStatus, TokenScope } from 'src/cores/enums';
 import { JwtService } from './jwt.service';
 import { ExtendedPrismaClient } from 'src/infrastructures/database/prisma/prisma.extension';
 
@@ -81,59 +81,103 @@ export class AuthService {
     return identity;
   }
 
-  async attempt({ localAuth }: { localAuth: LocalAuthEntity }) {
+  async attempt({
+    localAuth,
+  }: {
+    localAuth: LocalAuthEntity;
+  }): Promise<{ accessToken: string; refreshToken?: string }> {
     const permissions = localAuth.permissions.map((p) => p.slug);
 
-    const accessToken = await this.jwtService.accessToken({
+    const token: { accessToken: string; refreshToken?: string } = {
+      accessToken: '',
+      refreshToken: undefined,
+    };
+
+    token.accessToken = await this.jwtService.accessToken({
       userId: localAuth.id,
       username: localAuth.username,
     });
 
+    if (this.isRefreshStrategy()) {
+      token.refreshToken = await this.jwtService.refreshToken({
+        userId: localAuth.id,
+        username: localAuth.username,
+      });
+    }
+
     await Promise.all([
       this.destroy(localAuth.id),
-      this.setAccessToken(localAuth.id, accessToken),
+      this.setAccessToken(localAuth.id, token.accessToken),
+      this.setRefreshToken(localAuth.id, token.refreshToken),
       this.setPermissions(localAuth.id, permissions),
       this.setUser(localAuth.id, localAuth),
       this.setCacheStrategy(localAuth.id),
     ]);
 
-    return accessToken;
+    return token;
+  }
+
+  async revalidateToken(userId: string) {
+    const [user, permissions] = await Promise.all([
+      this.user(userId),
+      this.permissions(userId),
+    ]);
+
+    const token: { accessToken: string; refreshToken: string } = {
+      accessToken: '',
+      refreshToken: '',
+    };
+
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.accessToken({
+        userId: user.id,
+        username: user.username,
+      }),
+      this.jwtService.refreshToken({
+        userId: user.id,
+        username: user.username,
+      }),
+    ]);
+
+    token.accessToken = accessToken;
+    token.refreshToken = refreshToken;
+
+    await Promise.all([
+      this.destroy(user.id),
+      this.setAccessToken(user.id, token.accessToken),
+      this.setRefreshToken(user.id, token.refreshToken),
+      this.setPermissions(user.id, permissions),
+      this.setUser(user.id, user),
+      this.setCacheStrategy(user.id),
+    ]);
+
+    return { user, permissions, token };
   }
 
   async destroy(userId: string) {
     await Promise.all([
       this.cacheService.del(`${userId}:accessToken`),
+      this.cacheService.del(`${userId}:refreshToken`),
       this.cacheService.del(`${userId}:permissions`),
       this.cacheService.del(`${userId}:user`),
       this.cacheService.del(`${userId}:caching`),
     ]);
   }
 
-  async accessToken(userId: string) {
-    return await this.cacheService.get<string>(`${userId}:accessToken`);
-  }
-
-  async permissions(userId: string) {
-    return await this.cacheService.get<string[]>(`${userId}:permissions`);
-  }
-
-  async user(userId: string): Promise<LocalAuthEntity> {
-    return await this.cacheService.get<LocalAuthEntity>(`${userId}:user`);
-  }
-
-  async cacheStrategy(userId: string) {
+  async cacheStrategy(userId: string, token: string) {
     const caching = await this.cacheService.get<number | undefined>(
       `${userId}:caching`,
     );
 
     if (!caching) {
-      const [accessToken, permissions, user] = await Promise.all([
-        this.accessToken(userId),
+      const accessToken = await this.accessToken(userId);
+      if (!accessToken) return false;
+      if (accessToken !== token) return false;
+
+      const [permissions, user] = await Promise.all([
         this.permissions(userId),
         this.user(userId),
       ]);
-
-      if (!accessToken) return false;
 
       await Promise.all([
         this.setAccessToken(userId, accessToken),
@@ -145,22 +189,57 @@ export class AuthService {
       return true;
     }
 
-    return caching ? true : false;
+    const cachedAccessToken = await this.accessToken(userId);
+
+    return cachedAccessToken === token;
+  }
+
+  async refreshStrategy(userId: string, token: string) {
+    const cachedRefreshToken = await this.refreshToken(userId);
+    if (!cachedRefreshToken) return false;
+
+    return cachedRefreshToken === token;
+  }
+
+  async accessToken(userId: string) {
+    return await this.cacheService.get<string>(`${userId}:accessToken`);
+  }
+
+  async refreshToken(userId: string) {
+    return await this.cacheService.get<string>(`${userId}:refreshToken`);
+  }
+
+  async permissions(userId: string) {
+    return await this.cacheService.get<string[]>(`${userId}:permissions`);
+  }
+
+  async user(userId: string): Promise<LocalAuthEntity> {
+    return await this.cacheService.get<LocalAuthEntity>(`${userId}:user`);
   }
 
   async setAccessToken(userId: string, accessToken: string) {
     await this.cacheService.set(
       `${userId}:accessToken`,
       accessToken,
-      this.jwtConfig.expiresIn,
+      this.jwtService.expiration({ scope: TokenScope.Access }),
     );
+  }
+
+  async setRefreshToken(userId: string, refreshToken?: string) {
+    if (refreshToken) {
+      await this.cacheService.set(
+        `${userId}:refreshToken`,
+        refreshToken,
+        this.jwtService.expiration({ scope: TokenScope.Refresh }),
+      );
+    }
   }
 
   async setPermissions(userId: string, permissions: string[]) {
     await this.cacheService.set(
       `${userId}:permissions`,
       permissions,
-      this.jwtConfig.expiresIn,
+      this.jwtService.expiration({ scope: this.expirationScope() }),
     );
   }
 
@@ -168,7 +247,7 @@ export class AuthService {
     await this.cacheService.set(
       `${userId}:user`,
       user,
-      this.jwtConfig.expiresIn,
+      this.jwtService.expiration({ scope: this.expirationScope() }),
     );
   }
 
@@ -176,7 +255,7 @@ export class AuthService {
     await this.cacheService.set(
       `${userId}:caching`,
       1,
-      this.jwtConfig.expiresIn,
+      this.jwtService.expiration({ scope: TokenScope.Refresh }),
     );
   }
 
@@ -185,5 +264,13 @@ export class AuthService {
     return reqPermissions.some((permission) =>
       permissions.includes(permission),
     );
+  }
+
+  isRefreshStrategy() {
+    return this.jwtConfig.strategy === 'refresh';
+  }
+
+  expirationScope() {
+    return this.isRefreshStrategy() ? TokenScope.Refresh : TokenScope.Refresh;
   }
 }

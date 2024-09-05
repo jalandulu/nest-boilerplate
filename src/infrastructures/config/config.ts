@@ -41,6 +41,7 @@ export default () => {
       accessKeySecret: process.env.S3_ACCESS_KEY_SECRET,
     },
     jwt: {
+      strategy: process.env.JWT_STRATEGY || 'cache',
       expiresIn: parseInt(process.env.JWT_EXPIRE) || 300,
       secretKey: process.env.JWT_SECRET,
       issuer: process.env.JWT_ISSUER,

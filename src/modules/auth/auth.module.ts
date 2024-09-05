@@ -10,13 +10,22 @@ import {
   FileService,
 } from 'src/services';
 import { AuthService } from 'src/services';
-import { JwtStrategy, LocalStrategy } from 'src/middlewares/strategies';
+import {
+  AccessStrategy,
+  LocalStrategy,
+  RefreshStrategy,
+} from 'src/middlewares/strategies';
 import { IJwtRepository, IStorageRepository } from 'src/cores/interfaces';
 import {
   JwtRepository,
   StorageRepository,
 } from 'src/infrastructures/repositories';
-import { LoginUseCase, RegisterUseCase, LogoutUseCase } from './use-cases';
+import {
+  LoginUseCase,
+  RegisterUseCase,
+  LogoutUseCase,
+  RefreshUseCase,
+} from './use-cases';
 import { AuthMapper } from './mappers/auth.mapper';
 import { FileMapper } from '../storage/mappers';
 
@@ -28,8 +37,10 @@ import { FileMapper } from '../storage/mappers';
     RegisterUseCase,
     LoginUseCase,
     LogoutUseCase,
+    RefreshUseCase,
     LocalStrategy,
-    JwtStrategy,
+    AccessStrategy,
+    RefreshStrategy,
     JwtService,
     AuthService,
     RoleService,

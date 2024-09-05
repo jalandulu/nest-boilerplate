@@ -46,7 +46,7 @@ export class JwtService {
   }: {
     userId: string;
     username: string;
-    permissions: string[];
+    permissions?: string[];
   }) {
     return await this.jwtRepository.generate({
       data: {
@@ -112,5 +112,9 @@ export class JwtService {
     }
 
     return { accessToken, refreshToken };
+  }
+
+  expiration(params: { scope: TokenScope }) {
+    return this.jwtRepository.getExpiration(params);
   }
 }

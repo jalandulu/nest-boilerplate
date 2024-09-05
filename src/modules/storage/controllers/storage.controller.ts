@@ -7,13 +7,14 @@ import {
 } from '@nestjs/common';
 import { MultipleUploadRequest, UploadRequest } from '../requests';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/middlewares/guards';
+import { AccessAuthGuard } from 'src/middlewares/guards';
 import { UploadUseCase } from '../use-cases';
 import { MultipartInterceptor } from 'src/infrastructures/storage/interceptors';
 import { Files } from 'src/infrastructures/storage/decorators';
+import { S3 } from 'src/infrastructures/storage/globals';
 
 @ApiTags('Storage')
-@UseGuards(JwtAuthGuard)
+@UseGuards(AccessAuthGuard)
 @Controller({
   path: 'storages',
   version: '1.0',

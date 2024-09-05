@@ -10,12 +10,14 @@ export type AuthUserMap = Prisma.UserGetPayload<{
 export type AuthMap = {
   profile: AuthUserMap;
   accessToken: string;
+  refreshToken?: string;
   abilities: string[];
 };
 
 export type JwtEntity = {
   sub: string;
   username: string;
+  scope: string;
   permissions?: string[];
   iat: number;
   exp: number;
@@ -43,6 +45,7 @@ export type LocalAuthEntity = {
 export type AuthEntity = {
   profile: AuthUserEntity;
   accessToken: string;
+  refreshToken?: string;
   abilities: string[];
 };
 

@@ -1,5 +1,6 @@
 import { S3ReadStream } from 's3-readstream/dist/S3Readstream';
 import { IStorageUploadEntity } from 'src/cores/entities';
+import { S3 } from 'src/infrastructures/storage/globals';
 
 export abstract class IStorageRepository {
   abstract signedUrl({ path }: { path: string }): Promise<string>;

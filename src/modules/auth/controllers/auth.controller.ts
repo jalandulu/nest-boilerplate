@@ -11,11 +11,15 @@ import {
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { LoginRequest, RegisterRequest } from '../requests';
 import { AuthMapper } from '../mappers/auth.mapper';
-import { LoginUseCase, RegisterUseCase } from '../use-cases';
+import { LoginUseCase, RefreshUseCase, RegisterUseCase } from '../use-cases';
 import { LogoutUseCase } from '../use-cases/logout.use-case';
 import { JwtEntity, LocalAuthEntity } from 'src/cores/entities';
-import { JwtAuthGuard, LocalAuthGuard } from 'src/middlewares/guards';
-import { JwtPayload } from 'src/common/decorators';
+import {
+  AccessAuthGuard,
+  LocalAuthGuard,
+  RefreshAuthGuard,
+} from 'src/middlewares/guards';
+import { AuthPayload } from 'src/common/decorators';
 
 @ApiTags('Authentication')
 @Controller({
@@ -24,23 +28,12 @@ import { JwtPayload } from 'src/common/decorators';
 })
 export class AuthController {
   constructor(
-    private readonly registerUseCase: RegisterUseCase,
     private readonly loginUseCase: LoginUseCase,
+    private readonly registerUseCase: RegisterUseCase,
+    private readonly refreshUseCase: RefreshUseCase,
     private readonly logoutUseCase: LogoutUseCase,
     private readonly authMapper: AuthMapper,
   ) {}
-
-  @Post('register')
-  async register(@Body() registerRequest: RegisterRequest) {
-    const { user, authenticated, abilities } =
-      await this.registerUseCase.register(registerRequest);
-
-    return this.authMapper.toMap({
-      profile: user,
-      accessToken: authenticated,
-      abilities,
-    });
-  }
 
   @Post('login')
   @UseGuards(LocalAuthGuard)
@@ -55,15 +48,43 @@ export class AuthController {
 
     return this.authMapper.toMap({
       profile: user.user,
-      accessToken: authenticated,
+      accessToken: authenticated.accessToken,
+      refreshToken: authenticated.refreshToken,
+      abilities,
+    });
+  }
+
+  @Post('register')
+  async register(@Body() registerRequest: RegisterRequest) {
+    const { user, authenticated, abilities } =
+      await this.registerUseCase.register(registerRequest);
+
+    return this.authMapper.toMap({
+      profile: user,
+      accessToken: authenticated.accessToken,
+      refreshToken: authenticated.refreshToken,
+      abilities,
+    });
+  }
+
+  @Post('refresh')
+  @UseGuards(RefreshAuthGuard)
+  async refresh(@AuthPayload() payload: JwtEntity) {
+    const { user, authenticated, abilities } =
+      await this.refreshUseCase.refresh(payload);
+
+    return this.authMapper.toMap({
+      profile: user,
+      accessToken: authenticated.accessToken,
+      refreshToken: authenticated.refreshToken,
       abilities,
     });
   }
 
   @Delete('logout')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AccessAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async logout(@JwtPayload() payload: JwtEntity) {
+  async logout(@AuthPayload() payload: JwtEntity) {
     await this.logoutUseCase.logout(payload);
   }
 }

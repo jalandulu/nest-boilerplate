@@ -8,7 +8,7 @@ import {
 } from 'src/services';
 import { PermissionMapper, RoleMapper } from './mappers';
 import { PermissionUseCase, RoleUseCase } from './use-cases';
-import { JwtStrategy } from 'src/middlewares/strategies';
+import { AccessStrategy } from 'src/middlewares/strategies';
 import { IJwtRepository } from 'src/cores/interfaces';
 import { JwtRepository } from 'src/infrastructures/repositories';
 import { RoleController } from './controllers/role.controller';
@@ -23,7 +23,7 @@ import { RoleController } from './controllers/role.controller';
     PermissionService,
     RoleUseCase,
     PermissionUseCase,
-    JwtStrategy,
+    AccessStrategy,
     JwtService,
     AuthService,
     { provide: IJwtRepository, useClass: JwtRepository },

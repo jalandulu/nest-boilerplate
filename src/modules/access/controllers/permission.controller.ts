@@ -3,10 +3,10 @@ import { ApiTags } from '@nestjs/swagger';
 import { PermissionMapper } from '../mappers';
 import { PermissionUseCase } from '../use-cases';
 import { Permissions } from 'src/common/decorators';
-import { JwtAuthGuard, PermissionGuard } from 'src/middlewares/guards';
+import { AccessAuthGuard, PermissionGuard } from 'src/middlewares/guards';
 
 @ApiTags('Permissions')
-@UseGuards(JwtAuthGuard, PermissionGuard)
+@UseGuards(AccessAuthGuard, PermissionGuard)
 @Controller({
   path: 'access/permissions',
   version: '1.0',

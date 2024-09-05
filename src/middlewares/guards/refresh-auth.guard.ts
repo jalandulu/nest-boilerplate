@@ -7,7 +7,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthStrategy } from 'src/cores/enums';
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard(AuthStrategy.Access) {
+export class RefreshAuthGuard extends AuthGuard(AuthStrategy.Refresh) {
   canActivate(context: ExecutionContext) {
     return super.canActivate(context);
   }

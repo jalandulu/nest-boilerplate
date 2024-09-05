@@ -51,6 +51,7 @@ export interface IStorageServiceEnv {
 }
 
 export interface IJwtServiceEnv {
+  strategy: 'cache' | 'refresh';
   expiresIn: number;
   secretKey: string;
   issuer: string;
