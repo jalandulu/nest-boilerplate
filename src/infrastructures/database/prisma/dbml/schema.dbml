@@ -2,6 +2,29 @@
 //// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 //// ------------------------------------------------------
 
+Table notification_tokens {
+  id Int [pk, increment]
+  userId String [not null]
+  type String [not null]
+  token String [not null]
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+  user users [not null]
+}
+
+Table notifications {
+  id Int [pk, increment]
+  service String [not null]
+  type String [not null]
+  notifiableType String [not null]
+  notifiableId String [not null]
+  data Json [not null]
+  sentAt DateTime
+  readAt DateTime
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+}
+
 Table codes {
   code String [unique, not null]
   type String [not null]
@@ -30,7 +53,7 @@ Table stg_directories {
   deletedAt DateTime
   parent stg_directories
   children stg_directories [not null]
-  fileDirectories stg_file_directories [not null]
+  fileOnDirectories stg_file_on_directories [not null]
 }
 
 Table stg_files {
@@ -42,13 +65,14 @@ Table stg_files {
   ext String [not null]
   size Int [not null]
   attributes Json
+  uploadedAt DateTime
   createdAt DateTime [default: `now()`]
   updatedAt DateTime
   deletedAt DateTime
-  fileDirectories stg_file_directories [not null]
+  fileOnDirectories stg_file_on_directories [not null]
 }
 
-Table stg_file_directories {
+Table stg_file_on_directories {
   id Int [pk, increment]
   directoryId Int [not null]
   fileId Int [not null]
@@ -140,14 +164,17 @@ Table users {
   deletedAt DateTime
   identity identities
   code codes [not null]
-  picture stg_file_directories
+  picture stg_file_on_directories
+  notificationTokens notification_tokens [not null]
 }
+
+Ref: notification_tokens.userId > users.id
 
 Ref: stg_directories.parentId - stg_directories.id
 
-Ref: stg_file_directories.directoryId > stg_directories.id
+Ref: stg_file_on_directories.directoryId > stg_directories.id
 
-Ref: stg_file_directories.fileId > stg_files.id
+Ref: stg_file_on_directories.fileId > stg_files.id
 
 Ref: permissions_on_roles.permissionId > permissions.id
 
@@ -165,4 +192,4 @@ Ref: identities.status > codes.code
 
 Ref: users.type > codes.code
 
-Ref: users.pictureId > stg_file_directories.id
+Ref: users.pictureId > stg_file_on_directories.id

@@ -23,7 +23,7 @@ export class FileDirectoryService {
   ) {}
 
   async findAll() {
-    return await this.dataService.tx.stgFileDirectory.findMany({
+    return await this.dataService.tx.stgFileOnDirectory.findMany({
       where: {
         deletedAt: null,
       },
@@ -33,13 +33,13 @@ export class FileDirectoryService {
   async findOne(code: StorageCode, fileId: number) {
     const dirPath = Storage.path(code);
 
-    return await this.dataService.tx.stgFileDirectory.findFirst({
+    return await this.dataService.tx.stgFileOnDirectory.findFirst({
       where: { dirPath, fileId },
     });
   }
 
   async create(createFileDirectory: ICreateFileDirectoryDto) {
-    return await this.dataService.tx.stgFileDirectory.create({
+    return await this.dataService.tx.stgFileOnDirectory.create({
       data: {
         directoryId: createFileDirectory.directoryId,
         fileId: createFileDirectory.fileId,
@@ -73,22 +73,26 @@ export class FileDirectoryService {
   }) {
     const file = await this.fileService.findOne(fileId);
 
-    await this.directoryService.updateUsage(directory.id, {
-      totalFiles: directory.totalFiles + 1,
-      totalSize: directory.totalSize + file.size,
-    });
+    const [created] = await Promise.all([
+      this.create({
+        directoryId: directory.id,
+        fileId: fileId,
+        dirName: directory.name,
+        dirPath: directory.path,
+        fileOriginalName: file.originalName,
+        fileName: file.name,
+        filePath: file.path,
+        ext: file.ext,
+        size: file.size,
+      }),
+      this.fileService.uploaded(fileId),
+      this.directoryService.updateUsage(directory.id, {
+        totalFiles: directory.totalFiles + 1,
+        totalSize: directory.totalSize + file.size,
+      }),
+    ]);
 
-    return await this.create({
-      directoryId: directory.id,
-      fileId: fileId,
-      dirName: directory.name,
-      dirPath: directory.path,
-      fileOriginalName: file.originalName,
-      fileName: file.name,
-      filePath: file.path,
-      ext: file.ext,
-      size: file.size,
-    });
+    return created;
   }
 
   async save({
@@ -119,7 +123,7 @@ export class FileDirectoryService {
   }
 
   async remove(id: number) {
-    return await this.dataService.tx.stgFileDirectory.update({
+    return await this.dataService.tx.stgFileOnDirectory.update({
       where: {
         id,
       },
@@ -130,7 +134,7 @@ export class FileDirectoryService {
   }
 
   async removeForce(id: number) {
-    return await this.dataService.tx.stgFileDirectory.delete({
+    return await this.dataService.tx.stgFileOnDirectory.delete({
       where: {
         id,
       },
@@ -138,7 +142,7 @@ export class FileDirectoryService {
   }
 
   async removeMany(ids: number[]) {
-    return await this.dataService.tx.stgFileDirectory.softDeleteMany({
+    return await this.dataService.tx.stgFileOnDirectory.softDeleteMany({
       id: {
         in: ids,
       },
@@ -146,7 +150,7 @@ export class FileDirectoryService {
   }
 
   async removeForceMany(ids: number[]) {
-    return await this.dataService.tx.stgFileDirectory.deleteMany({
+    return await this.dataService.tx.stgFileOnDirectory.deleteMany({
       where: {
         id: {
           in: ids,

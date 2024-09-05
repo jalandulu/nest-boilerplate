@@ -1,62 +1,63 @@
 model StgDirectory {
-  id              Int                @id @default(autoincrement())
-  parentId        Int?
-  name            String             @db.VarChar(100)
-  path            String             @unique
-  totalFiles      Int                @default(0)
-  totalSize       Decimal            @default(0) @db.Decimal(20, 2)
-  starred         Boolean            @default(false)
-  editable        Boolean            @default(true)
-  removable       Boolean            @default(true)
-  description     String?
-  createdAt       DateTime?          @default(now()) @db.Timestamp(6)
-  updatedAt       DateTime?          @updatedAt @db.Timestamp(6)
-  deletedAt       DateTime?          @db.Timestamp(6)
-  parent          StgDirectory?      @relation("DirectorySubDirectory", fields: [parentId], references: [id])
-  children        StgDirectory[]     @relation("DirectorySubDirectory")
-  fileDirectories StgFileDirectory[]
+  id                Int                  @id @default(autoincrement())
+  parentId          Int?                 @map("parent_id")
+  name              String               @db.VarChar(100)
+  path              String               @unique
+  totalFiles        Int                  @default(0) @map("total_files")
+  totalSize         Decimal              @default(0) @map("total_size") @db.Decimal(20, 2)
+  starred           Boolean              @default(false)
+  editable          Boolean              @default(true)
+  removable         Boolean              @default(true)
+  description       String?
+  createdAt         DateTime?            @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt         DateTime?            @updatedAt @map("updated_at") @db.Timestamp(6)
+  deletedAt         DateTime?            @map("deleted_at") @db.Timestamp(6)
+  parent            StgDirectory?        @relation("DirectorySubDirectory", fields: [parentId], references: [id])
+  children          StgDirectory[]       @relation("DirectorySubDirectory")
+  fileOnDirectories StgFileOnDirectory[]
 
   @@map("stg_directories")
 }
 
 model StgFile {
-  id              Int                @id @default(autoincrement())
-  fileType        String             @db.VarChar(20)
-  originalName    String             @db.VarChar(255)
-  name            String             @db.VarChar(255)
-  path            String             @unique @db.VarChar(255)
-  ext             String             @db.VarChar(20)
-  size            Int
-  attributes      Json?
-  createdAt       DateTime?          @default(now()) @db.Timestamp(6)
-  updatedAt       DateTime?          @updatedAt @db.Timestamp(6)
-  deletedAt       DateTime?          @db.Timestamp(6)
-  fileDirectories StgFileDirectory[]
+  id                Int                  @id @default(autoincrement())
+  fileType          String               @map("file_type") @db.VarChar(20)
+  originalName      String               @map("original_name") @db.VarChar(255)
+  name              String               @db.VarChar(255)
+  path              String               @unique @db.VarChar(255)
+  ext               String               @db.VarChar(20)
+  size              Int
+  attributes        Json?
+  uploadedAt        DateTime?            @map("uploaded_at") @db.Timestamp(6)
+  createdAt         DateTime?            @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt         DateTime?            @updatedAt @map("updated_at") @db.Timestamp(6)
+  deletedAt         DateTime?            @map("deleted_at") @db.Timestamp(6)
+  fileOnDirectories StgFileOnDirectory[]
 
   @@map("stg_files")
 }
 
-model StgFileDirectory {
+model StgFileOnDirectory {
   id               Int           @id @default(autoincrement())
-  directoryId      Int
-  fileId           Int
-  dirName          String        @db.VarChar(100)
-  dirPath          String
-  fileOriginalName String        @db.VarChar(255)
-  fileName         String        @db.VarChar(255)
-  filePath         String        @db.VarChar(255)
+  directoryId      Int           @map("directory_id")
+  fileId           Int           @map("file_id")
+  dirName          String        @map("dir_name") @db.VarChar(100)
+  dirPath          String        @map("dir_path")
+  fileOriginalName String        @map("file_original_name") @db.VarChar(255)
+  fileName         String        @map("file_name") @db.VarChar(255)
+  filePath         String        @map("file_path") @db.VarChar(255)
   ext              String        @db.VarChar(20)
   size             Int
   attributes       Json?
   starred          Boolean       @default(false)
   editable         Boolean       @default(true)
   removable        Boolean       @default(true)
-  createdAt        DateTime?     @default(now()) @db.Timestamp(6)
-  updatedAt        DateTime?     @updatedAt @db.Timestamp(6)
-  deletedAt        DateTime?     @db.Timestamp(6)
+  createdAt        DateTime?     @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt        DateTime?     @updatedAt @map("updated_at") @db.Timestamp(6)
+  deletedAt        DateTime?     @map("deleted_at") @db.Timestamp(6)
   directory        StgDirectory? @relation(fields: [directoryId], references: [id])
   file             StgFile?      @relation(fields: [fileId], references: [id])
   users            User[]
 
-  @@map("stg_file_directories")
+  @@map("stg_file_on_directories")
 }
