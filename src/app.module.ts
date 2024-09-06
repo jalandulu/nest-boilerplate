@@ -1,23 +1,15 @@
 import { Module } from '@nestjs/common';
-import { ConfigServiceModule } from './infrastructures/config';
 import { ModulesModule } from './modules';
-import { CacheServiceModule } from './infrastructures/cache';
-import { DataServiceModule } from './infrastructures/database';
-import { QueueServiceModule } from './infrastructures/queue';
-import { StorageServiceModule } from './infrastructures/storage';
-import { JwtServiceModule } from './infrastructures/jwt';
+import { ServiceModule } from './services';
+import { MiddlewareModule } from './middlewares';
+import { InfrastructureModule } from './infrastructures';
 
 @Module({
   imports: [
-    ConfigServiceModule,
-    DataServiceModule,
-    CacheServiceModule,
-    QueueServiceModule,
-    StorageServiceModule,
-    JwtServiceModule,
+    InfrastructureModule,
+    MiddlewareModule,
+    ServiceModule,
     ModulesModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}

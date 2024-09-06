@@ -4,6 +4,7 @@ import {
   AuthMap,
   AuthUserEntity,
   AuthUserMap,
+  NotificationTokenEntity,
 } from 'src/cores/entities';
 import { FileMapper } from 'src/modules/storage/mappers';
 
@@ -22,12 +23,24 @@ export class AuthMapper {
     };
   }
 
+  notificationTokenMap(token: NotificationTokenEntity) {
+    return {
+      type: token.type,
+      token: token.token,
+    };
+  }
+
   async toMap(auth: AuthMap): Promise<{ data: AuthEntity }> {
     return {
       data: {
         profile: await this.profileMap(auth.profile),
         accessToken: auth.accessToken,
         refreshToken: auth.refreshToken,
+        notificationTokens: auth.profile.notificationTokens
+          ? auth.profile.notificationTokens.map((t) =>
+              this.notificationTokenMap(t),
+            )
+          : undefined,
         abilities: auth.abilities,
       },
     };

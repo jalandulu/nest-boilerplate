@@ -19,7 +19,7 @@ export class UploadRequest {
   })
   @IsNotEmpty()
   @IsString()
-  @IsExists('stgDirectory', 'path')
+  @IsExists('StgDirectory', 'path')
   @ValidateIf((o) => o.code === StorageCode.FileManager)
   public dir?: string;
 
@@ -42,7 +42,7 @@ export class MultipleUploadRequest {
   })
   @IsNotEmpty()
   @IsString()
-  @IsExists('stgDirectory', 'path')
+  @IsExists('StgDirectory', 'path')
   @ValidateIf((o) => o.code === StorageCode.FileManager)
   public dir?: string;
 

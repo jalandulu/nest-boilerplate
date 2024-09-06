@@ -1,9 +1,9 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { PermissionMapper } from '../mappers';
-import { PermissionUseCase } from '../use-cases';
 import { Permissions } from 'src/common/decorators';
 import { AccessAuthGuard, PermissionGuard } from 'src/middlewares/guards';
+import { GetPermissionUseCase } from '../use-cases';
 
 @ApiTags('Permissions')
 @UseGuards(AccessAuthGuard, PermissionGuard)
@@ -13,15 +13,13 @@ import { AccessAuthGuard, PermissionGuard } from 'src/middlewares/guards';
 })
 export class PermissionController {
   constructor(
-    private readonly permissionUseCase: PermissionUseCase,
-    private readonly permissionMapper: PermissionMapper,
+    private readonly getUseCase: GetPermissionUseCase,
+    private readonly mapper: PermissionMapper,
   ) {}
 
   @Get()
   @Permissions(['access:permission'])
   async findAll() {
-    return this.permissionMapper.toGroup(
-      await this.permissionUseCase.findAll(),
-    );
+    return this.mapper.toGroup(await this.getUseCase.findAll());
   }
 }

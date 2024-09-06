@@ -35,6 +35,7 @@ export class AuthService {
         user: {
           include: {
             picture: true,
+            notificationTokens: true,
           },
         },
         role: true,

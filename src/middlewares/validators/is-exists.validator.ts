@@ -52,7 +52,7 @@ export class IsExistsValidator implements ValidatorConstraintInterface {
 }
 
 export const IsExists = (
-  table: Uncapitalize<Prisma.ModelName>,
+  table: Prisma.ModelName,
   column: string,
   validationOptions?: ValidationOptions,
 ) => {

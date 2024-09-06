@@ -6,4 +6,8 @@ export namespace Generate {
     const ext = mime.extension(mimetype);
     return randomBytes(16).toString('hex') + '.' + ext;
   }
+
+  export function randomString(size: number = 16) {
+    return randomBytes(size).toString('hex');
+  }
 }

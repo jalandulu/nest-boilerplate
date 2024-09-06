@@ -19,9 +19,15 @@ import {
 } from '../requests';
 import { ApiTags } from '@nestjs/swagger';
 import { RoleMapper } from '../mappers/role.mapper';
-import { RoleUseCase } from '../use-cases';
 import { AccessAuthGuard, PermissionGuard } from 'src/middlewares/guards';
 import { Permissions } from 'src/common/decorators';
+import {
+  CreateRoleUseCase,
+  FindRoleUseCase,
+  GetRoleUseCase,
+  RemoveRoleUseCase,
+  UpdateRoleUseCase,
+} from '../use-cases';
 
 @ApiTags('Roles')
 @UseGuards(AccessAuthGuard, PermissionGuard)
@@ -31,30 +37,34 @@ import { Permissions } from 'src/common/decorators';
 })
 export class RoleController {
   constructor(
-    private readonly roleMapper: RoleMapper,
-    private readonly roleUseCase: RoleUseCase,
+    private readonly mapper: RoleMapper,
+    private readonly getUseCase: GetRoleUseCase,
+    private readonly findUseCase: FindRoleUseCase,
+    private readonly createUseCase: CreateRoleUseCase,
+    private readonly updateUseCase: UpdateRoleUseCase,
+    private readonly removeUseCase: RemoveRoleUseCase,
   ) {}
 
   @Get()
   @Permissions(['access:view'])
   async findAll(@Query() query: QueryRoleRequest) {
-    return this.roleMapper.toCollection(await this.roleUseCase.findAll(query));
+    return this.mapper.toCollection(await this.getUseCase.findAll(query));
   }
 
   @Get(':id')
   @Permissions(['access:view'])
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    const role = await this.roleUseCase.findOne(id);
+    const role = await this.findUseCase.findOne(id);
 
-    return this.roleMapper.toResource(role);
+    return this.mapper.toResource(role);
   }
 
   @Post()
   @Permissions(['access:create'])
   async create(@Body() createRoleRequest: CreateRoleRequest) {
-    const created = await this.roleUseCase.create(createRoleRequest);
+    const created = await this.createUseCase.create(createRoleRequest);
 
-    return this.roleMapper.toResource(created);
+    return this.mapper.toResource(created);
   }
 
   @Patch(':id')
@@ -63,15 +73,15 @@ export class RoleController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateRoleRequest: UpdateRoleRequest,
   ) {
-    const updated = await this.roleUseCase.update(id, updateRoleRequest);
+    const updated = await this.updateUseCase.update(id, updateRoleRequest);
 
-    return this.roleMapper.toResource(updated);
+    return this.mapper.toResource(updated);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @Permissions(['access:delete'])
   async remove(@Param('id', ParseIntPipe) id: number) {
-    await this.roleUseCase.remove(id);
+    await this.removeUseCase.remove(id);
   }
 }

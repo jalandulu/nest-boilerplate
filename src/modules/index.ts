@@ -1,2 +1,2 @@
 export * from './auth';
-export * from './modules.module';
+export * from './module.module';

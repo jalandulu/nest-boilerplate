@@ -1,9 +1,11 @@
 import { Prisma } from '@prisma/client';
 import { FileEntity } from '../storage.entity';
+import { NotificationTokenEntity } from '../notification.entity';
 
 export type AuthUserMap = Prisma.UserGetPayload<{
   include: {
     picture: true;
+    notificationTokens: true;
   };
 }>;
 
@@ -46,6 +48,7 @@ export type AuthEntity = {
   profile: AuthUserEntity;
   accessToken: string;
   refreshToken?: string;
+  notificationTokens?: NotificationTokenEntity[];
   abilities: string[];
 };
 

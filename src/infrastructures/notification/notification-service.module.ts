@@ -1,9 +1,14 @@
 import { Global, Module } from '@nestjs/common';
-import { MqttModule } from './mqtt';
+import { MqttModule, MqttService } from './mqtt';
+import { INotificationServiceProvider } from 'src/cores/contracts';
 
 @Global()
 @Module({
   imports: [MqttModule],
-  exports: [MqttModule],
+  providers: [{ provide: INotificationServiceProvider, useClass: MqttService }],
+  exports: [
+    MqttModule,
+    { provide: INotificationServiceProvider, useClass: MqttService },
+  ],
 })
 export class NotificationServiceModule {}

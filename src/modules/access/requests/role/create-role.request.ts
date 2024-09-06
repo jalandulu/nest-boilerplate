@@ -21,6 +21,6 @@ export class CreateRoleRequest {
   })
   @ArrayMinSize(1)
   @IsArray()
-  @IsExists('permission', 'id', { each: true })
+  @IsExists('Permission', 'id', { each: true })
   public permissions: number[];
 }

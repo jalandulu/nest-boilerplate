@@ -1,21 +1,30 @@
 import { Module } from '@nestjs/common';
-import { NotificationController } from './controllers';
-import { JwtService } from 'src/services';
-import { AuthService } from 'src/services';
-import { AccessStrategy } from 'src/middlewares/strategies';
-import { IJwtRepository } from 'src/cores/interfaces';
-import { JwtRepository } from 'src/infrastructures/repositories';
-import { INotificationServiceProvider } from 'src/cores/contracts';
-import { MqttService } from 'src/infrastructures/notification/mqtt/mqtt.service';
+import {
+  NotificationController,
+  NotificationTokenController,
+} from './controllers';
+import {
+  GetNotifiationUseCase,
+  ReadNotifiationUseCase,
+  ReadManyNotifiationUseCase,
+  RemoveNotifiationUseCase,
+  RemoveManyNotifiationUseCase,
+  UpsertNotifiationTokenUseCase,
+  GenerateNotifiationTokenUseCase,
+} from './use-cases';
+import { NotificationMapper } from './mappers';
 
 @Module({
-  controllers: [NotificationController],
+  controllers: [NotificationTokenController, NotificationController],
   providers: [
-    AccessStrategy,
-    JwtService,
-    AuthService,
-    { provide: IJwtRepository, useClass: JwtRepository },
-    { provide: INotificationServiceProvider, useClass: MqttService },
+    NotificationMapper,
+    GetNotifiationUseCase,
+    ReadNotifiationUseCase,
+    ReadManyNotifiationUseCase,
+    RemoveNotifiationUseCase,
+    RemoveManyNotifiationUseCase,
+    UpsertNotifiationTokenUseCase,
+    GenerateNotifiationTokenUseCase,
   ],
 })
 export class NotificationModule {}

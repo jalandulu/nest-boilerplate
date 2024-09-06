@@ -39,6 +39,7 @@ export class RegisterUseCase {
       Prisma.UserGetPayload<{
         include: {
           picture: true;
+          notificationTokens: true;
         };
       }>
     >(
@@ -49,6 +50,7 @@ export class RegisterUseCase {
       },
       {
         picture: true,
+        notificationTokens: true,
       },
     );
 
