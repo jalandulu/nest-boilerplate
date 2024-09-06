@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString, ValidateIf } from 'class-validator';
 import { StorageCode } from 'src/cores/enums';
 import { S3 } from 'src/infrastructures/storage/globals';
 import { IsExists } from 'src/middlewares/validators';
@@ -17,9 +17,10 @@ export class UploadRequest {
     description: 'The directory path',
     type: String,
   })
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   @IsExists('stgDirectory', 'path')
+  @ValidateIf((o) => o.code === StorageCode.FileManager)
   public dir?: string;
 
   @ApiProperty({ type: 'string', format: 'binary', required: true })
@@ -39,9 +40,10 @@ export class MultipleUploadRequest {
     description: 'The directory path',
     type: String,
   })
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   @IsExists('stgDirectory', 'path')
+  @ValidateIf((o) => o.code === StorageCode.FileManager)
   public dir?: string;
 
   @ApiProperty({ type: [String], format: 'binary', required: true })
