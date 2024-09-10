@@ -19,6 +19,6 @@ import { ICacheServiceProvider } from 'src/cores/contracts';
       useClass: RedisService,
     },
   ],
-  exports: [ICacheServiceProvider],
+  exports: [CacheModule, ICacheServiceProvider],
 })
 export class RedisModule {}

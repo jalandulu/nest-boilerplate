@@ -102,8 +102,8 @@ importers:
         specifier: ^5.12.13
         version: 5.12.13
       cache-manager:
-        specifier: ^5.7.3
-        version: 5.7.3
+        specifier: ^5.7.6
+        version: 5.7.6
       cache-manager-redis-store:
         specifier: ^3.0.1
         version: 3.0.1
