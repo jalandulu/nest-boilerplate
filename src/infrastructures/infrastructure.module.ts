@@ -6,6 +6,7 @@ import { QueueServiceModule } from './queue';
 import { StorageServiceModule } from './storage';
 import { JwtServiceModule } from './jwt';
 import { RepositoryModule } from './repositories';
+import { SignedUrlModule } from './signed-url';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { RepositoryModule } from './repositories';
     QueueServiceModule,
     StorageServiceModule,
     JwtServiceModule,
+    SignedUrlModule,
     RepositoryModule,
   ],
   exports: [
@@ -24,6 +26,7 @@ import { RepositoryModule } from './repositories';
     QueueServiceModule,
     StorageServiceModule,
     JwtServiceModule,
+    SignedUrlModule,
     RepositoryModule,
   ],
 })
