@@ -1,5 +1,5 @@
-import { ISendMailOptions } from '@nestjs-modules/mailer';
+import { MailMessage } from 'src/cores/interfaces';
 
 export abstract class IMailerServiceProvider {
-  abstract send(options: ISendMailOptions): Promise<void>;
+  abstract send(options: MailMessage): Promise<void>;
 }
