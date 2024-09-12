@@ -21,7 +21,7 @@ export type JwtEntity = {
   sub: string;
   username: string;
   scope: string;
-  permissions?: string[];
+  abilities?: string[];
   iat: number;
   exp: number;
   aud: string;
