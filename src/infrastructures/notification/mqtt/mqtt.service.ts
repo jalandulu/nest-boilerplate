@@ -6,9 +6,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import {
   BatchResponse,
   SendResponse,
-  TokenMessage,
 } from 'firebase-admin/lib/messaging/messaging-api';
-import { FirebaseError } from 'firebase-admin/lib/utils/error';
 import { DateTime } from 'luxon';
 import { IPublishPacket, ISubscriptionMap, MqttClient, connect } from 'mqtt';
 import { INotificationServiceProvider } from 'src/cores/contracts';
