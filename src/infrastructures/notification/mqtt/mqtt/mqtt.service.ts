@@ -6,13 +6,7 @@ import {
 } from '@nestjs/common';
 import { MODULE_OPTIONS_TOKEN } from './mqtt.module-definition';
 import { ITokenMessage, MqttModuleOptions } from './mqtt.interface';
-import {
-  connect,
-  connectAsync,
-  IPublishPacket,
-  ISubscriptionMap,
-  MqttClient,
-} from 'mqtt';
+import { connect, IPublishPacket, ISubscriptionMap, MqttClient } from 'mqtt';
 import {
   BatchResponse,
   SendResponse,

@@ -1,5 +1,5 @@
 import { TokenMessage } from 'firebase-admin/lib/messaging/messaging-api';
-import { IClientOptions } from 'mqtt/*';
+import { IClientOptions } from 'mqtt';
 
 export interface MqttModuleOptions {
   brokerUrl: string;
