@@ -48,7 +48,7 @@ export class EmailController {
 
     await this.queueProvider.mailer.add(QueueMailerProcessor.SendEmail, {
       to: 'template@gmail.com',
-      template: 'email',
+      template: 'email-verification',
       context: {
         link: 'http://localhost:3000',
       },
