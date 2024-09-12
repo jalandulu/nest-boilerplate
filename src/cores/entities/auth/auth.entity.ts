@@ -35,7 +35,6 @@ export type TokenEntity = {
 
 export type LocalAuthEntity = {
   id: string;
-  userId: string;
   roleId: number;
   username: string;
   password: string;
