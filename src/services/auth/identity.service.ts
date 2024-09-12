@@ -172,7 +172,7 @@ export class IdentityService {
     });
   }
 
-  async updatePassword(
+  async changePassword(
     id: string,
     { password }: Omit<IUpdateIdentityDto, 'username'>,
   ) {
@@ -195,6 +195,13 @@ export class IdentityService {
       ]);
     }
 
+    return await this.updatePassword(id, { password });
+  }
+
+  async updatePassword(
+    id: string,
+    { password }: Omit<IUpdateIdentityDto, 'username'>,
+  ) {
     return await this.dataService.tx.identity.update({
       where: { id },
       data: {

@@ -15,6 +15,8 @@ import {
   SignedVerifyRequest,
   LoginRequest,
   RegisterRequest,
+  ResetPasswordRequestRequest,
+  ResetPasswordResetRequest,
 } from '../requests';
 import { AuthMapper } from '../mappers/auth.mapper';
 import {
@@ -22,6 +24,7 @@ import {
   LoginUseCase,
   RefreshUseCase,
   RegisterUseCase,
+  ResetPasswordUseCase,
 } from '../use-cases';
 import { LogoutUseCase } from '../use-cases/logout.use-case';
 import { LocalAuthEntity, ProfileEntity } from 'src/cores/entities';
@@ -47,6 +50,7 @@ export class AuthController {
     private readonly refreshUseCase: RefreshUseCase,
     private readonly logoutUseCase: LogoutUseCase,
     private readonly emailVerificationUseCase: EmailVerificationUseCase,
+    private readonly resetPasswordUseCase: ResetPasswordUseCase,
     private readonly queueServiceProvider: IQueueServiceProvider,
     private readonly authMapper: AuthMapper,
   ) {}
@@ -122,6 +126,48 @@ export class AuthController {
     @Query() payload: SignedVerifyRequest,
   ) {
     await this.emailVerificationUseCase.verify(request, payload);
+  }
+
+  @Post('reset-password/request')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async requestResetPassword(
+    @Req() request: FastifyRequest,
+    @Body() payload: ResetPasswordRequestRequest,
+  ) {
+    const { url, identity } = await this.resetPasswordUseCase.request(
+      request,
+      payload,
+    );
+
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+      to: identity.username,
+      template: 'reset-password-request',
+      context: {
+        link: url,
+      },
+    });
+  }
+
+  @Post('reset-password/reset')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async resetPassword(
+    @Req() request: FastifyRequest,
+    @Query() query: SignedVerifyRequest,
+    @Body() payload: ResetPasswordResetRequest,
+  ) {
+    const identity = await this.resetPasswordUseCase.reset(
+      request,
+      query,
+      payload,
+    );
+
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+      to: identity.username,
+      template: 'reset-password-success',
+      context: {
+        link: request.headers.origin,
+      },
+    });
   }
 
   @Post('refresh')

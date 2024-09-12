@@ -176,6 +176,13 @@ export class AuthService {
     ]);
   }
 
+  async passwordResetted(userId: string) {
+    await Promise.all([
+      this.cacheService.del(`${userId}:reset-password:token`),
+      this.cacheService.del(`${userId}:reset-password:refresh`),
+    ]);
+  }
+
   async emailVerified(userId: string) {
     await Promise.all([
       this.cacheService.del(`${userId}:verification-email:token`),
@@ -220,6 +227,23 @@ export class AuthService {
     return cachedRefreshToken === token;
   }
 
+  async resetPasswordStrategy(url: string, userId: string) {
+    const isAlreadySent = await this.resetPasswordRefresh(userId);
+    if (isAlreadySent) {
+      throw new UnprocessableEntityException('reset password already sent');
+    }
+
+    const signatureUrl = this.createSignedUrl(url, userId);
+    const token = String.extractURL(signatureUrl, 'token');
+
+    await Promise.all([
+      await this.setResetPasswordToken(userId, token),
+      await this.setResetPasswordRefresh(userId),
+    ]);
+
+    return signatureUrl;
+  }
+
   async verifyEmailStrategy(url: string, userId: string) {
     const isAlreadySent = await this.emailVerificationRefresh(userId);
     if (isAlreadySent) {
@@ -251,6 +275,18 @@ export class AuthService {
 
   async user(userId: string): Promise<LocalAuthEntity> {
     return await this.cacheService.get<LocalAuthEntity>(`${userId}:user`);
+  }
+
+  async resetPasswordToken(userId: string) {
+    return await this.cacheService.get<string>(
+      `${userId}:reset-password:token`,
+    );
+  }
+
+  async resetPasswordRefresh(userId: string) {
+    return await this.cacheService.get<string>(
+      `${userId}:reset-password:refresh`,
+    );
   }
 
   async emailVerificationToken(userId: string) {
@@ -304,6 +340,22 @@ export class AuthService {
       `${userId}:caching`,
       1,
       this.jwtService.expiration({ scope: TokenScope.Refresh }),
+    );
+  }
+
+  async setResetPasswordToken(userId: string, token: string) {
+    await this.cacheService.set(
+      `${userId}:reset-password:token`,
+      token,
+      this.verificationConfig.resetTtl,
+    );
+  }
+
+  async setResetPasswordRefresh(userId: string) {
+    await this.cacheService.set(
+      `${userId}:reset-password:refresh`,
+      1,
+      this.verificationConfig.resetRefreshTtl,
     );
   }
 

@@ -6,6 +6,7 @@ import {
   LogoutUseCase,
   RefreshUseCase,
   EmailVerificationUseCase,
+  ResetPasswordUseCase,
 } from './use-cases';
 import { AuthMapper } from './mappers/auth.mapper';
 import { FileMapper } from '../storage/mappers';
@@ -20,6 +21,7 @@ import { FileMapper } from '../storage/mappers';
     LogoutUseCase,
     RefreshUseCase,
     EmailVerificationUseCase,
+    ResetPasswordUseCase,
   ],
 })
 export class AuthModule {}
