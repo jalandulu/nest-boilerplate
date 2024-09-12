@@ -4,7 +4,7 @@ export default () => {
   return {
     app: {
       host,
-      port: parseInt(process.env.APP_PORT) || 3000,
+      port: parseInt(process.env.APP_PORT || '3000'),
       mode: process.env.APP_MODE,
       name: process.env.APP_NAME,
       key: process.env.APP_KEY,
@@ -21,9 +21,9 @@ export default () => {
     },
     redis: {
       host: process.env.REDIS_HOST,
-      port: parseInt(process.env.REDIS_PORT) || 6379,
+      port: parseInt(process.env.REDIS_PORT || '6379'),
       password: process.env.REDIS_PASSWORD || null,
-      ttl: parseInt(process.env.REDIS_TTL) || 60000,
+      ttl: parseInt(process.env.REDIS_TTL || '60000'),
     },
     smtp: {
       host: process.env.SMTP_HOST,
@@ -47,7 +47,7 @@ export default () => {
     },
     jwt: {
       strategy: process.env.JWT_STRATEGY || 'cache',
-      expiresIn: parseInt(process.env.JWT_EXPIRE) || 300,
+      expiresIn: parseInt(process.env.JWT_EXPIRE || '300'),
       secretKey: process.env.JWT_SECRET,
       issuer: process.env.JWT_ISSUER,
       audience: process.env.JWT_AUDIENCE,

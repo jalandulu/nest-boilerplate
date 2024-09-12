@@ -16,12 +16,12 @@ export const configSchema = Joi.object({
   CLIENT_DOMAIN: Joi.string().optional(),
 
   REDIS_HOST: Joi.string(),
-  REDIS_PORT: Joi.number().port().default(6379),
+  REDIS_PORT: Joi.number().port().allow('').optional().default(6379),
   REDIS_PASSWORD: Joi.string(),
   REDIS_TTL: Joi.number().default(1000),
 
   SMTP_HOST: Joi.string().optional(),
-  SMTP_PORT: Joi.number().port().default(587),
+  SMTP_PORT: Joi.number().port().allow('').optional().default(587),
   SMTP_USERNAME: Joi.string().optional(),
   SMTP_PASSWORD: Joi.string().optional(),
   SMTP_FROM: Joi.string().optional(),
@@ -48,7 +48,7 @@ export const configSchema = Joi.object({
   RESET_VERIFICATION_REFRESH_TTL: Joi.number().allow('').optional().default(60),
 
   MQTT_HOST: Joi.string(),
-  MQTT_PORT: Joi.number().port().default(6379),
+  MQTT_PORT: Joi.number().port().optional().default(1883),
   MQTT_USER: Joi.string(),
   MQTT_PASSWORD: Joi.string(),
 });
