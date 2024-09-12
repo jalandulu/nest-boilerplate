@@ -13,6 +13,7 @@ export type AuthMap = {
   profile: AuthUserMap;
   accessToken: string;
   refreshToken?: string;
+  notificationTokens?: NotificationTokenEntity[];
   abilities: string[];
 };
 
