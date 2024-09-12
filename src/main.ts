@@ -16,6 +16,7 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter({
       logger: true,
+      trustProxy: true,
     }),
   );
 
@@ -23,6 +24,10 @@ async function bootstrap() {
 
   app.enableVersioning({
     type: VersioningType.URI,
+  });
+
+  app.enableCors({
+    origin: process.env.CLIENT_DOMAIN.trim().split(','),
   });
 
   app.useGlobalPipes(
