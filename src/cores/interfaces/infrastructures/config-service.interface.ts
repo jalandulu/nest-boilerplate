@@ -8,10 +8,16 @@ export interface IEnvironment {
 export interface IAppEnv extends IEnvironment {
   mode: Mode;
   name: string;
+  key: string;
+}
+
+export interface ISignatureEnv {
+  key: string;
+  ttl: number;
 }
 
 export interface IClientEnv {
-  domain: string;
+  domain: string[];
 }
 
 export interface IDataServiceEnv extends IEnvironment {
@@ -57,6 +63,13 @@ export interface IJwtServiceEnv {
   issuer: string;
   audience: string;
   lifetime: number;
+}
+
+export interface IVerificationEnv {
+  emailTtl: number;
+  emailRefreshTtl: number;
+  resetTtl: number;
+  resetRefreshTtl: number;
 }
 
 export interface IMqttServiceEnv extends IEnvironment {

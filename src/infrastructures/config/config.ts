@@ -7,9 +7,14 @@ export default () => {
       port: parseInt(process.env.APP_PORT) || 3000,
       mode: process.env.APP_MODE,
       name: process.env.APP_NAME,
+      key: process.env.APP_KEY,
+    },
+    signature: {
+      key: process.env.SIGNATURE_KEY,
+      ttl: parseInt(process.env.SIGNATURE_TTL || '86400'),
     },
     client: {
-      domain: process.env.CLIENT_DOMAIN,
+      domain: process.env.CLIENT_DOMAIN.trim().split(','),
     },
     database: {
       url: process.env.DB_URL,
@@ -50,6 +55,16 @@ export default () => {
     },
     firebase: {
       credentialPath: process.env.FIREBASE_CREDENTIAL_PATH,
+    },
+    verification: {
+      emailTtl: parseInt(process.env.EMAIL_VERIFICATION_TTL || '300'),
+      emailRefreshTtl: parseInt(
+        process.env.EMAIL_VERIFICATION_REFRESH_TTL || '60',
+      ),
+      resetTtl: parseInt(process.env.RESET_VERIFICATION_TTL || '300'),
+      resetRefreshTtl: parseInt(
+        process.env.RESET_VERIFICATION_REFRESH_TTL || '60',
+      ),
     },
     mqtt: {
       host: process.env.MQTT_HOST,

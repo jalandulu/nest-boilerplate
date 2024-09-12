@@ -6,8 +6,14 @@ export const configSchema = Joi.object({
   APP_MODE: Joi.string()
     .valid('local', 'development', 'production', 'test')
     .default('local'),
+  APP_KEY: Joi.string(),
+
+  SIGNATURE_KEY: Joi.string(),
+  SIGNATURE_TTL: Joi.number().allow('').optional().default(86400),
 
   DB_URL: Joi.string(),
+
+  CLIENT_DOMAIN: Joi.string().optional(),
 
   REDIS_HOST: Joi.string(),
   REDIS_PORT: Joi.number().port().default(6379),
@@ -35,6 +41,11 @@ export const configSchema = Joi.object({
   JWT_EXPIRE: Joi.number().allow('').optional().default(300),
 
   FIREBASE_CREDENTIAL_PATH: Joi.string().allow('').optional(),
+
+  EMAIL_VERIFICATION_TTL: Joi.number().allow('').optional().default(300),
+  EMAIL_VERIFICATION_REFRESH_TTL: Joi.number().allow('').optional().default(60),
+  RESET_VERIFICATION_TTL: Joi.number().allow('').optional().default(300),
+  RESET_VERIFICATION_REFRESH_TTL: Joi.number().allow('').optional().default(60),
 
   MQTT_HOST: Joi.string(),
   MQTT_PORT: Joi.number().port().default(6379),
