@@ -11,5 +11,6 @@ import { JwtConfigService } from './jwt-service.config';
       useClass: JwtConfigService,
     }),
   ],
+  exports: [JwtModule],
 })
 export class JwtServiceModule {}
