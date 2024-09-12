@@ -1,10 +1,17 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { TransactionHost } from '@nestjs-cls/transactional';
 import { ConfigService } from '@nestjs/config';
-import { IJwtServiceEnv } from 'src/cores/interfaces';
-import { ICacheServiceProvider } from 'src/cores/contracts';
-import { Hash } from 'src/common/helpers';
+import { IJwtServiceEnv, IVerificationEnv } from 'src/cores/interfaces';
+import {
+  ICacheServiceProvider,
+  ISignedUrlServiceProvider,
+} from 'src/cores/contracts';
+import { Hash, String } from 'src/common/helpers';
 import { LocalAuthEntity } from 'src/cores/entities';
 import { AccountStatus, TokenScope } from 'src/cores/enums';
 import { JwtService } from './jwt.service';
@@ -13,16 +20,20 @@ import { ExtendedPrismaClient } from 'src/infrastructures/database/prisma/prisma
 @Injectable()
 export class AuthService {
   private jwtConfig: IJwtServiceEnv;
+  private verificationConfig: IVerificationEnv;
 
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly cacheService: ICacheServiceProvider,
+    private readonly signedUrlService: ISignedUrlServiceProvider,
     private readonly dataService: TransactionHost<
       TransactionalAdapterPrisma<ExtendedPrismaClient>
     >,
   ) {
     this.jwtConfig = this.configService.get<IJwtServiceEnv>('jwt');
+    this.verificationConfig =
+      this.configService.get<IVerificationEnv>('verification');
   }
 
   async validate(username: string, password: string) {
@@ -165,6 +176,13 @@ export class AuthService {
     ]);
   }
 
+  async emailVerified(userId: string) {
+    await Promise.all([
+      this.cacheService.del(`${userId}:verification-email:token`),
+      this.cacheService.del(`${userId}:verification-email:refresh`),
+    ]);
+  }
+
   async cacheStrategy(userId: string, token: string) {
     const caching = await this.cacheService.get<number | undefined>(
       `${userId}:caching`,
@@ -202,6 +220,23 @@ export class AuthService {
     return cachedRefreshToken === token;
   }
 
+  async verifyEmailStrategy(url: string, userId: string) {
+    const isAlreadySent = await this.emailVerificationRefresh(userId);
+    if (isAlreadySent) {
+      throw new UnprocessableEntityException('email verification already sent');
+    }
+
+    const signatureUrl = this.createSignedUrl(url, userId);
+    const token = String.extractURL(signatureUrl, 'token');
+
+    await Promise.all([
+      await this.setEmailVerificationToken(userId, token),
+      await this.setEmailVerificationRefresh(userId),
+    ]);
+
+    return signatureUrl;
+  }
+
   async accessToken(userId: string) {
     return await this.cacheService.get<string>(`${userId}:accessToken`);
   }
@@ -216,6 +251,18 @@ export class AuthService {
 
   async user(userId: string): Promise<LocalAuthEntity> {
     return await this.cacheService.get<LocalAuthEntity>(`${userId}:user`);
+  }
+
+  async emailVerificationToken(userId: string) {
+    return await this.cacheService.get<string>(
+      `${userId}:verification-email:token`,
+    );
+  }
+
+  async emailVerificationRefresh(userId: string) {
+    return await this.cacheService.get<string>(
+      `${userId}:verification-email:refresh`,
+    );
   }
 
   async setAccessToken(userId: string, accessToken: string) {
@@ -260,11 +307,38 @@ export class AuthService {
     );
   }
 
+  async setEmailVerificationToken(userId: string, token: string) {
+    await this.cacheService.set(
+      `${userId}:verification-email:token`,
+      token,
+      this.verificationConfig.emailTtl,
+    );
+  }
+
+  async setEmailVerificationRefresh(userId: string) {
+    await this.cacheService.set(
+      `${userId}:verification-email:refresh`,
+      1,
+      this.verificationConfig.emailRefreshTtl,
+    );
+  }
+
   async hasPermission(userId: string, reqPermissions: string[]) {
     const permissions = await this.permissions(userId);
     return reqPermissions.some((permission) =>
       permissions.includes(permission),
     );
+  }
+
+  createSignedUrl(url: string, data?: string) {
+    return this.signedUrlService.sign(url, {
+      data: data,
+      ttl: this.verificationConfig.emailTtl,
+    });
+  }
+
+  verifySignedUrl(url: string) {
+    return this.signedUrlService.verify(url);
   }
 
   isRefreshStrategy() {

@@ -69,6 +69,7 @@ export type AuthUserEntity = {
   type: string;
   name: string;
   email: string;
+  emailVerifiedAt?: string;
   picture: FileEntity;
 };
 

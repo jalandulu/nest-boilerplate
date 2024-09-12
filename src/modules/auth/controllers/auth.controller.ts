@@ -5,21 +5,35 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Query,
+  Req,
   Request,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-import { LoginRequest, RegisterRequest } from '../requests';
+import {
+  SignedVerifyRequest,
+  LoginRequest,
+  RegisterRequest,
+} from '../requests';
 import { AuthMapper } from '../mappers/auth.mapper';
-import { LoginUseCase, RefreshUseCase, RegisterUseCase } from '../use-cases';
+import {
+  EmailVerificationUseCase,
+  LoginUseCase,
+  RefreshUseCase,
+  RegisterUseCase,
+} from '../use-cases';
 import { LogoutUseCase } from '../use-cases/logout.use-case';
-import { JwtEntity, LocalAuthEntity } from 'src/cores/entities';
+import { LocalAuthEntity, ProfileEntity } from 'src/cores/entities';
 import {
   AccessAuthGuard,
   LocalAuthGuard,
   RefreshAuthGuard,
 } from 'src/middlewares/guards';
 import { AuthPayload } from 'src/common/decorators';
+import { FastifyRequest } from 'fastify';
+import { IQueueServiceProvider } from 'src/cores/contracts';
+import { QueueMailerProcessor } from 'src/cores/consts';
 
 @ApiTags('Authentication')
 @Controller({
@@ -32,6 +46,8 @@ export class AuthController {
     private readonly registerUseCase: RegisterUseCase,
     private readonly refreshUseCase: RefreshUseCase,
     private readonly logoutUseCase: LogoutUseCase,
+    private readonly emailVerificationUseCase: EmailVerificationUseCase,
+    private readonly queueServiceProvider: IQueueServiceProvider,
     private readonly authMapper: AuthMapper,
   ) {}
 
@@ -55,9 +71,20 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(@Body() registerRequest: RegisterRequest) {
-    const { user, authenticated, abilities } =
-      await this.registerUseCase.register(registerRequest);
+  async register(
+    @Req() request: FastifyRequest,
+    @Body() payload: RegisterRequest,
+  ) {
+    const { user, authenticated, abilities, emailVerificationUrl } =
+      await this.registerUseCase.register(request, payload);
+
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+      to: user.email,
+      template: 'email-verification',
+      context: {
+        link: emailVerificationUrl,
+      },
+    });
 
     return this.authMapper.toMap({
       profile: user,
@@ -67,9 +94,39 @@ export class AuthController {
     });
   }
 
+  @Post('verification-email/send')
+  @UseGuards(AccessAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async sendEmailVerification(
+    @Req() request: FastifyRequest,
+    @AuthPayload() payload: ProfileEntity,
+  ) {
+    const url = await this.emailVerificationUseCase.sign(
+      request,
+      payload.profile.id,
+    );
+
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+      to: payload.profile.email,
+      template: 'email-verification',
+      context: {
+        link: url,
+      },
+    });
+  }
+
+  @Post('verification-email/verify')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async verifyEmailVerification(
+    @Req() request: FastifyRequest,
+    @Query() payload: SignedVerifyRequest,
+  ) {
+    await this.emailVerificationUseCase.verify(request, payload);
+  }
+
   @Post('refresh')
   @UseGuards(RefreshAuthGuard)
-  async refresh(@AuthPayload() payload: JwtEntity) {
+  async refresh(@AuthPayload() payload: ProfileEntity) {
     const { user, authenticated, abilities } =
       await this.refreshUseCase.refresh(payload);
 
@@ -84,7 +141,7 @@ export class AuthController {
   @Delete('logout')
   @UseGuards(AccessAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async logout(@AuthPayload() payload: JwtEntity) {
+  async logout(@AuthPayload() payload: ProfileEntity) {
     await this.logoutUseCase.logout(payload);
   }
 }

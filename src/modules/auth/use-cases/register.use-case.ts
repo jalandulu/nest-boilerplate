@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { AuthService, IdentityService, RoleService } from 'src/services';
 import { Transactional } from '@nestjs-cls/transactional';
 import { UserService } from 'src/services/user/user.service';
 import { RegisterRequest } from '../requests';
 import { UserType } from 'src/cores/enums';
 import { Prisma } from '@prisma/client';
+import { FastifyRequest } from 'fastify';
 
 @Injectable()
 export class RegisterUseCase {
@@ -16,7 +17,12 @@ export class RegisterUseCase {
   ) {}
 
   @Transactional()
-  async register(registerRequest: RegisterRequest) {
+  async register(request: FastifyRequest, payload: RegisterRequest) {
+    const origin = request.headers.origin;
+    if (!origin) {
+      throw new UnprocessableEntityException('undefined origin hostname');
+    }
+
     const role = await this.roleService.findBySlug<
       Prisma.RoleGetPayload<{
         include: {
@@ -45,8 +51,8 @@ export class RegisterUseCase {
     >(
       {
         type: UserType.Operator,
-        name: registerRequest.name,
-        email: registerRequest.email,
+        name: payload.name,
+        email: payload.email,
       },
       {
         picture: true,
@@ -59,15 +65,14 @@ export class RegisterUseCase {
     >({
       userId: user.id,
       roleId: role.id,
-      username: registerRequest.email,
-      password: registerRequest.password,
+      username: payload.email,
+      password: payload.password,
       permissionIds: role.permissionsOnRoles.map((p) => p.permissionId),
     });
 
     const authenticated = await this.authService.attempt({
       localAuth: {
         id: identity.id,
-        userId: identity.id,
         roleId: identity.roleId,
         username: identity.username,
         password: identity.password,
@@ -80,6 +85,11 @@ export class RegisterUseCase {
 
     const abilities = role.permissionsOnRoles.map((p) => p.permission.slug);
 
-    return { user, authenticated, abilities };
+    const emailVerificationUrl = await this.authService.verifyEmailStrategy(
+      `${origin}/verification-email/verify`,
+      identity.id,
+    );
+
+    return { user, authenticated, abilities, emailVerificationUrl };
   }
 }

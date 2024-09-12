@@ -74,6 +74,18 @@ export class IdentityService {
     });
   }
 
+  async isVerified(id: string) {
+    const isVerified = await this.dataService.tx.identity.findFirst({
+      where: {
+        id,
+        verifiedAt: null,
+        deletedAt: null,
+      },
+    });
+
+    return !!isVerified;
+  }
+
   async create<T>(
     createIdentityDto: ICreateIdentityDto,
     include?: Prisma.IdentityInclude,
@@ -197,6 +209,24 @@ export class IdentityService {
       data: {
         status: enabled ? AccountStatus.Active : AccountStatus.Inactive,
         disabledAt: enabled ? null : DateTime.now().toISO(),
+      },
+    });
+  }
+
+  async updateVerified(id: string, verifiedAt?: string) {
+    const emailVerifiedAt = verifiedAt || DateTime.now().toISO();
+
+    return await this.dataService.tx.identity.update({
+      where: { id },
+      data: {
+        verifiedAt: emailVerifiedAt,
+        user: {
+          update: {
+            data: {
+              emailVerifiedAt: emailVerifiedAt,
+            },
+          },
+        },
       },
     });
   }

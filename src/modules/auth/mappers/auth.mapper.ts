@@ -18,6 +18,7 @@ export class AuthMapper {
       type: profile.type,
       name: profile.name,
       email: profile.email,
+      emailVerifiedAt: profile.emailVerifiedAt?.toISOString() || null,
       picture: profile.picture
         ? (await this.fileMapper.toMap(profile.picture)).data
         : null,
