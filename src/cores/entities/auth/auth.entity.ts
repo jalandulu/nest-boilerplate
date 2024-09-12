@@ -70,3 +70,8 @@ export type AuthUserEntity = {
   email: string;
   picture: FileEntity;
 };
+
+export type ProfileEntity = {
+  profile: AuthUserEntity;
+  abilities: string[];
+};
