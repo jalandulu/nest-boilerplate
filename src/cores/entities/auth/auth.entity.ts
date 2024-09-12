@@ -66,6 +66,7 @@ export type AuthRoleEntity = {
 
 export type AuthUserEntity = {
   id: string;
+  type: string;
   name: string;
   email: string;
   picture: FileEntity;

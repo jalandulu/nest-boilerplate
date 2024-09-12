@@ -15,6 +15,7 @@ export class AuthMapper {
   async profileMap(profile: AuthUserMap): Promise<AuthUserEntity> {
     return {
       id: profile.id,
+      type: profile.type,
       name: profile.name,
       email: profile.email,
       picture: profile.picture
