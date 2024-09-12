@@ -1,11 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import {
-  CreateRoleRequest,
-  QueryRoleRequest,
-  UpdateRoleRequest,
-} from '../../requests';
+
 import { RoleService } from 'src/services';
-import { Transactional } from '@nestjs-cls/transactional';
 import { RoleResourceMap } from '../../mappers';
 
 @Injectable()
