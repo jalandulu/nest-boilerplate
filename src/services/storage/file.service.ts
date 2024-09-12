@@ -64,7 +64,7 @@ export class FileService {
         id,
       },
       data: {
-        uploadedAt: DateTime.now().toISO()
+        uploadedAt: DateTime.now().toISO(),
       },
     });
   }
