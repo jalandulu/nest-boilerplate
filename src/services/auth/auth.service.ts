@@ -305,7 +305,11 @@ export class AuthService {
     await this.cacheService.set(
       `${userId}:accessToken`,
       accessToken,
-      this.jwtService.expiration({ scope: TokenScope.Access }),
+      this.jwtService.expiration({
+        scope: this.isRefreshStrategy()
+          ? TokenScope.Access
+          : TokenScope.Refresh,
+      }),
     );
   }
 
@@ -339,7 +343,7 @@ export class AuthService {
     await this.cacheService.set(
       `${userId}:caching`,
       1,
-      this.jwtService.expiration({ scope: TokenScope.Refresh }),
+      this.jwtService.expiration({ scope: TokenScope.Access }),
     );
   }
 
