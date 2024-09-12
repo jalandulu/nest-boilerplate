@@ -15,5 +15,6 @@ import { configSchema } from './config.schema';
       },
     }),
   ],
+  exports: [ConfigModule],
 })
 export class ConfigServiceModule {}
