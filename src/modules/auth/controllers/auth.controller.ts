@@ -66,12 +66,15 @@ export class AuthController {
       user,
     });
 
-    return this.authMapper.toMap({
-      profile: user.user,
-      accessToken: authenticated.accessToken,
-      refreshToken: authenticated.refreshToken,
-      abilities,
-    });
+    return this.authMapper.toMap(
+      {
+        profile: user.user,
+        accessToken: authenticated.accessToken,
+        refreshToken: authenticated.refreshToken,
+        abilities,
+      },
+      user.role,
+    );
   }
 
   @Post('register')
@@ -79,7 +82,7 @@ export class AuthController {
     @Req() request: FastifyRequest,
     @Body() payload: RegisterRequest,
   ) {
-    const { user, authenticated, abilities, emailVerificationUrl } =
+    const { user, role, authenticated, abilities, emailVerificationUrl } =
       await this.registerUseCase.register(request, payload);
 
     await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
@@ -90,12 +93,15 @@ export class AuthController {
       },
     });
 
-    return this.authMapper.toMap({
-      profile: user,
-      accessToken: authenticated.accessToken,
-      refreshToken: authenticated.refreshToken,
-      abilities,
-    });
+    return this.authMapper.toMap(
+      {
+        profile: user,
+        accessToken: authenticated.accessToken,
+        refreshToken: authenticated.refreshToken,
+        abilities,
+      },
+      role,
+    );
   }
 
   @Post('verification-email/send')
@@ -176,12 +182,15 @@ export class AuthController {
     const { user, authenticated, abilities } =
       await this.refreshUseCase.refresh(payload);
 
-    return this.authMapper.toMap({
-      profile: user,
-      accessToken: authenticated.accessToken,
-      refreshToken: authenticated.refreshToken,
-      abilities,
-    });
+    return this.authMapper.toMap(
+      {
+        profile: user,
+        accessToken: authenticated.accessToken,
+        refreshToken: authenticated.refreshToken,
+        abilities,
+      },
+      payload.profile.role,
+    );
   }
 
   @Delete('logout')

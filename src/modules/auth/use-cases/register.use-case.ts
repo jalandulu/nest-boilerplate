@@ -90,6 +90,6 @@ export class RegisterUseCase {
       identity.id,
     );
 
-    return { user, authenticated, abilities, emailVerificationUrl };
+    return { user, role, authenticated, abilities, emailVerificationUrl };
   }
 }

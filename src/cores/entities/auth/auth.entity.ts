@@ -71,6 +71,10 @@ export type AuthUserEntity = {
   email: string;
   emailVerifiedAt?: string;
   picture: FileEntity;
+  role?: AuthRoleEntity;
+  createdAt: string;
+  updatedAt: string;
+  notificationTokens?: NotificationTokenEntity[];
 };
 
 export type ProfileEntity = {
