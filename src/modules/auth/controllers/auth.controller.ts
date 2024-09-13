@@ -18,7 +18,6 @@ import {
   ResetPasswordRequestRequest,
   ResetPasswordResetRequest,
 } from '../requests';
-import { AuthMapper } from '../mappers/auth.mapper';
 import {
   EmailVerificationUseCase,
   LoginUseCase,
@@ -37,6 +36,7 @@ import { AuthPayload } from 'src/common/decorators';
 import { FastifyRequest } from 'fastify';
 import { IQueueServiceProvider } from 'src/cores/contracts';
 import { QueueMailerProcessor } from 'src/cores/consts';
+import { AuthMapper, ProfileMapper } from 'src/middlewares/interceptors';
 
 @ApiTags('Authentication')
 @Controller({
@@ -45,6 +45,8 @@ import { QueueMailerProcessor } from 'src/cores/consts';
 })
 export class AuthController {
   constructor(
+    private readonly authMapper: AuthMapper,
+    private readonly profileMapper: ProfileMapper,
     private readonly loginUseCase: LoginUseCase,
     private readonly registerUseCase: RegisterUseCase,
     private readonly refreshUseCase: RefreshUseCase,
@@ -52,7 +54,6 @@ export class AuthController {
     private readonly emailVerificationUseCase: EmailVerificationUseCase,
     private readonly resetPasswordUseCase: ResetPasswordUseCase,
     private readonly queueServiceProvider: IQueueServiceProvider,
-    private readonly authMapper: AuthMapper,
   ) {}
 
   @Post('login')
@@ -66,15 +67,12 @@ export class AuthController {
       user,
     });
 
-    return this.authMapper.toMap(
-      {
-        profile: user.user,
-        accessToken: authenticated.accessToken,
-        refreshToken: authenticated.refreshToken,
-        abilities,
-      },
-      user.role,
-    );
+    return this.authMapper.toMap({
+      profile: await this.profileMapper.toMap(user.user, user.role),
+      accessToken: authenticated.accessToken,
+      refreshToken: authenticated.refreshToken,
+      abilities,
+    });
   }
 
   @Post('register')
@@ -93,15 +91,12 @@ export class AuthController {
       },
     });
 
-    return this.authMapper.toMap(
-      {
-        profile: user,
-        accessToken: authenticated.accessToken,
-        refreshToken: authenticated.refreshToken,
-        abilities,
-      },
-      role,
-    );
+    return this.authMapper.toMap({
+      profile: await this.profileMapper.toMap(user, role),
+      accessToken: authenticated.accessToken,
+      refreshToken: authenticated.refreshToken,
+      abilities,
+    });
   }
 
   @Post('verification-email/send')
@@ -111,13 +106,10 @@ export class AuthController {
     @Req() request: FastifyRequest,
     @AuthPayload() payload: ProfileEntity,
   ) {
-    const url = await this.emailVerificationUseCase.sign(
-      request,
-      payload.profile.id,
-    );
+    const url = await this.emailVerificationUseCase.sign(request, payload.id);
 
     await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
-      to: payload.profile.email,
+      to: payload.email,
       template: 'email-verification',
       context: {
         link: url,
@@ -182,15 +174,12 @@ export class AuthController {
     const { user, authenticated, abilities } =
       await this.refreshUseCase.refresh(payload);
 
-    return this.authMapper.toMap(
-      {
-        profile: user,
-        accessToken: authenticated.accessToken,
-        refreshToken: authenticated.refreshToken,
-        abilities,
-      },
-      payload.profile.role,
-    );
+    return this.authMapper.toMap({
+      profile: user,
+      accessToken: authenticated.accessToken,
+      refreshToken: authenticated.refreshToken,
+      abilities,
+    });
   }
 
   @Delete('logout')

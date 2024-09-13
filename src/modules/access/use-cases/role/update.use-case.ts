@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UpdateRoleRequest } from '../../requests';
 import { RoleService } from 'src/services';
 import { Transactional } from '@nestjs-cls/transactional';
-import { RoleResourceMap } from '../../mappers';
+import { RoleResourceMap } from 'src/cores/entities';
 
 @Injectable()
 export class UpdateRoleUseCase {

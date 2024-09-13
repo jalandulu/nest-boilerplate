@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { IPaginationMetaEntity } from 'src/cores/entities';
-
-export type NotificationMap =
-  Prisma.NotificationGetPayload<Prisma.NotificationDefaultArgs>;
-
-export type NotificationResourceMap = NotificationMap;
-
-export type NotificationsMap = NotificationMap[];
+import {
+  IPaginationMetaEntity,
+  NotificationEntity,
+  NotificationMap,
+  NotificationResourceMap,
+  NotificationsMap,
+} from 'src/cores/entities';
 
 @Injectable()
 export class NotificationMapper {
   constructor() {}
 
-  toResource(notification: NotificationResourceMap) {
+  toResource(notification: NotificationResourceMap): {
+    data: NotificationEntity;
+  } {
     return {
       data: {
         id: notification.id,

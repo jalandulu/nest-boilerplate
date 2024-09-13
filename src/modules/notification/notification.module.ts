@@ -12,12 +12,10 @@ import {
   UpsertNotifiationTokenUseCase,
   GenerateNotifiationTokenUseCase,
 } from './use-cases';
-import { NotificationMapper } from './mappers';
 
 @Module({
   controllers: [NotificationTokenController, NotificationController],
   providers: [
-    NotificationMapper,
     GetNotifiationUseCase,
     ReadNotifiationUseCase,
     ReadManyNotifiationUseCase,

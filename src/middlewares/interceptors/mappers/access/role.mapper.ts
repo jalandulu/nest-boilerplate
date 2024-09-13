@@ -1,21 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { IPaginationMetaEntity } from 'src/cores/entities';
 import { PermissionMapper } from './permission.mapper';
-
-export type RoleMap = Prisma.RoleGetPayload<Prisma.RoleDefaultArgs>;
-
-export type RoleResourceMap = Prisma.RoleGetPayload<{
-  include: {
-    permissionsOnRoles: {
-      include: {
-        permission: true;
-      };
-    };
-  };
-}>;
-
-export type RolesMap = RoleMap[];
+import {
+  RoleEntity,
+  RoleMap,
+  RoleResourceMap,
+  RolesMap,
+} from 'src/cores/entities/access/role.entity';
 
 @Injectable()
 export class RoleMapper {
@@ -37,11 +28,13 @@ export class RoleMapper {
     };
   }
 
-  toMap(role: RoleMap) {
+  toMap(role: RoleMap): { data: RoleEntity } {
     return {
       data: {
         id: role.id,
         name: role.name,
+        slug: role.slug,
+        visible: role.visible,
         createdAt: role.createdAt,
         updatedAt: role.updatedAt,
       },

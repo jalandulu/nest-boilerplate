@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { PermissionController } from './controllers';
-import { PermissionMapper, RoleMapper } from './mappers';
 import { RoleController } from './controllers/role.controller';
 import {
   CreateRoleUseCase,
@@ -14,8 +13,6 @@ import {
 @Module({
   controllers: [RoleController, PermissionController],
   providers: [
-    RoleMapper,
-    PermissionMapper,
     GetRoleUseCase,
     FindRoleUseCase,
     CreateRoleUseCase,

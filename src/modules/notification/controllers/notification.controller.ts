@@ -28,7 +28,7 @@ import {
   RemoveManyNotifiationUseCase,
   RemoveNotifiationUseCase,
 } from '../use-cases';
-import { NotificationMapper } from '../mappers';
+import { NotificationMapper } from 'src/middlewares/interceptors';
 
 @ApiTags('Notification')
 @UseGuards(AccessAuthGuard)

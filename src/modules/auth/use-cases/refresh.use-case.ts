@@ -10,11 +10,11 @@ export class RefreshUseCase {
   @Transactional()
   async refresh(payload: ProfileEntity) {
     const { user, permissions, token } = await this.authService.revalidateToken(
-      payload.profile.id,
+      payload.id,
     );
 
     return {
-      user: user.user,
+      user: user,
       abilities: permissions,
       authenticated: token,
     };

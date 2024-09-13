@@ -12,10 +12,11 @@ import {
   ISignedUrlServiceProvider,
 } from 'src/cores/contracts';
 import { Hash, String } from 'src/common/helpers';
-import { LocalAuthEntity } from 'src/cores/entities';
+import { LocalAuthEntity, ProfileEntity } from 'src/cores/entities';
 import { AccountStatus, TokenScope } from 'src/cores/enums';
 import { JwtService } from './jwt.service';
 import { ExtendedPrismaClient } from 'src/infrastructures/database/prisma/prisma.extension';
+import { ProfileMapper } from 'src/middlewares/interceptors';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +24,7 @@ export class AuthService {
   private verificationConfig: IVerificationEnv;
 
   constructor(
+    private readonly profileMapper: ProfileMapper,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly cacheService: ICacheServiceProvider,
@@ -117,12 +119,17 @@ export class AuthService {
       });
     }
 
+    const user: ProfileEntity = await this.profileMapper.toMap(
+      localAuth.user,
+      localAuth.role,
+    );
+
     await Promise.all([
       this.destroy(localAuth.id),
       this.setAccessToken(localAuth.id, token.accessToken),
       this.setRefreshToken(localAuth.id, token.refreshToken),
       this.setPermissions(localAuth.id, permissions),
-      this.setUser(localAuth.id, localAuth),
+      this.setUser(localAuth.id, user),
       this.setCacheStrategy(localAuth.id),
     ]);
 
@@ -143,11 +150,11 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.accessToken({
         userId: user.id,
-        username: user.username,
+        username: user.email,
       }),
       this.jwtService.refreshToken({
         userId: user.id,
-        username: user.username,
+        username: user.email,
       }),
     ]);
 
@@ -273,8 +280,8 @@ export class AuthService {
     return await this.cacheService.get<string[]>(`${userId}:permissions`);
   }
 
-  async user(userId: string): Promise<LocalAuthEntity> {
-    return await this.cacheService.get<LocalAuthEntity>(`${userId}:user`);
+  async user(userId: string): Promise<ProfileEntity> {
+    return await this.cacheService.get<ProfileEntity>(`${userId}:user`);
   }
 
   async resetPasswordToken(userId: string) {
@@ -331,7 +338,7 @@ export class AuthService {
     );
   }
 
-  async setUser(userId: string, user: LocalAuthEntity) {
+  async setUser(userId: string, user: ProfileEntity) {
     await this.cacheService.set(
       `${userId}:user`,
       user,

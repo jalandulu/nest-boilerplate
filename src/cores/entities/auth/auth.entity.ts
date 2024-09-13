@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { FileEntity } from '../storage.entity';
 import { NotificationTokenEntity } from '../notification.entity';
+import { RoleEntity, RoleMap } from '../access';
 
 export type AuthUserMap = Prisma.UserGetPayload<{
   include: {
@@ -9,11 +10,10 @@ export type AuthUserMap = Prisma.UserGetPayload<{
   };
 }>;
 
-export type AuthMap = {
-  profile: AuthUserMap;
+export type AuthEntity = {
+  profile: ProfileEntity;
   accessToken: string;
   refreshToken?: string;
-  notificationTokens?: NotificationTokenEntity[];
   abilities: string[];
 };
 
@@ -40,16 +40,8 @@ export type LocalAuthEntity = {
   password: string;
   isActive: Date;
   user: AuthUserMap;
-  role: AuthRoleEntity;
+  role?: RoleMap;
   permissions: AuthPermissionEntity[];
-};
-
-export type AuthEntity = {
-  profile: AuthUserEntity;
-  accessToken: string;
-  refreshToken?: string;
-  notificationTokens?: NotificationTokenEntity[];
-  abilities: string[];
 };
 
 export type AuthPermissionEntity = {
@@ -57,27 +49,15 @@ export type AuthPermissionEntity = {
   slug: string;
 };
 
-export type AuthRoleEntity = {
-  id: number;
-  name: string;
-  slug: string;
-  visible: boolean;
-};
-
-export type AuthUserEntity = {
+export type ProfileEntity = {
   id: string;
   type: string;
   name: string;
   email: string;
   emailVerifiedAt?: string;
   picture: FileEntity;
-  role?: AuthRoleEntity;
+  role?: RoleEntity;
   createdAt: string;
   updatedAt: string;
   notificationTokens?: NotificationTokenEntity[];
-};
-
-export type ProfileEntity = {
-  profile: AuthUserEntity;
-  abilities: string[];
 };

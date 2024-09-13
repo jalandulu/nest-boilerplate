@@ -1,23 +1,14 @@
-import { Prisma } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
-
-export type PermissionMap =
-  Prisma.PermissionGetPayload<Prisma.PermissionDefaultArgs>;
-
-export type PermissionsMap = PermissionMap[];
-
-export type PermissionGroupMap = {
-  module: string;
-  permissions: {
-    id: number;
-    slug: string;
-    action: string;
-  }[];
-}[];
+import {
+  PermissionEntity,
+  PermissionGroupMap,
+  PermissionMap,
+  PermissionsMap,
+} from 'src/cores/entities';
 
 @Injectable()
 export class PermissionMapper {
-  toMap(permission: PermissionMap) {
+  toMap(permission: PermissionMap): { data: PermissionEntity } {
     return {
       data: {
         id: permission.id,

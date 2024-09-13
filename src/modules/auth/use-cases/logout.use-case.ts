@@ -9,6 +9,6 @@ export class LogoutUseCase {
 
   @Transactional()
   async logout(payload: ProfileEntity) {
-    return await this.authService.destroy(payload.profile.id);
+    return await this.authService.destroy(payload.id);
   }
 }

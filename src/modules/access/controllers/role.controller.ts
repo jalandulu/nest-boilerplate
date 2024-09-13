@@ -18,7 +18,6 @@ import {
   UpdateRoleRequest,
 } from '../requests';
 import { ApiTags } from '@nestjs/swagger';
-import { RoleMapper } from '../mappers/role.mapper';
 import { AccessAuthGuard, PermissionGuard } from 'src/middlewares/guards';
 import { Permissions } from 'src/common/decorators';
 import {
@@ -28,6 +27,7 @@ import {
   RemoveRoleUseCase,
   UpdateRoleUseCase,
 } from '../use-cases';
+import { RoleMapper } from 'src/middlewares/interceptors';
 
 @ApiTags('Roles')
 @UseGuards(AccessAuthGuard, PermissionGuard)

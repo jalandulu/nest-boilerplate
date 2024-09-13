@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { RoleResourceMap } from 'src/cores/entities';
 
 import { RoleService } from 'src/services';
-import { RoleResourceMap } from '../../mappers';
 
 @Injectable()
 export class FindRoleUseCase {

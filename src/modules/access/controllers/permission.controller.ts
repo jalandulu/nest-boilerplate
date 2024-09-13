@@ -1,9 +1,9 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { PermissionMapper } from '../mappers';
 import { Permissions } from 'src/common/decorators';
 import { AccessAuthGuard, PermissionGuard } from 'src/middlewares/guards';
 import { GetPermissionUseCase } from '../use-cases';
+import { PermissionMapper } from 'src/middlewares/interceptors';
 
 @ApiTags('Permissions')
 @UseGuards(AccessAuthGuard, PermissionGuard)
