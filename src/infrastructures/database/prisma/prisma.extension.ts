@@ -62,7 +62,10 @@ export const extendedPrismaClient = new PrismaClient<
 
           return result === null;
         },
-        async softDelete<T>(this: T, where: Prisma.Args<T, 'update'>['where']) {
+        async softDelete<T, K>(
+          this: T,
+          where: Prisma.Args<T, 'update'>['where'],
+        ): Promise<Prisma.Result<T, K, 'update'>> {
           const context = Prisma.getExtensionContext(this);
 
           return await (context as any).update({
@@ -72,10 +75,10 @@ export const extendedPrismaClient = new PrismaClient<
             },
           });
         },
-        async softDeleteMany<T>(
+        async softDeleteMany<T, K>(
           this: T,
           where: Prisma.Args<T, 'updateMany'>['where'],
-        ) {
+        ): Promise<Prisma.Result<T, K, 'update'>> {
           const context = Prisma.getExtensionContext(this);
 
           return await (context as any).updateMany({
