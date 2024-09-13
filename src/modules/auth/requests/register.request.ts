@@ -11,7 +11,7 @@ export class RegisterRequest {
   @IsNotEmpty()
   @IsString()
   @IsEmail()
-  @IsUnique('user', 'email')
+  @IsUnique('User', 'email')
   @ApiProperty({ default: 'register@nest.com' })
   email: string;
 

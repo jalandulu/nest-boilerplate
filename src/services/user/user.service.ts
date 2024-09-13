@@ -3,20 +3,28 @@ import { DateTime } from 'luxon';
 import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { Prisma } from '@prisma/client';
-import { ICreateUserDto, IUpdateUserDto } from 'src/cores/dtos';
+import { ICreateUserDto, IPaginationDto, IUpdateUserDto } from 'src/cores/dtos';
+import { ExtendedPrismaClient } from 'src/infrastructures/database/prisma/prisma.extension';
 
 @Injectable()
 export class UserService {
   constructor(
-    private readonly dataService: TransactionHost<TransactionalAdapterPrisma>,
+    private readonly dataService: TransactionHost<
+      TransactionalAdapterPrisma<ExtendedPrismaClient>
+    >,
   ) {}
 
-  async findAll() {
-    return await this.dataService.tx.user.findMany({
-      include: {
-        picture: true,
-      },
-    });
+  async findAll(pagination: IPaginationDto) {
+    return await this.dataService.tx.user
+      .paginate({
+        include: {
+          picture: true,
+        },
+      })
+      .withPages({
+        limit: pagination.perPage,
+        page: pagination.page,
+      });
   }
 
   async findOne<T>(id: string, include?: Prisma.UserInclude) {
@@ -49,32 +57,55 @@ export class UserService {
         name: updateUserDto.name,
         email: updateUserDto.email,
         pictureId: updateUserDto.pictureId,
+        identity: {
+          update: {
+            data: {
+              username: updateUserDto.email,
+            },
+          },
+        },
       },
       include,
     })) as T;
   }
 
   async remove(id: string) {
-    return await this.dataService.tx.user.update({
+    const now = DateTime.now().toISO();
+
+    const updatedUser = await this.dataService.tx.user.update({
       where: { id },
-      data: {
-        deletedAt: DateTime.now().toISO(),
-        identity: {
-          update: {
-            deletedAt: DateTime.now().toISO(),
-          },
-        },
-      },
+      data: { deletedAt: now },
+      include: { identity: true },
     });
+
+    if (updatedUser.identity) {
+      await this.dataService.tx.identity.update({
+        where: { id: id },
+        data: { deletedAt: now },
+      });
+    }
+
+    return updatedUser;
   }
 
   async removeForce(id: string) {
-    await this.dataService.tx.permissionsOnIdentities.deleteMany({
-      where: { identityId: id },
-    });
-    await this.dataService.tx.identity.delete({
+    const user = await this.dataService.tx.user.findUnique({
       where: { id },
+      include: { identity: true },
     });
+
+    if (!user) {
+      throw new Error(`user with id: ${id} not found`);
+    }
+
+    if (user.identity) {
+      await this.dataService.tx.permissionsOnIdentities.deleteMany({
+        where: { identityId: id },
+      });
+      await this.dataService.tx.identity.delete({
+        where: { id },
+      });
+    }
 
     return await this.dataService.tx.user.delete({
       where: { id },

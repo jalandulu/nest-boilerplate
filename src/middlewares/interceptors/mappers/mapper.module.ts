@@ -4,12 +4,14 @@ import { FileMapper } from './storage';
 import { NotificationMapper } from './notification';
 import { PermissionMapper, RoleMapper } from './access';
 import { ProfileMapper } from './profile';
+import { UserMapper } from './user';
 
 @Global()
 @Module({
   providers: [
     AuthMapper,
     ProfileMapper,
+    UserMapper,
     FileMapper,
     NotificationMapper,
     RoleMapper,
@@ -18,6 +20,7 @@ import { ProfileMapper } from './profile';
   exports: [
     AuthMapper,
     ProfileMapper,
+    UserMapper,
     FileMapper,
     NotificationMapper,
     RoleMapper,

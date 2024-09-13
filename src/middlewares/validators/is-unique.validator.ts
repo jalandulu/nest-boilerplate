@@ -49,7 +49,7 @@ export class IsUniqueValidator implements ValidatorConstraintInterface {
 }
 
 export const IsUnique = (
-  table: Uncapitalize<Prisma.ModelName>,
+  table: Prisma.ModelName,
   column: string,
   validationOptions?: ValidationOptions,
 ) => {
