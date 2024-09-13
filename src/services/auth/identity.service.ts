@@ -11,6 +11,7 @@ import { Hash } from 'src/common/helpers';
 import {
   ICreateIdentityDto,
   IPaginationDto,
+  IUpdateIdentityCredentialDto,
   IUpdateIdentityDto,
   IUpdateIdentityProfileDto,
 } from 'src/cores/dtos';
@@ -174,7 +175,7 @@ export class IdentityService {
 
   async changePassword(
     id: string,
-    { password }: Omit<IUpdateIdentityDto, 'username'>,
+    { currentPassword, password }: IUpdateIdentityCredentialDto,
   ) {
     const exist = await this.dataService.tx.identity.findFirst({
       where: {
@@ -186,7 +187,7 @@ export class IdentityService {
       throw new NotFoundException(`account doesn't exist`);
     }
 
-    if (!(await Hash.verify(password, exist.password))) {
+    if (!(await Hash.verify(currentPassword, exist.password))) {
       throw new BadRequestException([
         {
           field: 'currentPassword',

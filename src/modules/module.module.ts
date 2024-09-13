@@ -4,10 +4,12 @@ import { AccessModule } from './access';
 import { StorageModule } from './storage';
 import { NotificationModule } from './notification';
 import { EmailModule } from './email';
+import { UserModule } from './user';
 
 @Module({
   imports: [
     AuthModule,
+    UserModule,
     AccessModule,
     StorageModule,
     NotificationModule,
