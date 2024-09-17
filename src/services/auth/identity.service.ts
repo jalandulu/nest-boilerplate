@@ -46,7 +46,11 @@ export class IdentityService {
           deletedAt: null,
         },
         include: {
-          user: true,
+          user: {
+            include: {
+              picture: true,
+            },
+          },
           role: true,
         },
       })
@@ -56,14 +60,11 @@ export class IdentityService {
       });
   }
 
-  async findOne(id: string) {
-    return await this.dataService.tx.identity.findFirst({
+  async findOne<T>(id: string, include?: Prisma.IdentityInclude) {
+    return (await this.dataService.tx.identity.findFirst({
       where: { id, deletedAt: null },
-      include: {
-        user: true,
-        role: true,
-      },
-    });
+      include: include,
+    })) as T;
   }
 
   async findUsername(username: string) {
@@ -81,6 +82,24 @@ export class IdentityService {
         id,
         verifiedAt: null,
         deletedAt: null,
+      },
+      select: {
+        verifiedAt: true,
+      },
+    });
+
+    return !!isVerified;
+  }
+
+  async isActive(id: string) {
+    const isVerified = await this.dataService.tx.identity.findFirst({
+      where: {
+        id,
+        disabledAt: null,
+        deletedAt: null,
+      },
+      select: {
+        disabledAt: true,
       },
     });
 

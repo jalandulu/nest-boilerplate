@@ -4,7 +4,7 @@ import { FileMapper } from './storage';
 import { NotificationMapper } from './notification';
 import { PermissionMapper, RoleMapper } from './access';
 import { ProfileMapper } from './profile';
-import { UserMapper } from './user';
+import { AccountMapper, UserMapper } from './user';
 
 @Global()
 @Module({
@@ -12,6 +12,7 @@ import { UserMapper } from './user';
     AuthMapper,
     ProfileMapper,
     UserMapper,
+    AccountMapper,
     FileMapper,
     NotificationMapper,
     RoleMapper,
@@ -21,6 +22,7 @@ import { UserMapper } from './user';
     AuthMapper,
     ProfileMapper,
     UserMapper,
+    AccountMapper,
     FileMapper,
     NotificationMapper,
     RoleMapper,
