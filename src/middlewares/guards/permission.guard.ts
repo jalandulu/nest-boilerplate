@@ -1,5 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { FastifyRequest } from 'fastify';
 import { Permissions } from 'src/common/decorators';
 import { AuthService } from 'src/services';
 
@@ -17,9 +18,13 @@ export class PermissionGuard implements CanActivate {
       return false;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<FastifyRequest>();
+    if (!request.user) {
+      return false;
+    }
+
     const hasPermission = await this.authService.hasPermission(
-      request.user.sub,
+      request.user.id,
       permissions,
     );
 
