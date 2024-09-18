@@ -21,6 +21,8 @@ export class RoleMapper {
       data: {
         id: role.id,
         name: role.name,
+        slug: role.slug,
+        visible: role.visible,
         permissions: permissions,
         createdAt: role.createdAt,
         updatedAt: role.updatedAt,
