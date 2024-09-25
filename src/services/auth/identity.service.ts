@@ -88,7 +88,9 @@ export class IdentityService {
       },
     });
 
-    return !!isVerified;
+    if (!isVerified) return true;
+
+    return !!isVerified.verifiedAt;
   }
 
   async isActive(id: string) {

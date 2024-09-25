@@ -110,7 +110,7 @@ export class AuthController {
     @Req() request: FastifyRequest,
     @AuthPayload() payload: ProfileEntity,
   ) {
-    const url = await this.emailVerificationUseCase.sign(request, payload.id);
+    const url = await this.emailVerificationUseCase.send(request, payload.id);
 
     await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
       to: payload.email,
@@ -125,7 +125,7 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async verifyEmailVerification(
     @Req() request: FastifyRequest,
-    @Query() payload: SignedVerifyRequest,
+    @Body() payload: SignedVerifyRequest,
   ) {
     await this.emailVerificationUseCase.verify(request, payload);
   }

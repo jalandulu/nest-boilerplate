@@ -276,7 +276,7 @@ export class AuthService {
     return signatureUrl;
   }
 
-  async verifyEmailStrategy(url: string, userId: string) {
+  async verifyEmailStrategy(userId: string, url: string) {
     const isAlreadySent = await this.emailVerificationRefresh(userId);
     if (isAlreadySent) {
       throw new UnprocessableEntityException('email verification already sent');

@@ -10,7 +10,11 @@ export class EmailVerificationUseCase {
     private readonly identityService: IdentityService,
   ) {}
 
-  async sign(request: FastifyRequest, userId: string) {
+  private signatureUrl(origin: string) {
+    return `${origin}/auth/verification-email/verify`;
+  }
+
+  async send(request: FastifyRequest, userId: string) {
     const isVerified = await this.identityService.isVerified(userId);
     if (isVerified) {
       throw new UnprocessableEntityException('email is already verified');
@@ -22,8 +26,8 @@ export class EmailVerificationUseCase {
     }
 
     const signatureUrl = this.authService.verifyEmailStrategy(
-      `${origin}/verification-email/verify`,
       userId,
+      this.signatureUrl(origin),
     );
 
     return signatureUrl;
@@ -36,7 +40,7 @@ export class EmailVerificationUseCase {
         throw new UnprocessableEntityException('undefined origin hostname');
       }
 
-      const signatureUrl = new URL(`${origin}/verification-email/verify`);
+      const signatureUrl = new URL(this.signatureUrl(origin));
       signatureUrl.searchParams.append('signed', payload.signed);
       signatureUrl.searchParams.append('token', payload.token);
 
