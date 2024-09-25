@@ -117,9 +117,9 @@ export class AuthService {
 
     const { exp: accessTokenExpAt, token: accessToken } =
       await this.jwtService.accessToken({
-      userId: localAuth.id,
-      username: localAuth.username,
-    });
+        userId: localAuth.id,
+        username: localAuth.username,
+      });
 
     token.accessToken = accessToken;
     token.accessTokenExpAt = accessTokenExpAt;
@@ -127,9 +127,9 @@ export class AuthService {
     if (this.isRefreshStrategy()) {
       const { exp: refreshTokenExpAt, token: refreshToken } =
         await this.jwtService.refreshToken({
-        userId: localAuth.id,
-        username: localAuth.username,
-      });
+          userId: localAuth.id,
+          username: localAuth.username,
+        });
 
       token.refreshToken = refreshToken;
       token.refreshTokenExpAt = refreshTokenExpAt;
@@ -365,7 +365,7 @@ export class AuthService {
     await this.cacheService.set(
       `${userId}:permissions`,
       permissions,
-      this.jwtService.expiration({ scope: this.expirationScope() }),
+      this.jwtService.expiration({ scope: TokenScope.Refresh }),
     );
   }
 
@@ -373,7 +373,7 @@ export class AuthService {
     await this.cacheService.set(
       `${userId}:user`,
       user,
-      this.jwtService.expiration({ scope: this.expirationScope() }),
+      this.jwtService.expiration({ scope: TokenScope.Refresh }),
     );
   }
 
@@ -445,9 +445,5 @@ export class AuthService {
 
   isRefreshStrategy() {
     return this.jwtConfig.strategy === 'refresh';
-  }
-
-  expirationScope() {
-    return this.isRefreshStrategy() ? TokenScope.Refresh : TokenScope.Refresh;
   }
 }
