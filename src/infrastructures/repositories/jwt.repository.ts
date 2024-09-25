@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService as JwtServiceProvider } from '@nestjs/jwt';
+import { DateTime } from 'luxon';
 import { IJwtSignDto } from 'src/cores/dtos';
 import { JwtEntity } from 'src/cores/entities';
 import { TokenScope } from 'src/cores/enums';
@@ -20,7 +21,10 @@ export class JwtRepository implements IJwtRepository {
   async generate({ data }: { data: IJwtSignDto }) {
     const expiresIn = this.getExpiration({ scope: data.scope });
 
-    return await this.jwt.signAsync(
+    const now = DateTime.now();
+    const iat = now.toSeconds();
+    const exp = now.plus({ seconds: expiresIn }).toSeconds();
+    const token = await this.jwt.signAsync(
       {
         sub: data.userId,
         username: data.username,
@@ -31,6 +35,12 @@ export class JwtRepository implements IJwtRepository {
         expiresIn,
       },
     );
+
+    return {
+      iat: iat,
+      exp: exp,
+      token: token,
+    };
   }
 
   async verify({ token }: { token: string }) {

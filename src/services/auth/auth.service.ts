@@ -95,28 +95,44 @@ export class AuthService {
     return identity;
   }
 
-  async attempt({
-    localAuth,
-  }: {
-    localAuth: LocalAuthEntity;
-  }): Promise<{ accessToken: string; refreshToken?: string }> {
+  async attempt({ localAuth }: { localAuth: LocalAuthEntity }): Promise<{
+    accessToken: string;
+    accessTokenExpAt: number;
+    refreshToken?: string;
+    refreshTokenExpAt?: number;
+  }> {
     const permissions = localAuth.permissions.map((p) => p.slug);
 
-    const token: { accessToken: string; refreshToken?: string } = {
+    const token: {
+      accessToken: string;
+      accessTokenExpAt: number;
+      refreshToken?: string;
+      refreshTokenExpAt?: number;
+    } = {
       accessToken: '',
+      accessTokenExpAt: 0,
       refreshToken: undefined,
+      refreshTokenExpAt: undefined,
     };
 
-    token.accessToken = await this.jwtService.accessToken({
+    const { exp: accessTokenExpAt, token: accessToken } =
+      await this.jwtService.accessToken({
       userId: localAuth.id,
       username: localAuth.username,
     });
 
+    token.accessToken = accessToken;
+    token.accessTokenExpAt = accessTokenExpAt;
+
     if (this.isRefreshStrategy()) {
-      token.refreshToken = await this.jwtService.refreshToken({
+      const { exp: refreshTokenExpAt, token: refreshToken } =
+        await this.jwtService.refreshToken({
         userId: localAuth.id,
         username: localAuth.username,
       });
+
+      token.refreshToken = refreshToken;
+      token.refreshTokenExpAt = refreshTokenExpAt;
     }
 
     const user: ProfileEntity = await this.profileMapper.toMap(
@@ -142,9 +158,16 @@ export class AuthService {
       this.permissions(userId),
     ]);
 
-    const token: { accessToken: string; refreshToken: string } = {
+    const token: {
+      accessToken: string;
+      accessTokenExpAt: number;
+      refreshToken?: string;
+      refreshTokenExpAt?: number;
+    } = {
       accessToken: '',
-      refreshToken: '',
+      accessTokenExpAt: 0,
+      refreshToken: undefined,
+      refreshTokenExpAt: undefined,
     };
 
     const [accessToken, refreshToken] = await Promise.all([
@@ -158,8 +181,10 @@ export class AuthService {
       }),
     ]);
 
-    token.accessToken = accessToken;
-    token.refreshToken = refreshToken;
+    token.accessToken = accessToken.token;
+    token.accessTokenExpAt = accessToken.exp;
+    token.refreshToken = refreshToken.token;
+    token.refreshTokenExpAt = refreshToken.exp;
 
     await Promise.all([
       this.destroy(user.id),

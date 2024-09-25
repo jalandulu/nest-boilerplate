@@ -70,7 +70,9 @@ export class AuthController {
     return this.authMapper.toMap({
       profile: await this.profileMapper.toMap(user.user, user.role),
       accessToken: authenticated.accessToken,
+      accessTokenExpAt: authenticated.accessTokenExpAt,
       refreshToken: authenticated.refreshToken,
+      refreshTokenExpAt: authenticated.refreshTokenExpAt,
       abilities,
     });
   }
@@ -94,7 +96,9 @@ export class AuthController {
     return this.authMapper.toMap({
       profile: await this.profileMapper.toMap(user, role),
       accessToken: authenticated.accessToken,
+      accessTokenExpAt: authenticated.accessTokenExpAt,
       refreshToken: authenticated.refreshToken,
+      refreshTokenExpAt: authenticated.refreshTokenExpAt,
       abilities,
     });
   }
@@ -177,7 +181,9 @@ export class AuthController {
     return this.authMapper.toMap({
       profile: user,
       accessToken: authenticated.accessToken,
+      accessTokenExpAt: authenticated.accessTokenExpAt,
       refreshToken: authenticated.refreshToken,
+      refreshTokenExpAt: authenticated.refreshTokenExpAt,
       abilities,
     });
   }

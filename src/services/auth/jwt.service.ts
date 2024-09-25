@@ -86,32 +86,50 @@ export class JwtService {
     rememberMe?: boolean,
   ): Promise<{
     accessToken: string;
+    accessTokenExpAt: number;
     refreshToken: string;
+    refreshTokenExpAt: number;
     rememberMeToken?: string;
+    rememberMeTokenExpAt?: number;
   }> {
-    const accessToken = await this.accessToken({
-      userId: payload.sub,
-      username: payload.username,
-      permissions: payload.permissions,
-    });
-
-    const refreshToken = await this.refreshToken({
-      userId: payload.sub,
-      username: payload.username,
-      permissions: payload.permissions,
-    });
-
-    if (rememberMe) {
-      const rememberMeToken = await this.rememberMeToken({
+    const { exp: accessTokenExpAt, token: accessToken } =
+      await this.accessToken({
         userId: payload.sub,
         username: payload.username,
         permissions: payload.permissions,
       });
 
-      return { accessToken, refreshToken, rememberMeToken };
+    const { exp: refreshTokenExpAt, token: refreshToken } =
+      await this.refreshToken({
+        userId: payload.sub,
+        username: payload.username,
+        permissions: payload.permissions,
+      });
+
+    if (rememberMe) {
+      const { exp: rememberMeTokenExpAt, token: rememberMeToken } =
+        await this.rememberMeToken({
+          userId: payload.sub,
+          username: payload.username,
+          permissions: payload.permissions,
+        });
+
+      return {
+        accessToken,
+        accessTokenExpAt,
+        refreshToken,
+        refreshTokenExpAt,
+        rememberMeToken,
+        rememberMeTokenExpAt,
+      };
     }
 
-    return { accessToken, refreshToken };
+    return {
+      accessToken,
+      accessTokenExpAt,
+      refreshToken,
+      refreshTokenExpAt,
+    };
   }
 
   expiration(params: { scope: TokenScope }) {
