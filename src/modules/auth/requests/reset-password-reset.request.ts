@@ -1,8 +1,14 @@
 import { IsNotEmpty, IsString, IsStrongPassword } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsMatch } from 'src/middlewares/validators';
+import { SignedVerifyRequest } from './signed-verify.request';
 
-export class ResetPasswordResetRequest {
+export class ResetPasswordResetRequest extends SignedVerifyRequest {
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty()
+  code: string;
+
   @IsNotEmpty()
   @IsString()
   @IsStrongPassword()

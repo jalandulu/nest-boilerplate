@@ -5,7 +5,6 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  Query,
   Req,
   Request,
   UseGuards,
@@ -136,7 +135,7 @@ export class AuthController {
     @Req() request: FastifyRequest,
     @Body() payload: ResetPasswordRequestRequest,
   ) {
-    const { url, identity } = await this.resetPasswordUseCase.request(
+    const { url, code, identity } = await this.resetPasswordUseCase.request(
       request,
       payload,
     );
@@ -146,6 +145,7 @@ export class AuthController {
       template: 'reset-password-request',
       context: {
         link: url,
+        code: code,
       },
     });
   }
@@ -154,14 +154,9 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async resetPassword(
     @Req() request: FastifyRequest,
-    @Query() query: SignedVerifyRequest,
     @Body() payload: ResetPasswordResetRequest,
   ) {
-    const identity = await this.resetPasswordUseCase.reset(
-      request,
-      query,
-      payload,
-    );
+    const identity = await this.resetPasswordUseCase.reset(request, payload);
 
     await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
       to: identity.username,

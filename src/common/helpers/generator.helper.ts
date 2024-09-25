@@ -10,4 +10,8 @@ export namespace Generate {
   export function randomString(size: number = 16) {
     return randomBytes(size).toString('hex');
   }
+
+  export function verificationCode() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
 }

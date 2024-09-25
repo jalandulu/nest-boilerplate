@@ -11,7 +11,7 @@ import {
   ICacheServiceProvider,
   ISignedUrlServiceProvider,
 } from 'src/cores/contracts';
-import { Hash, String } from 'src/common/helpers';
+import { Generate, Hash, String } from 'src/common/helpers';
 import { LocalAuthEntity, ProfileEntity } from 'src/cores/entities';
 import { AccountStatus, TokenScope } from 'src/cores/enums';
 import { JwtService } from './jwt.service';
@@ -259,7 +259,7 @@ export class AuthService {
     return cachedRefreshToken === token;
   }
 
-  async resetPasswordStrategy(url: string, userId: string) {
+  async resetPasswordStrategy(userId: string, url: string) {
     const isAlreadySent = await this.resetPasswordRefresh(userId);
     if (isAlreadySent) {
       throw new UnprocessableEntityException('reset password already sent');
@@ -267,13 +267,15 @@ export class AuthService {
 
     const signatureUrl = this.createSignedUrl(url, userId);
     const token = String.extractURL(signatureUrl, 'token');
+    const verificationCode = Generate.verificationCode();
 
     await Promise.all([
       await this.setResetPasswordToken(userId, token),
+      await this.setResetPasswordCode(userId, verificationCode),
       await this.setResetPasswordRefresh(userId),
     ]);
 
-    return signatureUrl;
+    return { signatureUrl, verificationCode };
   }
 
   async verifyEmailStrategy(userId: string, url: string) {
@@ -313,6 +315,10 @@ export class AuthService {
     return await this.cacheService.get<string>(
       `${userId}:reset-password:token`,
     );
+  }
+
+  async resetPasswordCode(userId: string) {
+    return await this.cacheService.get<string>(`${userId}:reset-password:code`);
   }
 
   async resetPasswordRefresh(userId: string) {
@@ -383,6 +389,14 @@ export class AuthService {
     await this.cacheService.set(
       `${userId}:reset-password:token`,
       token,
+      this.verificationConfig.resetTtl,
+    );
+  }
+
+  async setResetPasswordCode(userId: string, code: string) {
+    await this.cacheService.set(
+      `${userId}:reset-password:code`,
+      code,
       this.verificationConfig.resetTtl,
     );
   }

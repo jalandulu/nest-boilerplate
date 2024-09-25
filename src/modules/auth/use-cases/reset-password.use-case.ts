@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   Injectable,
   NotFoundException,
@@ -9,7 +10,6 @@ import { FastifyRequest } from 'fastify';
 import {
   ResetPasswordResetRequest,
   ResetPasswordRequestRequest,
-  SignedVerifyRequest,
 } from '../requests';
 import { SignatureError } from 'signed';
 
@@ -19,6 +19,10 @@ export class ResetPasswordUseCase {
     private readonly authService: AuthService,
     private readonly identityService: IdentityService,
   ) {}
+
+  private signatureUrl(origin: string) {
+    return `${origin}/auth/reset-password/reset`;
+  }
 
   async request(request: FastifyRequest, payload: ResetPasswordRequestRequest) {
     const origin = request.headers.origin;
@@ -31,41 +35,59 @@ export class ResetPasswordUseCase {
       throw new NotFoundException(`email or username does not found`);
     }
 
-    const signatureUrl = await this.authService.resetPasswordStrategy(
-      `${origin}/reset-password/reset`,
-      identity.id,
-    );
+    const { signatureUrl, verificationCode } =
+      await this.authService.resetPasswordStrategy(
+        identity.id,
+        this.signatureUrl(origin),
+      );
 
-    return { url: signatureUrl, identity };
+    return { url: signatureUrl, code: verificationCode, identity };
   }
 
-  async reset(
-    request: FastifyRequest,
-    query: SignedVerifyRequest,
-    payload: ResetPasswordResetRequest,
-  ) {
+  async reset(request: FastifyRequest, payload: ResetPasswordResetRequest) {
     try {
       const origin = request.headers.origin;
       if (!origin) {
         throw new UnprocessableEntityException('undefined origin hostname');
       }
 
-      const signatureUrl = new URL(`${origin}/reset-password/reset`);
-      signatureUrl.searchParams.append('signed', query.signed);
-      signatureUrl.searchParams.append('token', query.token);
+      const signatureUrl = new URL(this.signatureUrl(origin));
+      signatureUrl.searchParams.append('signed', payload.signed);
+      signatureUrl.searchParams.append('token', payload.token);
 
-      const { data } = this.authService.verifySignedUrl(signatureUrl.href);
+      const { data: userId } = this.authService.verifySignedUrl(
+        signatureUrl.href,
+      );
 
-      const isValidToken = await this.authService.resetPasswordToken(data);
+      const isValidToken = await this.authService.resetPasswordToken(userId);
       if (!isValidToken) {
         throw new UnprocessableEntityException('Request expired');
       }
 
+      const isValidCode = await this.authService.resetPasswordCode(userId);
+      if (!isValidCode) {
+        throw new BadRequestException([
+          {
+            field: 'code',
+            errors: [`code is expired.`],
+          },
+        ]);
+      }
+
+      if (isValidCode !== payload.code) {
+        throw new BadRequestException([
+          {
+            field: 'code',
+            errors: [`code is invalid.`],
+          },
+        ]);
+      }
+
       const [identity] = await Promise.all([
-        this.identityService.updatePassword(data, {
+        this.identityService.updatePassword(userId, {
           password: payload.password,
         }),
-        this.authService.passwordResetted(data),
+        this.authService.passwordResetted(userId),
       ]);
 
       return identity;
