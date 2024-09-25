@@ -29,8 +29,6 @@ export class SignedUrlService implements ISignedUrlServiceProvider {
   }
 
   sign(url: string, options?: ISignSignedUrlOption) {
-    console.log(url);
-
     const signatureUrl = new URL(this.signature.sign(url, options));
 
     if (options.data) {
