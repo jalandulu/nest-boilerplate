@@ -1,4 +1,4 @@
-import { S3 } from 'src/infrastructures/storage/globals';
+import { S3 } from 'src/infrastructures/storage/storage';
 import { ProfileEntity } from '../entities';
 
 declare module 'fastify' {

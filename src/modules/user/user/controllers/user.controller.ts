@@ -21,7 +21,6 @@ import {
 } from '../requests';
 import { MultipartInterceptor } from 'src/infrastructures/storage/interceptors';
 import { Files } from 'src/infrastructures/storage/decorators';
-import { S3 } from 'src/infrastructures/storage/globals';
 import { UserPictureUseCase, UserUseCase } from '../use-cases';
 import { FileMapper, UserMapper } from 'src/middlewares/interceptors';
 

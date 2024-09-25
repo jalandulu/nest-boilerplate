@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { FileDirectoryService, StorageService } from 'src/services/storage';
-import { S3 } from 'src/infrastructures/storage/globals';
 import { UserService } from 'src/services';
 import { StorageCode } from 'src/cores/enums';
 

@@ -5,7 +5,6 @@ import { Storage } from 'src/common/helpers';
 import { IStorageRepository } from 'src/cores/interfaces';
 import { ExtendedPrismaClient } from 'src/infrastructures/database/prisma/prisma.extension';
 import { StorageCode } from 'src/cores/enums';
-import { S3 } from 'src/infrastructures/storage/globals';
 
 @Injectable()
 export class StorageService {

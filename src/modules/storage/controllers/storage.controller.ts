@@ -11,7 +11,6 @@ import { AccessAuthGuard } from 'src/middlewares/guards';
 import { UploadUseCase } from '../use-cases';
 import { MultipartInterceptor } from 'src/infrastructures/storage/interceptors';
 import { Files } from 'src/infrastructures/storage/decorators';
-import { S3 } from 'src/infrastructures/storage/globals';
 
 @ApiTags('Storage')
 @UseGuards(AccessAuthGuard)

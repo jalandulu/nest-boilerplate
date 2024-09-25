@@ -16,7 +16,6 @@ import { AccessAuthGuard } from 'src/middlewares/guards';
 import { UpdatePasswordRequest, UpdateProfileRequest } from '../requests';
 import { MultipartInterceptor } from 'src/infrastructures/storage/interceptors';
 import { Files } from 'src/infrastructures/storage/decorators';
-import { S3 } from 'src/infrastructures/storage/globals';
 import { IQueueServiceProvider } from 'src/cores/contracts';
 import { QueueMailerProcessor } from 'src/cores/consts';
 import {

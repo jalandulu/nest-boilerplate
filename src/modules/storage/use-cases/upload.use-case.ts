@@ -3,7 +3,6 @@ import { MultipleUploadRequest, UploadRequest } from '../requests';
 import { StorageCode } from 'src/cores/enums';
 import { FileDirectoryService, StorageService } from 'src/services/storage';
 import { IStorageServiceProvider } from 'src/cores/contracts';
-import { S3 } from 'src/infrastructures/storage/globals';
 
 @Injectable()
 export class UploadUseCase {
