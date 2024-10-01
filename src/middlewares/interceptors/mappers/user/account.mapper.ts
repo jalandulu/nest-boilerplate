@@ -29,6 +29,7 @@ export class AccountMapper {
     return {
       data: {
         id: account.id,
+        name: account.user.name,
         username: account.username,
         status: account.status,
         role: account?.role ? await this.roleMap(account.role) : undefined,

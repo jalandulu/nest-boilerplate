@@ -15,6 +15,7 @@ export type AccountsMap = AccountMap[];
 
 export type AccountEntity = {
   id: string;
+  name: string;
   username: string;
   status: string;
   role: RoleEntity;
