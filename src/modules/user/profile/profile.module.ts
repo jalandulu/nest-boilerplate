@@ -4,10 +4,16 @@ import {
   ProfilePasswordUseCase,
   ProfilePictureUseCase,
   ProfileUseCase,
+  ProfileUsernameUseCase,
 } from './use-cases';
 
 @Module({
   controllers: [ProfileController],
-  providers: [ProfileUseCase, ProfilePictureUseCase, ProfilePasswordUseCase],
+  providers: [
+    ProfileUseCase,
+    ProfilePictureUseCase,
+    ProfileUsernameUseCase,
+    ProfilePasswordUseCase,
+  ],
 })
 export class ProfileModule {}

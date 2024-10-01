@@ -14,16 +14,29 @@ export class UserService {
     >,
   ) {}
 
-  async findAll(pagination: IPaginationDto) {
+  async findAll({
+    perPage,
+    page,
+    account,
+  }: { account?: boolean } & IPaginationDto) {
     return await this.dataService.tx.user
       .paginate({
+        where:
+          account === false
+            ? {
+                OR: [
+                  { identity: null },
+                  { identity: { deletedAt: { not: null } } },
+                ],
+              }
+            : undefined,
         include: {
           picture: true,
         },
       })
       .withPages({
-        limit: pagination.perPage,
-        page: pagination.page,
+        limit: perPage,
+        page: page,
       });
   }
 

@@ -1,4 +1,10 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Permissions } from 'src/common/decorators';
 import { AccessAuthGuard, PermissionGuard } from 'src/middlewares/guards';
@@ -21,5 +27,11 @@ export class PermissionController {
   @Permissions(['access:permission'])
   async findAll() {
     return this.mapper.toGroup(await this.getUseCase.findAll());
+  }
+
+  @Get('role/:roleId')
+  @Permissions(['access:permission'])
+  async findByRole(@Param('roleId', ParseIntPipe) roleId: number) {
+    return this.mapper.toGroup(await this.getUseCase.findByRole(roleId));
   }
 }

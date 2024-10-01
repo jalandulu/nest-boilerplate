@@ -377,6 +377,20 @@ export class AuthService {
     );
   }
 
+  async updateUser(userId: string, user: Partial<ProfileEntity>) {
+    const cached = await this.user(`${userId}:user`);
+    if (cached) {
+      await this.cacheService.set(
+        `${userId}:user`,
+        {
+          ...cached,
+          ...user,
+        },
+        this.jwtService.expiration({ scope: TokenScope.Refresh }),
+      );
+    }
+  }
+
   async setCacheStrategy(userId: string) {
     await this.cacheService.set(
       `${userId}:caching`,

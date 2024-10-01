@@ -17,13 +17,23 @@ import { AccessAuthGuard } from 'src/middlewares/guards';
 import {
   CreateAccountRequest,
   QueryUserRequest,
+  UpdateAccountAccessRequest,
+  UpdateAccountPasswordRequest,
   UpdateAccountRequest,
 } from '../requests';
-import { AccountUseCase } from '../use-cases';
+import {
+  AccountAccessUseCase,
+  AccountCredentialUseCase,
+  AccountStatusUseCase,
+  AccountUseCase,
+} from '../use-cases';
 import { AccountMapper } from 'src/middlewares/interceptors';
 import { IQueueServiceProvider } from 'src/cores/contracts';
 import { QueueMailerProcessor } from 'src/cores/consts';
 import { FastifyRequest } from 'fastify';
+import { AuthPayload } from 'src/common/decorators';
+import { ProfileEntity } from 'src/cores/entities';
+import { AccountStatus } from 'src/cores/enums';
 
 @ApiTags('Account')
 @UseGuards(AccessAuthGuard)
@@ -35,12 +45,18 @@ export class AccountController {
   constructor(
     private readonly accountMapper: AccountMapper,
     private readonly accountUseCase: AccountUseCase,
+    private readonly accountCredentialUseCase: AccountCredentialUseCase,
+    private readonly accountStatusUseCase: AccountStatusUseCase,
+    private readonly accountAccessUseCase: AccountAccessUseCase,
     private readonly queueServiceProvider: IQueueServiceProvider,
   ) {}
 
   @Get()
-  async findAll(@Query() query: QueryUserRequest) {
-    const [accounts, meta] = await this.accountUseCase.findAll(query);
+  async findAll(
+    @Query() query: QueryUserRequest,
+    @AuthPayload() profile: ProfileEntity,
+  ) {
+    const [accounts, meta] = await this.accountUseCase.findAll(query, profile);
 
     return await this.accountMapper.toPaginate(accounts, meta);
   }
@@ -49,20 +65,16 @@ export class AccountController {
   async findOne(@Param('id') id: string) {
     const account = await this.accountUseCase.findOne(id);
 
-    return await this.accountMapper.toMap(account);
+    return await this.accountMapper.toResource(account);
   }
 
-  @Post(':userId')
+  @Post()
   @HttpCode(HttpStatus.NO_CONTENT)
   async create(
     @Req() request: FastifyRequest,
-    @Param('userId') userId: string,
     @Body() payload: CreateAccountRequest,
   ) {
-    const { account, credential } = await this.accountUseCase.create(
-      userId,
-      payload,
-    );
+    const { account, credential } = await this.accountUseCase.create(payload);
 
     await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
       to: credential.username,
@@ -82,10 +94,33 @@ export class AccountController {
     return await this.accountUseCase.update(id, payload);
   }
 
-  @Patch(':id/reset')
+  @Patch(':id/username')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async reset(@Req() request: FastifyRequest, @Param('id') id: string) {
-    const account = await this.accountUseCase.reset(id);
+  async updateUsername(
+    @Param('id') id: string,
+    @Body() payload: UpdateAccountRequest,
+  ) {
+    const account = await this.accountCredentialUseCase.updateUsername(
+      id,
+      payload,
+    );
+
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+      to: account.before,
+      template: 'account-username',
+      context: {
+        username: account.after,
+      },
+    });
+  }
+
+  @Patch(':id/password/reset')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async updateResetPassword(
+    @Req() request: FastifyRequest,
+    @Param('id') id: string,
+  ) {
+    const account = await this.accountCredentialUseCase.resetPassword(id);
 
     await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
       to: account.credential.username,
@@ -97,10 +132,41 @@ export class AccountController {
     });
   }
 
+  @Patch(':id/password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async updatePassword(
+    @Req() request: FastifyRequest,
+    @Param('id') id: string,
+    @Body() payload: UpdateAccountPasswordRequest,
+  ) {
+    const account = await this.accountCredentialUseCase.updatePassword(
+      id,
+      payload,
+    );
+
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+      to: account.credential.username,
+      template: 'account-credential',
+      context: {
+        credential: account.credential,
+        link: request.headers.origin,
+      },
+    });
+  }
+
+  @Patch(':id/access')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async updateAccess(
+    @Param('id') id: string,
+    @Body() payload: UpdateAccountAccessRequest,
+  ) {
+    await this.accountAccessUseCase.access(id, payload);
+  }
+
   @Patch(':id/disable')
   @HttpCode(HttpStatus.NO_CONTENT)
   async disable(@Param('id') id: string) {
-    const account = await this.accountUseCase.disable(id);
+    const account = await this.accountStatusUseCase.disable(id);
 
     await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
       to: account.username,
@@ -111,11 +177,25 @@ export class AccountController {
   @Patch(':id/enable')
   @HttpCode(HttpStatus.NO_CONTENT)
   async enable(@Param('id') id: string) {
-    const account = await this.accountUseCase.enable(id);
+    const account = await this.accountStatusUseCase.enable(id);
 
     await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
       to: account.username,
       template: 'account-enable',
+    });
+  }
+
+  @Patch(':id/status')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async status(@Param('id') id: string) {
+    const account = await this.accountStatusUseCase.status(id);
+
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+      to: account.username,
+      template:
+        account.status === AccountStatus.Active
+          ? 'account-enable'
+          : 'account-disable',
     });
   }
 

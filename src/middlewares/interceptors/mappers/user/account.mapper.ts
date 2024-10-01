@@ -6,23 +6,30 @@ import {
   AccountsMap,
   UserMap,
   RoleMap,
+  PermissionsMap,
+  AccountResourceMap,
 } from 'src/cores/entities';
 import { UserMapper } from './user.mapper';
-import { RoleMapper } from '../access';
+import { PermissionMapper, RoleMapper } from '../access';
 
 @Injectable()
 export class AccountMapper {
   constructor(
     private readonly userMapper: UserMapper,
     private readonly roleMapper: RoleMapper,
+    private readonly permissionMapper: PermissionMapper,
   ) {}
 
   async userMap(user: UserMap) {
     return (await this.userMapper.toMap(user)).data;
   }
 
-  async roleMap(role: RoleMap) {
-    return (await this.roleMapper.toMap(role)).data;
+  roleMap(role: RoleMap) {
+    return this.roleMapper.toMap(role).data;
+  }
+
+  permissionMap(permission: PermissionsMap) {
+    return this.permissionMapper.toCollection(permission).data;
   }
 
   async toMap(account: AccountMap): Promise<{ data: AccountEntity }> {
@@ -34,6 +41,27 @@ export class AccountMapper {
         status: account.status,
         role: account?.role ? await this.roleMap(account.role) : undefined,
         user: account?.user ? await this.userMap(account.user) : undefined,
+        disabledAt: account.disabledAt?.toISOString(),
+        createdAt: account.createdAt.toISOString(),
+        updatedAt: account.updatedAt.toISOString(),
+      },
+    };
+  }
+
+  async toResource(
+    account: AccountResourceMap,
+  ): Promise<{ data: AccountEntity }> {
+    return {
+      data: {
+        id: account.id,
+        name: account.user.name,
+        username: account.username,
+        status: account.status,
+        role: account?.role ? await this.roleMap(account.role) : undefined,
+        user: account?.user ? await this.userMap(account.user) : undefined,
+        permissions: this.permissionMap(
+          account?.permissionsOnIdentities.map((p) => p.permission),
+        ),
         disabledAt: account.disabledAt?.toISOString(),
         createdAt: account.createdAt.toISOString(),
         updatedAt: account.updatedAt.toISOString(),

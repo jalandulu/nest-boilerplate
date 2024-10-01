@@ -6,14 +6,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { DateTime } from 'luxon';
 import { Hash } from 'src/common/helpers';
 import {
   ICreateIdentityDto,
   IPaginationDto,
+  IUpdateIdentityPasswordDto,
   IUpdateIdentityCredentialDto,
-  IUpdateIdentityDto,
   IUpdateIdentityProfileDto,
+  IUpdateIdentityDto,
 } from 'src/cores/dtos';
 import { AccountStatus } from 'src/cores/enums';
 import { ExtendedPrismaClient } from 'src/infrastructures/database/prisma/prisma.extension';
@@ -67,11 +69,20 @@ export class IdentityService {
     })) as T;
   }
 
-  async findUsername(username: string) {
+  async findUsername(
+    username: string,
+    exclude?: {
+      column: string;
+      value: any;
+    },
+  ) {
     return await this.dataService.tx.identity.findFirst({
       where: {
         username,
         deletedAt: null,
+        [exclude.column]: {
+          not: exclude.value,
+        },
       },
     });
   }
@@ -129,6 +140,51 @@ export class IdentityService {
     })) as T;
   }
 
+  async update<T>(
+    id: string,
+    updateIdentityDto: IUpdateIdentityDto,
+    include?: Prisma.IdentityInclude,
+  ) {
+    await this.removePermissions(id);
+
+    return (await this.dataService.tx.identity.update({
+      where: {
+        id,
+      },
+      data: {
+        roleId: updateIdentityDto.roleId,
+        username: updateIdentityDto.username,
+        password: await Hash.make(updateIdentityDto.password),
+        status: AccountStatus.Active,
+        disabledAt: null,
+        deletedAt: null,
+        permissionsOnIdentities: {
+          create: updateIdentityDto.permissionIds.map((id) => ({
+            permissionId: id,
+          })),
+        },
+      },
+      include,
+    })) as T;
+  }
+
+  async upsert<T>(
+    identityDto: ICreateIdentityDto,
+    include?: Prisma.IdentityInclude,
+  ) {
+    try {
+      return await this.create<T>(identityDto, include);
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          return await this.update<T>(identityDto.userId, identityDto, include);
+        }
+      }
+
+      throw error;
+    }
+  }
+
   async updateProfile(id: string, profileDto: IUpdateIdentityProfileDto) {
     return await this.dataService.tx.identity.update({
       where: { id },
@@ -146,7 +202,7 @@ export class IdentityService {
 
   async updateUsername(
     id: string,
-    { username }: Pick<IUpdateIdentityDto, 'username'>,
+    { username }: Pick<IUpdateIdentityCredentialDto, 'username'>,
   ) {
     return await this.dataService.tx.identity.update({
       where: { id },
@@ -196,7 +252,7 @@ export class IdentityService {
 
   async changePassword(
     id: string,
-    { currentPassword, password }: IUpdateIdentityCredentialDto,
+    { currentPassword, password }: IUpdateIdentityPasswordDto,
   ) {
     const exist = await this.dataService.tx.identity.findFirst({
       where: {
@@ -222,7 +278,7 @@ export class IdentityService {
 
   async updatePassword(
     id: string,
-    { password }: Omit<IUpdateIdentityDto, 'username'>,
+    { password }: Omit<IUpdateIdentityCredentialDto, 'username'>,
   ) {
     return await this.dataService.tx.identity.update({
       where: { id },

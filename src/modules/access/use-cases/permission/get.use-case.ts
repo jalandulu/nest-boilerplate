@@ -8,4 +8,8 @@ export class GetPermissionUseCase {
   async findAll() {
     return await this.permissionService.groupPermissionsByModule();
   }
+
+  async findByRole(roleId: number) {
+    return await this.permissionService.groupPermissionsByModule(roleId);
+  }
 }

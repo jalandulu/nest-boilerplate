@@ -13,7 +13,11 @@ import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AuthPayload } from 'src/common/decorators';
 import { ProfileEntity } from 'src/cores/entities';
 import { AccessAuthGuard } from 'src/middlewares/guards';
-import { UpdatePasswordRequest, UpdateProfileRequest } from '../requests';
+import {
+  UpdatePasswordRequest,
+  UpdateProfileRequest,
+  UpdateUsernameRequest,
+} from '../requests';
 import { MultipartInterceptor } from 'src/infrastructures/storage/interceptors';
 import { Files } from 'src/infrastructures/storage/decorators';
 import { IQueueServiceProvider } from 'src/cores/contracts';
@@ -22,6 +26,7 @@ import {
   ProfilePasswordUseCase,
   ProfilePictureUseCase,
   ProfileUseCase,
+  ProfileUsernameUseCase,
 } from '../use-cases';
 
 @ApiTags('Profile')
@@ -34,6 +39,7 @@ export class ProfileController {
   constructor(
     private readonly profileUseCase: ProfileUseCase,
     private readonly profilePictureUseCase: ProfilePictureUseCase,
+    private readonly profileUsernameUseCase: ProfileUsernameUseCase,
     private readonly profilePasswordUseCase: ProfilePasswordUseCase,
     private readonly queueServiceProvider: IQueueServiceProvider,
   ) {}
@@ -67,6 +73,15 @@ export class ProfileController {
     );
 
     return { data: updated };
+  }
+
+  @Patch('update/username')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async updateUsername(
+    @Body() payload: UpdateUsernameRequest,
+    @AuthPayload() profile: ProfileEntity,
+  ) {
+    await this.profileUsernameUseCase.updateUsername(profile, payload);
   }
 
   @Patch('update/password')

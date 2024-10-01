@@ -19,7 +19,7 @@ export class PermissionService {
     });
   }
 
-  async groupPermissionsByModule() {
+  async groupPermissionsByModule(roleId?: number) {
     const permissions = await this.dataService.tx.permission.findMany({
       select: {
         id: true,
@@ -27,6 +27,7 @@ export class PermissionService {
         action: true,
         slug: true,
       },
+      where: roleId ? { permissionsOnRoles: { some: { roleId } } } : undefined,
     });
 
     const groupedPermissions = {};
@@ -64,6 +65,16 @@ export class PermissionService {
           },
         },
         deletedAt: null,
+      },
+    });
+  }
+
+  async findIn(ids: number[]) {
+    return await this.dataService.tx.permission.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
       },
     });
   }
