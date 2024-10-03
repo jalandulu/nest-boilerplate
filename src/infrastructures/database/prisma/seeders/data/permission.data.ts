@@ -35,25 +35,25 @@ export const user = [
   {
     module: 'User',
     action: 'View',
-    slug: 'profile:view',
+    slug: 'user:view',
     use: ['superadmin', 'admin', 'staff'],
   },
   {
     module: 'User',
     action: 'Create',
-    slug: 'profile:create',
+    slug: 'user:create',
     use: ['superadmin', 'admin', 'staff'],
   },
   {
     module: 'User',
     action: 'Update',
-    slug: 'profile:update',
+    slug: 'user:update',
     use: ['superadmin', 'admin', 'staff'],
   },
   {
     module: 'User',
     action: 'Delete',
-    slug: 'profile:delete',
+    slug: 'user:delete',
     use: ['superadmin', 'admin', 'staff'],
   },
 ];
