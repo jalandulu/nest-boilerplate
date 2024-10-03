@@ -5,7 +5,7 @@ import { permissions } from './data/permission.data';
 export default async function roleSeeder({ prisma }: { prisma: PrismaClient }) {
   for (const role of roles) {
     const permissionsFiltered = permissions
-      .filter((p) => p.use.includes(role.slug))
+      .filter((p) => p.use.includes(role.slug as any))
       .map((p) => p.slug);
 
     const permissionIds = await prisma.permission.findMany({
