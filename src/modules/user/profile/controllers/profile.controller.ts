@@ -10,9 +10,9 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { AuthPayload } from 'src/common/decorators';
+import { AuthPayload, Permissions } from 'src/common/decorators';
 import { ProfileEntity } from 'src/cores/entities';
-import { AccessAuthGuard } from 'src/middlewares/guards';
+import { AccessAuthGuard, PermissionGuard } from 'src/middlewares/guards';
 import {
   UpdatePasswordRequest,
   UpdateProfileRequest,
@@ -30,7 +30,7 @@ import {
 } from '../use-cases';
 
 @ApiTags('Profile')
-@UseGuards(AccessAuthGuard)
+@UseGuards(AccessAuthGuard, PermissionGuard)
 @Controller({
   path: 'profile',
   version: '1.0',
@@ -45,6 +45,7 @@ export class ProfileController {
   ) {}
 
   @Get()
+  @Permissions(['profile:view'])
   async profile(@AuthPayload() profile: ProfileEntity) {
     return {
       data: profile,
@@ -52,6 +53,7 @@ export class ProfileController {
   }
 
   @Patch('update/profile')
+  @Permissions(['profile:update'])
   async updateProfile(
     @Body() payload: UpdateProfileRequest,
     @AuthPayload() profile: ProfileEntity,
@@ -60,6 +62,7 @@ export class ProfileController {
   }
 
   @Patch('update/picture')
+  @Permissions(['profile:update'])
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(MultipartInterceptor({ maxFileSize: 1000_000 }))
   async updatePicture(
@@ -76,6 +79,7 @@ export class ProfileController {
   }
 
   @Patch('update/username')
+  @Permissions(['profile:update-username'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateUsername(
     @Body() payload: UpdateUsernameRequest,
@@ -85,6 +89,7 @@ export class ProfileController {
   }
 
   @Patch('update/password')
+  @Permissions(['profile:update-password'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePassword(
     @Body() payload: UpdatePasswordRequest,
@@ -94,6 +99,7 @@ export class ProfileController {
   }
 
   @Delete('destroy')
+  @Permissions(['profile:delete'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async destroy(@AuthPayload() profile: ProfileEntity) {
     await this.profileUseCase.destroy(profile);

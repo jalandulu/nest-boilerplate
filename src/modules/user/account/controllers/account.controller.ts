@@ -13,7 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { AccessAuthGuard } from 'src/middlewares/guards';
+import { AccessAuthGuard, PermissionGuard } from 'src/middlewares/guards';
 import {
   CreateAccountRequest,
   QueryUserRequest,
@@ -31,12 +31,12 @@ import { AccountMapper } from 'src/middlewares/interceptors';
 import { IQueueServiceProvider } from 'src/cores/contracts';
 import { QueueMailerProcessor } from 'src/cores/consts';
 import { FastifyRequest } from 'fastify';
-import { AuthPayload } from 'src/common/decorators';
+import { AuthPayload, Permissions } from 'src/common/decorators';
 import { ProfileEntity } from 'src/cores/entities';
 import { AccountStatus } from 'src/cores/enums';
 
 @ApiTags('Account')
-@UseGuards(AccessAuthGuard)
+@UseGuards(AccessAuthGuard, PermissionGuard)
 @Controller({
   path: 'accounts',
   version: '1.0',
@@ -52,6 +52,7 @@ export class AccountController {
   ) {}
 
   @Get()
+  @Permissions(['account:view'])
   async findAll(
     @Query() query: QueryUserRequest,
     @AuthPayload() profile: ProfileEntity,
@@ -62,6 +63,7 @@ export class AccountController {
   }
 
   @Get(':id')
+  @Permissions(['account:view'])
   async findOne(@Param('id') id: string) {
     const account = await this.accountUseCase.findOne(id);
 
@@ -69,6 +71,7 @@ export class AccountController {
   }
 
   @Post()
+  @Permissions(['account:create'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async create(
     @Req() request: FastifyRequest,
@@ -89,12 +92,14 @@ export class AccountController {
   }
 
   @Patch(':id')
+  @Permissions(['account:update'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async update(@Param('id') id: string, @Body() payload: UpdateAccountRequest) {
     return await this.accountUseCase.update(id, payload);
   }
 
   @Patch(':id/username')
+  @Permissions(['account:update-username'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateUsername(
     @Param('id') id: string,
@@ -115,6 +120,7 @@ export class AccountController {
   }
 
   @Patch(':id/password/reset')
+  @Permissions(['account:update-password'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateResetPassword(
     @Req() request: FastifyRequest,
@@ -133,6 +139,7 @@ export class AccountController {
   }
 
   @Patch(':id/password')
+  @Permissions(['account:update-password'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePassword(
     @Req() request: FastifyRequest,
@@ -155,6 +162,7 @@ export class AccountController {
   }
 
   @Patch(':id/access')
+  @Permissions(['account:access-control'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateAccess(
     @Param('id') id: string,
@@ -164,6 +172,7 @@ export class AccountController {
   }
 
   @Patch(':id/disable')
+  @Permissions(['account:update-status'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async disable(@Param('id') id: string) {
     const account = await this.accountStatusUseCase.disable(id);
@@ -175,6 +184,7 @@ export class AccountController {
   }
 
   @Patch(':id/enable')
+  @Permissions(['account:update-status'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async enable(@Param('id') id: string) {
     const account = await this.accountStatusUseCase.enable(id);
@@ -186,6 +196,7 @@ export class AccountController {
   }
 
   @Patch(':id/status')
+  @Permissions(['account:update-status'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async status(@Param('id') id: string) {
     const account = await this.accountStatusUseCase.status(id);
@@ -200,6 +211,7 @@ export class AccountController {
   }
 
   @Delete(':id/destroy')
+  @Permissions(['account:delete'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async destroy(@Param('id') id: string) {
     const account = await this.accountUseCase.destroy(id);

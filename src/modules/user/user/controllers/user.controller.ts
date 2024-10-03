@@ -13,7 +13,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { AccessAuthGuard } from 'src/middlewares/guards';
+import { AccessAuthGuard, PermissionGuard } from 'src/middlewares/guards';
 import {
   CreateUserRequest,
   QueryUserRequest,
@@ -23,9 +23,10 @@ import { MultipartInterceptor } from 'src/infrastructures/storage/interceptors';
 import { Files } from 'src/infrastructures/storage/decorators';
 import { UserPictureUseCase, UserUseCase } from '../use-cases';
 import { FileMapper, UserMapper } from 'src/middlewares/interceptors';
+import { Permissions } from 'src/common/decorators';
 
 @ApiTags('User')
-@UseGuards(AccessAuthGuard)
+@UseGuards(AccessAuthGuard, PermissionGuard)
 @Controller({
   path: 'users',
   version: '1.0',
@@ -39,6 +40,7 @@ export class UserController {
   ) {}
 
   @Get()
+  @Permissions(['user:view'])
   async findAll(@Query() query: QueryUserRequest) {
     const [users, meta] = await this.userUseCase.findAll(query);
 
@@ -46,16 +48,19 @@ export class UserController {
   }
 
   @Get(':id')
+  @Permissions(['user:view'])
   async findOne(@Param('id') id: string) {
     return await this.userMapper.toMap(await this.userUseCase.findOne(id));
   }
 
   @Post()
+  @Permissions(['user:create'])
   async create(@Body() payload: CreateUserRequest) {
     return await this.userMapper.toMap(await this.userUseCase.create(payload));
   }
 
   @Patch(':id')
+  @Permissions(['user:update'])
   async update(@Param('id') id: string, @Body() payload: UpdateUserRequest) {
     return await this.userMapper.toMap(
       await this.userUseCase.update(id, payload),
@@ -63,6 +68,7 @@ export class UserController {
   }
 
   @Patch(':id/picture')
+  @Permissions(['user:update'])
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(MultipartInterceptor({ maxFileSize: 1000_000 }))
   async updatePicture(
@@ -76,6 +82,7 @@ export class UserController {
   }
 
   @Delete(':id')
+  @Permissions(['user:delete'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
     await this.userUseCase.remove(id);
