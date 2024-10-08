@@ -1,5 +1,12 @@
 import { Prisma } from '@prisma/client';
 
+export type NotificationStatisticMap = Prisma.GetNotificationAggregateType<{
+  _count: {
+    id: true;
+    readAt: true;
+  };
+}>;
+
 export type NotificationMap =
   Prisma.NotificationGetPayload<Prisma.NotificationDefaultArgs>;
 

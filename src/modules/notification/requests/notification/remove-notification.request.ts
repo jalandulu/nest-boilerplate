@@ -3,5 +3,5 @@ import { QueryNotifiableRequest } from './query-notifiable.request';
 
 export class RemoveNotificationRequest extends PickType(
   QueryNotifiableRequest,
-  ['notifiableType', 'notifiableType'],
+  ['notifiableType', 'notifiableId'],
 ) {}

@@ -1,6 +1,7 @@
 import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { DateTime } from 'luxon';
 import {
   ICreateNotificationDto,
@@ -18,11 +19,31 @@ export class NotificationService {
     >,
   ) {}
 
-  async findAll(pagination: IPaginationDto) {
-    return await this.dataService.tx.notification.paginate().withPages({
-      limit: pagination.perPage,
-      page: pagination.page,
+  async statistic(params?: INotifiableNotificationDto) {
+    let where: Prisma.NotificationWhereInput | undefined = undefined;
+    if (params) {
+      where = {
+        notifiableId: params.notifiableId,
+        notifiableType: params.notifiableType,
+      };
+    }
+
+    return await this.dataService.tx.notification.aggregate({
+      where,
+      _count: {
+        id: true,
+        readAt: true,
+      },
     });
+  }
+
+  async findAll(pagination: IPaginationDto) {
+    return await this.dataService.tx.notification
+      .paginate({ orderBy: { createdAt: 'desc' } })
+      .withPages({
+        limit: pagination.perPage,
+        page: pagination.page,
+      });
   }
 
   async findByNotifiable({
@@ -37,6 +58,7 @@ export class NotificationService {
           notifiableType,
           notifiableId,
         },
+        orderBy: { createdAt: 'desc' },
       })
       .withPages({
         limit: perPage,
@@ -124,12 +146,28 @@ export class NotificationService {
   }
 
   async remove(id: number) {
+    return await this.dataService.tx.notification.softDelete({
+      id,
+    });
+  }
+
+  async removeByNotifiable({
+    notifiableType,
+    notifiableId,
+  }: INotifiableNotificationDto) {
+    return await this.dataService.tx.notification.softDeleteMany({
+      notifiableType,
+      notifiableId,
+    });
+  }
+
+  async removeForce(id: number) {
     return await this.dataService.tx.notification.delete({
       where: { id },
     });
   }
 
-  async removeByNotifiable({
+  async removeForceByNotifiable({
     notifiableType,
     notifiableId,
   }: INotifiableNotificationDto) {

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { NotificationType } from 'src/cores/enums';
+import { NotificationTokenType } from 'src/cores/enums';
 import { IsExists } from 'src/middlewares/validators';
 
 export class UpsertNotificationTokenRequest {
@@ -18,8 +18,8 @@ export class UpsertNotificationTokenRequest {
     description: 'The notification type',
   })
   @IsNotEmpty()
-  @IsEnum(NotificationType)
-  public type: NotificationType;
+  @IsEnum(NotificationTokenType)
+  public type: NotificationTokenType;
 
   @ApiProperty({
     type: String,

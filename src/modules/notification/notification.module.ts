@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import {
   NotificationController,
+  NotificationSelfController,
   NotificationTokenController,
 } from './controllers';
 import {
@@ -11,12 +12,18 @@ import {
   RemoveManyNotifiationUseCase,
   UpsertNotifiationTokenUseCase,
   GenerateNotifiationTokenUseCase,
+  StatisticNotifiationUseCase,
 } from './use-cases';
 
 @Module({
-  controllers: [NotificationTokenController, NotificationController],
+  controllers: [
+    NotificationTokenController,
+    NotificationSelfController,
+    NotificationController,
+  ],
   providers: [
     GetNotifiationUseCase,
+    StatisticNotifiationUseCase,
     ReadNotifiationUseCase,
     ReadManyNotifiationUseCase,
     RemoveNotifiationUseCase,

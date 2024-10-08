@@ -5,6 +5,7 @@ import {
   NotificationMap,
   NotificationResourceMap,
   NotificationsMap,
+  NotificationStatisticMap,
 } from 'src/cores/entities';
 
 @Injectable()
@@ -50,6 +51,18 @@ export class NotificationMapper {
         return this.toMap(notification).data;
       }),
       meta,
+    };
+  }
+
+  toStatistic(data: NotificationStatisticMap) {
+    return {
+      data: {
+        count: {
+          all: data._count.id,
+          unread: data._count.id - data._count.readAt,
+          read: data._count.readAt,
+        },
+      },
     };
   }
 }

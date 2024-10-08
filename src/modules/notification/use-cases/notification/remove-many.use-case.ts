@@ -11,4 +11,10 @@ export class RemoveManyNotifiationUseCase {
       notificationRequest,
     );
   }
+
+  async removeForceMany(notificationRequest: RemoveNotificationRequest) {
+    return await this.notificationService.removeForceByNotifiable(
+      notificationRequest,
+    );
+  }
 }

@@ -2,15 +2,12 @@ import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { Injectable } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import {
-  BatchResponse,
-  Message,
-} from 'firebase-admin/lib/messaging/messaging-api';
+import { BatchResponse } from 'firebase-admin/lib/messaging/messaging-api';
 import { DateTime } from 'luxon';
 import { FirebaseAdmin, InjectFirebaseAdmin } from 'nestjs-firebase';
 import { INotificationServiceProvider } from 'src/cores/contracts';
 import { ITokenMessage } from 'src/cores/interfaces';
-import { ExtendedPrismaClient } from 'src/infrastructures/database/prisma/prisma.extension';
+import { ExtendedPrismaClient } from 'src/infrastructures/database';
 
 @Injectable()
 export class FirebaseService implements INotificationServiceProvider {

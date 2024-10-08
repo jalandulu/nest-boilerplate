@@ -16,9 +16,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { AccessAuthGuard } from 'src/middlewares/guards';
 import { INotificationServiceProvider } from 'src/cores/contracts';
 import {
-  QueryNotificationRequest,
-  ReadNotificationRequest,
-  RemoveNotificationRequest,
+  QueryNotificationSelfRequest,
   SendNotificationRequest,
 } from '../requests';
 import {
@@ -30,19 +28,20 @@ import {
   StatisticNotifiationUseCase,
 } from '../use-cases';
 import { NotificationMapper } from 'src/middlewares/interceptors';
-import { NotificationType } from 'src/cores/enums';
+import { AuthPayload } from 'src/common/decorators';
+import { ProfileEntity } from 'src/cores/entities';
 
 @ApiTags('Notification')
 @UseGuards(AccessAuthGuard)
 @Controller({
-  path: 'notification',
+  path: 'notification/self',
   version: '1.0',
 })
-export class NotificationController {
+export class NotificationSelfController {
   constructor(
     private readonly mapper: NotificationMapper,
-    private readonly statisticUseCase: StatisticNotifiationUseCase,
     private readonly getUseCase: GetNotifiationUseCase,
+    private readonly statisticUseCase: StatisticNotifiationUseCase,
     private readonly readUseCase: ReadNotifiationUseCase,
     private readonly readManyUseCase: ReadManyNotifiationUseCase,
     private readonly removeUseCase: RemoveNotifiationUseCase,
@@ -51,13 +50,25 @@ export class NotificationController {
   ) {}
 
   @Get('statistic')
-  async statistic(@Query() request: QueryNotificationRequest) {
-    return this.mapper.toStatistic(await this.statisticUseCase.get(request));
+  async statistic(@AuthPayload() profile: ProfileEntity) {
+    const statistic = await this.statisticUseCase.get({
+      notifiableType: 'users',
+      notifiableId: profile.id,
+    });
+
+    return this.mapper.toStatistic(statistic);
   }
 
   @Get()
-  async findAll(@Query() request: QueryNotificationRequest) {
-    const [data, meta] = await this.getUseCase.findAll(request);
+  async findAll(
+    @Query() request: QueryNotificationSelfRequest,
+    @AuthPayload() profile: ProfileEntity,
+  ) {
+    const [data, meta] = await this.getUseCase.findAll({
+      ...request,
+      notifiableType: 'users',
+      notifiableId: profile.id,
+    });
     return this.mapper.toPaginate(data, meta);
   }
 
@@ -69,8 +80,11 @@ export class NotificationController {
 
   @Patch()
   @HttpCode(HttpStatus.NO_CONTENT)
-  async readMany(@Body() request: ReadNotificationRequest) {
-    await this.readManyUseCase.readMany(request);
+  async readMany(@AuthPayload() profile: ProfileEntity) {
+    await this.readManyUseCase.readMany({
+      notifiableType: 'users',
+      notifiableId: profile.id,
+    });
   }
 
   @Post()
@@ -78,7 +92,7 @@ export class NotificationController {
   async send(@Body() request: SendNotificationRequest) {
     await this.notificationProvider.sendEach([
       {
-        type: NotificationType.Unknown,
+        type: request.data.type,
         token: request.token,
         data: request.data,
       },
@@ -93,7 +107,10 @@ export class NotificationController {
 
   @Delete()
   @HttpCode(HttpStatus.NO_CONTENT)
-  async removeMany(@Body() request: RemoveNotificationRequest) {
-    await this.removeManyUseCase.removeMany(request);
+  async removeMany(@AuthPayload() profile: ProfileEntity) {
+    await this.removeManyUseCase.removeMany({
+      notifiableType: 'users',
+      notifiableId: profile.id,
+    });
   }
 }

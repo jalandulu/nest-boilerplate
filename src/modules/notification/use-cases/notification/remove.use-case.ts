@@ -8,4 +8,8 @@ export class RemoveNotifiationUseCase {
   async remove(id: number) {
     return await this.notificationService.remove(id);
   }
+
+  async removeForce(id: number) {
+    return await this.notificationService.removeForce(id);
+  }
 }

@@ -10,12 +10,14 @@ import { DateTime } from 'luxon';
 import { IPublishPacket, ISubscriptionMap } from 'mqtt';
 import { INotificationServiceProvider } from 'src/cores/contracts';
 import { ITokenMessage } from 'src/cores/interfaces';
-import { ExtendedPrismaClient } from 'src/infrastructures/database/prisma/prisma.extension';
+import { ExtendedPrismaClient } from 'src/infrastructures/database';
 import { MqttService as NestMqttService } from './mqtt';
+import { NotificationMapper } from 'src/middlewares/interceptors';
 
 @Injectable()
 export class MqttService implements INotificationServiceProvider {
   constructor(
+    private readonly notificationMapper: NotificationMapper,
     private readonly mqttService: NestMqttService,
     private readonly dataService: TransactionHost<
       TransactionalAdapterPrisma<ExtendedPrismaClient>
@@ -32,19 +34,20 @@ export class MqttService implements INotificationServiceProvider {
           },
         });
 
-      await Promise.all([
-        this.mqttService.publish(token, JSON.stringify(message)),
-        this.dataService.tx.notification.create({
-          data: {
-            service: 'mqtt',
-            type: type,
-            notifiableType: 'users',
-            notifiableId: notificationToken.user.id,
-            data: message,
-            sentAt: DateTime.now().toISO(),
-          },
-        }),
-      ]);
+      const created = await this.dataService.tx.notification.create({
+        data: {
+          service: 'mqtt',
+          type: type,
+          notifiableType: 'users',
+          notifiableId: notificationToken.user.id,
+          data: message,
+          sentAt: DateTime.now().toISO(),
+        },
+      });
+
+      const mapped = this.notificationMapper.toResource(created);
+      await this.mqttService.publish(token, JSON.stringify(mapped));
+
       return Promise.resolve(JSON.stringify(message));
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
