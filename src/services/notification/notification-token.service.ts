@@ -8,7 +8,7 @@ import {
   ICreateNotificationTokenDto,
   IUpdateNotificationTokenDto,
 } from 'src/cores/dtos';
-import { ExtendedPrismaClient } from 'src/infrastructures/database/prisma/prisma.extension';
+import { ExtendedPrismaClient } from 'src/infrastructures/database';
 
 @Injectable()
 export class NotificationTokenService {

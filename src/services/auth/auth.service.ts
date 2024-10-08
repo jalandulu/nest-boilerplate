@@ -15,7 +15,7 @@ import { Generate, Hash, String } from 'src/common/helpers';
 import { LocalAuthEntity, ProfileEntity } from 'src/cores/entities';
 import { AccountStatus, TokenScope } from 'src/cores/enums';
 import { JwtService } from './jwt.service';
-import { ExtendedPrismaClient } from 'src/infrastructures/database/prisma/prisma.extension';
+import { ExtendedPrismaClient } from 'src/infrastructures/database';
 import { ProfileMapper } from 'src/middlewares/interceptors';
 
 @Injectable()

@@ -3,7 +3,7 @@ import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { Storage } from 'src/common/helpers';
 import { IStorageRepository } from 'src/cores/interfaces';
-import { ExtendedPrismaClient } from 'src/infrastructures/database/prisma/prisma.extension';
+import { ExtendedPrismaClient } from 'src/infrastructures/database';
 import { StorageCode } from 'src/cores/enums';
 
 @Injectable()

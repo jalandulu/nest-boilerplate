@@ -7,7 +7,7 @@ import {
   IUpdateDirectoryDto,
   IUpdateUsageDirectoryDto,
 } from 'src/cores/dtos/storage';
-import { ExtendedPrismaClient } from 'src/infrastructures/database/prisma/prisma.extension';
+import { ExtendedPrismaClient } from 'src/infrastructures/database';
 
 @Injectable()
 export class DirectoryService {

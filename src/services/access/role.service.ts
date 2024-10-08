@@ -5,7 +5,7 @@ import { Prisma } from '@prisma/client';
 import { kebabCase } from 'lodash';
 import { DateTime } from 'luxon';
 import { ICreateRoleDto, IUpdateRoleDto } from 'src/cores/dtos';
-import { ExtendedPrismaClient } from 'src/infrastructures/database/prisma/prisma.extension';
+import { ExtendedPrismaClient } from 'src/infrastructures/database';
 
 @Injectable()
 export class RoleService {
