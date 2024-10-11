@@ -1,4 +1,6 @@
-export interface ICreateFileDto {
+import { ICreateFileDto } from 'src/cores/interfaces/dtos';
+
+export class CreateFileDto implements ICreateFileDto {
   fileType: string;
   originalName: string;
   name: string;

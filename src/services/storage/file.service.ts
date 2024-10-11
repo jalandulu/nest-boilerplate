@@ -2,7 +2,7 @@ import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { Injectable } from '@nestjs/common';
 import { DateTime } from 'luxon';
-import { ICreateFileDto } from 'src/cores/dtos/storage';
+import { CreateFileDto } from 'src/cores/dtos';
 import { ExtendedPrismaClient } from 'src/infrastructures/database';
 
 @Injectable()
@@ -27,7 +27,7 @@ export class FileService {
     });
   }
 
-  async create(createFile: ICreateFileDto) {
+  async create(createFile: CreateFileDto) {
     return await this.dataService.tx.stgFile.create({
       data: {
         fileType: createFile.fileType,
@@ -41,7 +41,7 @@ export class FileService {
     });
   }
 
-  async update(id: number, createFile: ICreateFileDto) {
+  async update(id: number, createFile: CreateFileDto) {
     return await this.dataService.tx.stgFile.update({
       where: {
         id,

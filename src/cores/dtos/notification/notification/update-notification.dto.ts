@@ -1,6 +1,11 @@
-import { ICreateNotificationDto } from './create-notification.dto';
+import {
+  ICreateNotificationDto,
+  IUpdateNotificationDto,
+} from 'src/cores/interfaces/dtos';
 
-export interface IUpdateNotificationDto<T> {
+export class UpdateNotificationDto<T extends { [key: string]: any }>
+  implements IUpdateNotificationDto<T>
+{
   service?: ICreateNotificationDto<T>['service'];
   type?: ICreateNotificationDto<T>['type'];
   notifiableType?: ICreateNotificationDto<T>['notifiableType'];

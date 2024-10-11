@@ -1,6 +1,6 @@
-import { ICreateFileDto } from './create-file.dto';
+import { ICreateFileDto, IUpdateFileDto } from 'src/cores/interfaces/dtos';
 
-export interface IUpdateFileDto {
+export class UpdateFileDto implements IUpdateFileDto {
   fileType: ICreateFileDto['fileType'];
   originalName: ICreateFileDto['originalName'];
   name: ICreateFileDto['name'];

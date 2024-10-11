@@ -4,10 +4,10 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DateTime } from 'luxon';
 import {
-  ICreateNotificationDto,
-  INotifiableNotificationDto,
-  IPaginationDto,
-  IUpdateNotificationDto,
+  PaginationDto,
+  NotifiableNotificationDto,
+  CreateNotificationDto,
+  UpdateNotificationDto,
 } from 'src/cores/dtos';
 import { ExtendedPrismaClient } from 'src/infrastructures/database';
 
@@ -19,7 +19,7 @@ export class NotificationService {
     >,
   ) {}
 
-  async statistic(params?: INotifiableNotificationDto) {
+  async statistic(params?: NotifiableNotificationDto) {
     let where: Prisma.NotificationWhereInput | undefined = undefined;
     if (params) {
       where = {
@@ -37,7 +37,7 @@ export class NotificationService {
     });
   }
 
-  async findAll(pagination: IPaginationDto) {
+  async findAll(pagination: PaginationDto) {
     return await this.dataService.tx.notification
       .paginate({ orderBy: { createdAt: 'desc' } })
       .withPages({
@@ -51,7 +51,7 @@ export class NotificationService {
     notifiableId,
     page,
     perPage,
-  }: INotifiableNotificationDto & IPaginationDto) {
+  }: NotifiableNotificationDto & PaginationDto) {
     return await this.dataService.tx.notification
       .paginate({
         where: {
@@ -72,7 +72,7 @@ export class NotificationService {
     })) as T;
   }
 
-  async create<T, U>(notifiactionDto: ICreateNotificationDto<U>) {
+  async create<T, U>(notifiactionDto: CreateNotificationDto<U>) {
     return (await this.dataService.tx.notification.create({
       data: {
         service: notifiactionDto.service,
@@ -86,7 +86,7 @@ export class NotificationService {
     })) as T;
   }
 
-  async createMany<T, U>(notifiactionDto: ICreateNotificationDto<U>[]) {
+  async createMany<T, U>(notifiactionDto: CreateNotificationDto<U>[]) {
     return (await this.dataService.tx.notification.createMany({
       data: notifiactionDto.map((n) => ({
         service: n.service,
@@ -100,7 +100,7 @@ export class NotificationService {
     })) as T;
   }
 
-  async update<T, U>(id: number, notifiactionDto: IUpdateNotificationDto<U>) {
+  async update<T, U>(id: number, notifiactionDto: UpdateNotificationDto<U>) {
     return (await this.dataService.tx.notification.update({
       where: { id },
       data: {
@@ -136,7 +136,7 @@ export class NotificationService {
   async readByNotifiable({
     notifiableType,
     notifiableId,
-  }: INotifiableNotificationDto) {
+  }: NotifiableNotificationDto) {
     return await this.dataService.tx.notification.updateMany({
       where: { notifiableId, notifiableType },
       data: {
@@ -154,7 +154,7 @@ export class NotificationService {
   async removeByNotifiable({
     notifiableType,
     notifiableId,
-  }: INotifiableNotificationDto) {
+  }: NotifiableNotificationDto) {
     return await this.dataService.tx.notification.softDeleteMany({
       notifiableType,
       notifiableId,
@@ -170,7 +170,7 @@ export class NotificationService {
   async removeForceByNotifiable({
     notifiableType,
     notifiableId,
-  }: INotifiableNotificationDto) {
+  }: NotifiableNotificationDto) {
     return await this.dataService.tx.notification.deleteMany({
       where: { notifiableType, notifiableId },
     });

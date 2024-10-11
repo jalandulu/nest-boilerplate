@@ -1,6 +1,7 @@
 import { TokenScope } from 'src/cores/enums';
+import { IJwtSignDto } from 'src/cores/interfaces/dtos';
 
-export interface IJwtSignDto {
+export class JwtSignDto implements IJwtSignDto {
   userId: string;
   username: string;
   scope: TokenScope;

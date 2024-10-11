@@ -1,4 +1,6 @@
-export interface IUpdateUserDto {
+import { IUpdateUserDto } from 'src/cores/interfaces/dtos';
+
+export class UpdateUserDto implements IUpdateUserDto {
   name?: string;
   email?: string;
   pictureId?: number;

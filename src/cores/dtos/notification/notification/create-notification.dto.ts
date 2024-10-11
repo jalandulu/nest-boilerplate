@@ -1,4 +1,8 @@
-export interface ICreateNotificationDto<T> {
+import { ICreateNotificationDto } from 'src/cores/interfaces/dtos';
+
+export class CreateNotificationDto<T extends { [key: string]: any }>
+  implements ICreateNotificationDto<T>
+{
   service: string;
   type: string;
   notifiableType: string;

@@ -1,13 +1,8 @@
-import { ICreateIdentityDto } from './create-identity.dto';
+import { IUpdateIdentityDto } from 'src/cores/interfaces/dtos';
 
-export type IUpdateIdentityDto = Partial<Omit<ICreateIdentityDto, 'id'>>;
-
-export interface IUpdateIdentityCredentialDto {
+export class UpdateIdentityDto implements IUpdateIdentityDto {
+  roleId?: number;
   username?: string;
   password?: string;
-}
-
-export interface IUpdateIdentityPasswordDto {
-  currentPassword: string;
-  password: string;
+  permissionIds?: number[];
 }

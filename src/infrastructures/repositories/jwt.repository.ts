@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService as JwtServiceProvider } from '@nestjs/jwt';
 import { DateTime } from 'luxon';
-import { IJwtSignDto } from 'src/cores/dtos';
+import { JwtSignDto } from 'src/cores/dtos';
 import { JwtEntity } from 'src/cores/entities';
 import { TokenScope } from 'src/cores/enums';
 import { IJwtRepository } from 'src/cores/interfaces';
@@ -18,7 +18,7 @@ export class JwtRepository implements IJwtRepository {
     this.DEFAULT_EXPIRATION = this.config.get<number>('jwt.expiresIn');
   }
 
-  async generate({ data }: { data: IJwtSignDto }) {
+  async generate({ data }: { data: JwtSignDto }) {
     const expiresIn = this.getExpiration({ scope: data.scope });
 
     const now = DateTime.now();

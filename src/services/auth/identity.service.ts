@@ -10,12 +10,12 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { DateTime } from 'luxon';
 import { Hash } from 'src/common/helpers';
 import {
-  ICreateIdentityDto,
-  IPaginationDto,
-  IUpdateIdentityPasswordDto,
-  IUpdateIdentityCredentialDto,
-  IUpdateIdentityProfileDto,
-  IUpdateIdentityDto,
+  CreateIdentityDto,
+  PaginationDto,
+  UpdateIdentityPasswordDto,
+  UpdateIdentityCredentialDto,
+  UpdateIdentityProfileDto,
+  UpdateIdentityDto,
 } from 'src/cores/dtos';
 import { AccountStatus } from 'src/cores/enums';
 import { ExtendedPrismaClient } from 'src/infrastructures/database';
@@ -35,7 +35,7 @@ export class IdentityService {
   }: {
     q?: string;
     currentUserId?: string;
-  } & IPaginationDto) {
+  } & PaginationDto) {
     return await this.dataService.tx.identity
       .paginate({
         where: {
@@ -120,7 +120,7 @@ export class IdentityService {
   }
 
   async create<T>(
-    createIdentityDto: ICreateIdentityDto,
+    createIdentityDto: CreateIdentityDto,
     include?: Prisma.IdentityInclude,
   ) {
     return (await this.dataService.tx.identity.create({
@@ -142,7 +142,7 @@ export class IdentityService {
 
   async update<T>(
     id: string,
-    updateIdentityDto: IUpdateIdentityDto,
+    updateIdentityDto: UpdateIdentityDto,
     include?: Prisma.IdentityInclude,
   ) {
     await this.removePermissions(id);
@@ -169,7 +169,7 @@ export class IdentityService {
   }
 
   async upsert<T>(
-    identityDto: ICreateIdentityDto,
+    identityDto: CreateIdentityDto,
     include?: Prisma.IdentityInclude,
   ) {
     try {
@@ -185,7 +185,7 @@ export class IdentityService {
     }
   }
 
-  async updateProfile(id: string, profileDto: IUpdateIdentityProfileDto) {
+  async updateProfile(id: string, profileDto: UpdateIdentityProfileDto) {
     return await this.dataService.tx.identity.update({
       where: { id },
       data: {
@@ -202,7 +202,7 @@ export class IdentityService {
 
   async updateUsername(
     id: string,
-    { username }: Pick<IUpdateIdentityCredentialDto, 'username'>,
+    { username }: Pick<UpdateIdentityCredentialDto, 'username'>,
   ) {
     return await this.dataService.tx.identity.update({
       where: { id },
@@ -219,7 +219,7 @@ export class IdentityService {
     });
   }
 
-  async updateRole(id: string, { roleId }: Pick<ICreateIdentityDto, 'roleId'>) {
+  async updateRole(id: string, { roleId }: Pick<CreateIdentityDto, 'roleId'>) {
     return await this.dataService.tx.identity.update({
       where: { id },
       data: {
@@ -230,7 +230,7 @@ export class IdentityService {
 
   async updatePermission(
     id: string,
-    { permissionIds }: Pick<ICreateIdentityDto, 'permissionIds'>,
+    { permissionIds }: Pick<CreateIdentityDto, 'permissionIds'>,
   ) {
     await this.dataService.tx.permissionsOnIdentities.deleteMany({
       where: {
@@ -252,7 +252,7 @@ export class IdentityService {
 
   async changePassword(
     id: string,
-    { currentPassword, password }: IUpdateIdentityPasswordDto,
+    { currentPassword, password }: UpdateIdentityPasswordDto,
   ) {
     const exist = await this.dataService.tx.identity.findFirst({
       where: {
@@ -278,7 +278,7 @@ export class IdentityService {
 
   async updatePassword(
     id: string,
-    { password }: Omit<IUpdateIdentityCredentialDto, 'username'>,
+    { password }: Omit<UpdateIdentityCredentialDto, 'username'>,
   ) {
     return await this.dataService.tx.identity.update({
       where: { id },

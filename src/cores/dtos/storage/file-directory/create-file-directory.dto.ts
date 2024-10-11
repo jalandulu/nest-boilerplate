@@ -1,4 +1,6 @@
-export interface ICreateFileDirectoryDto {
+import { ICreateFileDirectoryDto } from 'src/cores/interfaces/dtos';
+
+export class CreateFileDirectoryDto implements ICreateFileDirectoryDto {
   directoryId?: number;
   fileId?: number;
   dirName?: string;

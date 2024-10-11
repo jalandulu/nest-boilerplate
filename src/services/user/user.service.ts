@@ -3,7 +3,7 @@ import { DateTime } from 'luxon';
 import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { Prisma } from '@prisma/client';
-import { ICreateUserDto, IPaginationDto, IUpdateUserDto } from 'src/cores/dtos';
+import { CreateUserDto, PaginationDto, UpdateUserDto } from 'src/cores/dtos';
 import { ExtendedPrismaClient } from 'src/infrastructures/database';
 
 @Injectable()
@@ -18,7 +18,7 @@ export class UserService {
     perPage,
     page,
     account,
-  }: { account?: boolean } & IPaginationDto) {
+  }: { account?: boolean } & PaginationDto) {
     return await this.dataService.tx.user
       .paginate({
         where:
@@ -47,7 +47,7 @@ export class UserService {
     })) as T;
   }
 
-  async create<T>(createUserDto: ICreateUserDto, include?: Prisma.UserInclude) {
+  async create<T>(createUserDto: CreateUserDto, include?: Prisma.UserInclude) {
     return (await this.dataService.tx.user.create({
       data: {
         type: createUserDto.type,
@@ -61,7 +61,7 @@ export class UserService {
 
   async update<T>(
     id: string,
-    updateUserDto: IUpdateUserDto,
+    updateUserDto: UpdateUserDto,
     include?: Prisma.UserInclude,
   ) {
     return (await this.dataService.tx.user.update({

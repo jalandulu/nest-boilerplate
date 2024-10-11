@@ -3,10 +3,10 @@ import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-pr
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import {
-  ICreateDirectoryDto,
-  IUpdateDirectoryDto,
-  IUpdateUsageDirectoryDto,
-} from 'src/cores/dtos/storage';
+  CreateDirectoryDto,
+  UpdateDirectoryDto,
+  UpdateUsageDirectoryDto,
+} from 'src/cores/dtos';
 import { ExtendedPrismaClient } from 'src/infrastructures/database';
 
 @Injectable()
@@ -35,7 +35,7 @@ export class DirectoryService {
   }
 
   async create<T>(
-    createDirectory: ICreateDirectoryDto,
+    createDirectory: CreateDirectoryDto,
     include?: Prisma.StgDirectoryInclude,
   ) {
     return (await this.dataService.tx.stgDirectory.create({
@@ -56,7 +56,7 @@ export class DirectoryService {
 
   async update<T>(
     id: number,
-    updateDirectory: IUpdateDirectoryDto,
+    updateDirectory: UpdateDirectoryDto,
     include?: Prisma.StgDirectoryInclude,
   ) {
     await this.isEditable({ id });
@@ -82,7 +82,7 @@ export class DirectoryService {
 
   async updateUsage<T>(
     id: number,
-    updateDirectory: IUpdateUsageDirectoryDto,
+    updateDirectory: UpdateUsageDirectoryDto,
     include?: Prisma.StgDirectoryInclude,
   ) {
     return (await this.dataService.tx.stgDirectory.update({

@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { kebabCase } from 'lodash';
 import { DateTime } from 'luxon';
-import { ICreateRoleDto, IUpdateRoleDto } from 'src/cores/dtos';
+import { CreateRoleDto, UpdateRoleDto } from 'src/cores/dtos';
 import { ExtendedPrismaClient } from 'src/infrastructures/database';
 
 @Injectable()
@@ -42,7 +42,7 @@ export class RoleService {
   }
 
   async create<T>(
-    { name, permissions }: ICreateRoleDto,
+    { name, permissions }: CreateRoleDto,
     include?: Prisma.RoleInclude,
   ) {
     return (await this.dataService.tx.role.create({
@@ -65,7 +65,7 @@ export class RoleService {
 
   async update<T>(
     id: number,
-    { name, permissions }: IUpdateRoleDto,
+    { name, permissions }: UpdateRoleDto,
     include?: Prisma.RoleInclude,
   ) {
     await this.dataService.tx.permissionsOnRoles.deleteMany({

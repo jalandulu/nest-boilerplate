@@ -7,7 +7,7 @@ import { DirectoryService } from './directory.service';
 import { IStorageRepository } from 'src/cores/interfaces';
 import { StorageCode } from 'src/cores/enums';
 import { Storage } from 'src/common/helpers';
-import { ICreateFileDirectoryDto } from 'src/cores/dtos/storage';
+import { CreateFileDirectoryDto } from 'src/cores/dtos';
 import { Prisma } from '@prisma/client';
 import { ExtendedPrismaClient } from 'src/infrastructures/database';
 
@@ -38,7 +38,7 @@ export class FileDirectoryService {
     });
   }
 
-  async create(createFileDirectory: ICreateFileDirectoryDto) {
+  async create(createFileDirectory: CreateFileDirectoryDto) {
     return await this.dataService.tx.stgFileOnDirectory.create({
       data: {
         directoryId: createFileDirectory.directoryId,

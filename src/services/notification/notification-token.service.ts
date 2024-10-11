@@ -5,8 +5,8 @@ import { Prisma } from '@prisma/client';
 import { createHash } from 'crypto';
 import { Generate } from 'src/common/helpers';
 import {
-  ICreateNotificationTokenDto,
-  IUpdateNotificationTokenDto,
+  CreateNotificationTokenDto,
+  UpdateNotificationTokenDto,
 } from 'src/cores/dtos';
 import { ExtendedPrismaClient } from 'src/infrastructures/database';
 
@@ -33,7 +33,7 @@ export class NotificationTokenService {
   }
 
   async create<T>(
-    notifiactionDto: ICreateNotificationTokenDto,
+    notifiactionDto: CreateNotificationTokenDto,
     include?: Prisma.NotificationTokenInclude,
   ) {
     return (await this.dataService.tx.notificationToken.create({
@@ -51,7 +51,7 @@ export class NotificationTokenService {
   }
 
   async createTokenAndSave<T>(
-    notifiationDto: Omit<ICreateNotificationTokenDto, 'token'>,
+    notifiationDto: Omit<CreateNotificationTokenDto, 'token'>,
     include?: Prisma.NotificationTokenInclude,
   ) {
     const exist = await this.findOne<
@@ -80,7 +80,7 @@ export class NotificationTokenService {
 
   async update<T>(
     id: number,
-    notifiactionDto: IUpdateNotificationTokenDto,
+    notifiactionDto: UpdateNotificationTokenDto,
     include?: Prisma.NotificationTokenInclude,
   ) {
     return (await this.dataService.tx.notificationToken.update({

@@ -1,6 +1,9 @@
-import { ICreateNotificationTokenDto } from './create-notification-token.dto';
+import {
+  ICreateNotificationTokenDto,
+  IUpdateNotificationTokenDto,
+} from 'src/cores/interfaces/dtos';
 
-export interface IUpdateNotificationTokenDto {
+export class UpdateNotificationTokenDto implements IUpdateNotificationTokenDto {
   userId?: ICreateNotificationTokenDto['userId'];
   type?: ICreateNotificationTokenDto['type'];
   token?: ICreateNotificationTokenDto['token'];

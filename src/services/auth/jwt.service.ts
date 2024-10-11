@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IJwtSignDto } from 'src/cores/dtos';
+import { JwtSignDto } from 'src/cores/dtos';
 import { JwtEntity } from 'src/cores/entities';
 import { TokenScope } from 'src/cores/enums';
 import { IJwtRepository } from 'src/cores/interfaces';
@@ -16,7 +16,7 @@ export class JwtService {
     }
   }
 
-  async generate(data: IJwtSignDto) {
+  async generate(data: JwtSignDto) {
     return await this.jwtRepository.generate({ data });
   }
 
