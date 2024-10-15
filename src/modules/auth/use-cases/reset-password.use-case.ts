@@ -12,6 +12,7 @@ import {
   ResetPasswordRequestRequest,
 } from '../requests';
 import { SignatureError } from 'signed';
+import { SetIdentityPasswordDto } from 'src/cores/dtos';
 
 @Injectable()
 export class ResetPasswordUseCase {
@@ -84,9 +85,12 @@ export class ResetPasswordUseCase {
       }
 
       const [identity] = await Promise.all([
-        this.identityService.updatePassword(userId, {
-          password: payload.password,
-        }),
+        this.identityService.updatePassword(
+          userId,
+          new SetIdentityPasswordDto({
+            password: payload.password,
+          }),
+        ),
         this.authService.passwordResetted(userId),
       ]);
 

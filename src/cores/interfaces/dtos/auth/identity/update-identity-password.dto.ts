@@ -1,4 +1,6 @@
+import { ICreateIdentityDto } from './create-identity.dto';
+
 export interface IUpdateIdentityPasswordDto {
-  currentPassword: string;
-  password: string;
+  currentPassword: ICreateIdentityDto['password'];
+  password: ICreateIdentityDto['password'];
 }

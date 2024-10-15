@@ -6,6 +6,7 @@ import { RegisterRequest } from '../requests';
 import { UserType } from 'src/cores/enums';
 import { Prisma } from '@prisma/client';
 import { FastifyRequest } from 'fastify';
+import { CreateIdentityDto } from 'src/cores/dtos';
 
 @Injectable()
 export class RegisterUseCase {
@@ -62,13 +63,15 @@ export class RegisterUseCase {
 
     const identity = await this.identityService.create<
       Prisma.IdentityGetPayload<Prisma.IdentityDefaultArgs>
-    >({
+    >(
+      new CreateIdentityDto({
       userId: user.id,
       roleId: role.id,
       username: payload.email,
       password: payload.password,
-      permissionIds: role.permissionsOnRoles.map((p) => p.permissionId),
-    });
+        permissionIds: role.permissionsOnRoles.map((p) => p.permissionId),
+      }),
+    );
 
     const authenticated = await this.authService.attempt({
       localAuth: {

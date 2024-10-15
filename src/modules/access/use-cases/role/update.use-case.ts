@@ -3,6 +3,7 @@ import { UpdateRoleRequest } from '../../requests';
 import { RoleService } from 'src/services';
 import { Transactional } from '@nestjs-cls/transactional';
 import { RoleResourceMap } from 'src/cores/entities';
+import { UpdateRoleDto } from 'src/cores/dtos';
 
 @Injectable()
 export class UpdateRoleUseCase {
@@ -12,7 +13,10 @@ export class UpdateRoleUseCase {
   async update(id: number, updateRoleRequest: UpdateRoleRequest) {
     return await this.roleService.update<RoleResourceMap>(
       id,
-      updateRoleRequest,
+      new UpdateRoleDto({
+        name: updateRoleRequest.name,
+        permissions: updateRoleRequest.permissions,
+      }),
       {
         permissionsOnRoles: {
           include: {

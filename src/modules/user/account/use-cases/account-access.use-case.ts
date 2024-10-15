@@ -3,6 +3,7 @@ import { Transactional } from '@nestjs-cls/transactional';
 import { AuthService, IdentityService, PermissionService } from 'src/services';
 import { Prisma } from '@prisma/client';
 import { UpdateAccountAccessRequest } from '../requests';
+import { SetIdentityStatusDto, SetIdentityPermissionDto } from 'src/cores/dtos';
 
 @Injectable()
 export class AccountAccessUseCase {
@@ -32,9 +33,12 @@ export class AccountAccessUseCase {
     }
 
     parallel.push(
-      this.identityService.updatePermission(userId, {
-        permissionIds: payload.permissions,
-      }),
+      this.identityService.updatePermission(
+        userId,
+        new SetIdentityPermissionDto({
+          permissionIds: payload.permissions,
+        }),
+      ),
     );
 
     const [permissions] = await Promise.all([
@@ -47,6 +51,9 @@ export class AccountAccessUseCase {
       permissions.map((p) => p.slug),
     );
 
-    return await this.identityService.updateStatus(userId, true);
+    return await this.identityService.updateStatus(
+      userId,
+      new SetIdentityStatusDto({ enable: true }),
+    );
   }
 }

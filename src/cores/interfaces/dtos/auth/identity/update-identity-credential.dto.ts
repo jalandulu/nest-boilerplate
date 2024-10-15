@@ -1,4 +1,6 @@
+import { ICreateIdentityDto } from './create-identity.dto';
+
 export interface IUpdateIdentityCredentialDto {
-  username?: string;
-  password?: string;
+  username?: ICreateIdentityDto['username'];
+  password?: ICreateIdentityDto['password'];
 }

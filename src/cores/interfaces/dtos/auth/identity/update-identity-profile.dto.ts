@@ -1,4 +1,6 @@
+import { ICreateUserDto } from '../../user';
+
 export interface IUpdateIdentityProfileDto {
-  name?: string;
-  pictureId?: number;
+  name?: ICreateUserDto['name'];
+  pictureId?: ICreateUserDto['pictureId'];
 }

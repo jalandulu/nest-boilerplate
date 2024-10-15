@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ProfileEntity } from 'src/cores/entities';
 import { UpdatePasswordRequest } from '../requests';
 import { IdentityService } from 'src/services';
+import { UpdateIdentityPasswordDto } from 'src/cores/dtos';
 
 @Injectable()
 export class ProfilePasswordUseCase {
@@ -11,9 +12,12 @@ export class ProfilePasswordUseCase {
     profile: ProfileEntity,
     { currentPassword, password }: UpdatePasswordRequest,
   ) {
-    return await this.identityService.changePassword(profile.id, {
-      currentPassword,
-      password,
-    });
+    return await this.identityService.changePassword(
+      profile.id,
+      new UpdateIdentityPasswordDto({
+        currentPassword,
+        password,
+      }),
+    );
   }
 }

@@ -2,7 +2,6 @@ import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { kebabCase } from 'lodash';
 import { DateTime } from 'luxon';
 import { CreateRoleDto, UpdateRoleDto } from 'src/cores/dtos';
 import { ExtendedPrismaClient } from 'src/infrastructures/database';
@@ -41,22 +40,13 @@ export class RoleService {
     })) as T;
   }
 
-  async create<T>(
-    { name, permissions }: CreateRoleDto,
-    include?: Prisma.RoleInclude,
-  ) {
+  async create<T>(createRoleDto: CreateRoleDto, include?: Prisma.RoleInclude) {
     return (await this.dataService.tx.role.create({
       data: {
-        name: name,
-        slug: kebabCase(name),
+        name: createRoleDto.name,
+        slug: createRoleDto.slug,
         permissionsOnRoles: {
-          create: permissions.map((id) => ({
-            permission: {
-              connect: {
-                id,
-              },
-            },
-          })),
+          create: createRoleDto.permissionsToPrisma,
         },
       },
       include,
@@ -65,7 +55,7 @@ export class RoleService {
 
   async update<T>(
     id: number,
-    { name, permissions }: UpdateRoleDto,
+    updateRoleDto: UpdateRoleDto,
     include?: Prisma.RoleInclude,
   ) {
     await this.dataService.tx.permissionsOnRoles.deleteMany({
@@ -77,15 +67,10 @@ export class RoleService {
     return (await this.dataService.tx.role.update({
       where: { id },
       data: {
-        name: name,
+        slug: updateRoleDto.slug,
+        name: updateRoleDto.name,
         permissionsOnRoles: {
-          create: permissions.map((id) => ({
-            permission: {
-              connect: {
-                id,
-              },
-            },
-          })),
+          create: updateRoleDto.permissionsToPrisma,
         },
       },
       include,

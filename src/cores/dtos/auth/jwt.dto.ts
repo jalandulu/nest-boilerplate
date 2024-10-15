@@ -6,4 +6,11 @@ export class JwtSignDto implements IJwtSignDto {
   username: string;
   scope: TokenScope;
   permissions?: string[];
+
+  constructor(payload: IJwtSignDto) {
+    this.userId = payload.userId;
+    this.username = payload.username;
+    this.scope = payload.scope;
+    this.permissions = payload.permissions;
+  }
 }

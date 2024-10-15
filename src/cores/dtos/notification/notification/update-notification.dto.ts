@@ -1,16 +1,23 @@
-import {
-  ICreateNotificationDto,
-  IUpdateNotificationDto,
-} from 'src/cores/interfaces/dtos';
+import { IUpdateNotificationDto } from 'src/cores/interfaces/dtos';
 
 export class UpdateNotificationDto<T extends { [key: string]: any }>
   implements IUpdateNotificationDto<T>
 {
-  service?: ICreateNotificationDto<T>['service'];
-  type?: ICreateNotificationDto<T>['type'];
-  notifiableType?: ICreateNotificationDto<T>['notifiableType'];
-  notifiableId?: ICreateNotificationDto<T>['notifiableId'];
-  data?: ICreateNotificationDto<T>['data'];
-  sentAt?: ICreateNotificationDto<T>['sentAt'];
-  readAt?: ICreateNotificationDto<T>['readAt'];
+  service?: string;
+  type?: string;
+  notifiableType?: string;
+  notifiableId?: string;
+  data?: T;
+  sentAt?: string;
+  readAt?: string;
+
+  constructor(payload: IUpdateNotificationDto<T>) {
+    this.service = payload.service;
+    this.type = payload.type;
+    this.notifiableType = payload.notifiableType;
+    this.notifiableId = payload.notifiableId;
+    this.data = payload.data;
+    this.readAt = payload.sentAt;
+    this.sentAt = payload.readAt;
+  }
 }

@@ -6,6 +6,7 @@ import {
 import { Transactional } from '@nestjs-cls/transactional';
 import { AuthService, IdentityService } from 'src/services';
 import { Prisma } from '@prisma/client';
+import { SetIdentityStatusDto } from 'src/cores/dtos/auth/identity/set-identity-status.dto';
 
 @Injectable()
 export class AccountStatusUseCase {
@@ -21,7 +22,10 @@ export class AccountStatusUseCase {
       throw new UnprocessableEntityException(`account is already activated.`);
     }
 
-    return await this.identityService.updateStatus(userId, true);
+    return await this.identityService.updateStatus(
+      userId,
+      new SetIdentityStatusDto({ enable: true }),
+    );
   }
 
   @Transactional()
@@ -31,7 +35,10 @@ export class AccountStatusUseCase {
       throw new UnprocessableEntityException(`account is already deactivated.`);
     }
 
-    return await this.identityService.updateStatus(userId, false);
+    return await this.identityService.updateStatus(
+      userId,
+      new SetIdentityStatusDto({ enable: false }),
+    );
   }
 
   @Transactional()
@@ -46,7 +53,7 @@ export class AccountStatusUseCase {
     const currentStatus = identity.disabledAt === null ? false : true;
     const updated = await this.identityService.updateStatus(
       userId,
-      currentStatus,
+      new SetIdentityStatusDto({ enable: currentStatus }),
     );
 
     if (!currentStatus) {

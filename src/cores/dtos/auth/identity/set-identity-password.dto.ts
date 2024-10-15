@@ -1,12 +1,12 @@
 import { Hash } from 'src/common/helpers';
 import { IUpdateIdentityPasswordDto } from 'src/cores/interfaces/dtos';
 
-export class UpdateIdentityPasswordDto implements IUpdateIdentityPasswordDto {
-  currentPassword: string;
+export class SetIdentityPasswordDto
+  implements Omit<IUpdateIdentityPasswordDto, 'currentPassword'>
+{
   password: string;
 
-  constructor(payload: IUpdateIdentityPasswordDto) {
-    this.currentPassword = payload.currentPassword;
+  constructor(payload: Omit<IUpdateIdentityPasswordDto, 'currentPassword'>) {
     this.password = payload.password;
   }
 

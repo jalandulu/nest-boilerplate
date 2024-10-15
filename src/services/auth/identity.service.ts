@@ -13,10 +13,14 @@ import {
   CreateIdentityDto,
   PaginationDto,
   UpdateIdentityPasswordDto,
-  UpdateIdentityCredentialDto,
   UpdateIdentityProfileDto,
   UpdateIdentityDto,
+  SetIdentityPasswordDto,
+  SetIdentityPermissionDto,
+  SetIdentityUsernameDto,
+  SetIdentityRoleDto,
 } from 'src/cores/dtos';
+import { SetIdentityStatusDto } from 'src/cores/dtos/auth/identity/set-identity-status.dto';
 import { AccountStatus } from 'src/cores/enums';
 import { ExtendedPrismaClient } from 'src/infrastructures/database';
 
@@ -128,13 +132,13 @@ export class IdentityService {
         id: createIdentityDto.userId,
         roleId: createIdentityDto.roleId,
         username: createIdentityDto.username,
-        password: await Hash.make(createIdentityDto.password),
+        password: await createIdentityDto.hashPassword,
         status: AccountStatus.Active,
-        permissionsOnIdentities: {
-          create: createIdentityDto.permissionIds.map((id) => ({
-            permissionId: id,
-          })),
-        },
+        permissionsOnIdentities: createIdentityDto.permissionsToPrisma
+          ? {
+              create: createIdentityDto.permissionsToPrisma,
+            }
+          : undefined,
       },
       include,
     })) as T;
@@ -154,15 +158,15 @@ export class IdentityService {
       data: {
         roleId: updateIdentityDto.roleId,
         username: updateIdentityDto.username,
-        password: await Hash.make(updateIdentityDto.password),
+        password: await updateIdentityDto.hashPassword,
         status: AccountStatus.Active,
         disabledAt: null,
         deletedAt: null,
-        permissionsOnIdentities: {
-          create: updateIdentityDto.permissionIds.map((id) => ({
-            permissionId: id,
-          })),
-        },
+        permissionsOnIdentities: updateIdentityDto.permissionsToPrisma
+          ? {
+              create: updateIdentityDto.permissionsToPrisma,
+            }
+          : undefined,
       },
       include,
     })) as T;
@@ -200,10 +204,7 @@ export class IdentityService {
     });
   }
 
-  async updateUsername(
-    id: string,
-    { username }: Pick<UpdateIdentityCredentialDto, 'username'>,
-  ) {
+  async updateUsername(id: string, { username }: SetIdentityUsernameDto) {
     return await this.dataService.tx.identity.update({
       where: { id },
       data: {
@@ -219,7 +220,7 @@ export class IdentityService {
     });
   }
 
-  async updateRole(id: string, { roleId }: Pick<CreateIdentityDto, 'roleId'>) {
+  async updateRole(id: string, { roleId }: SetIdentityRoleDto) {
     return await this.dataService.tx.identity.update({
       where: { id },
       data: {
@@ -230,7 +231,7 @@ export class IdentityService {
 
   async updatePermission(
     id: string,
-    { permissionIds }: Pick<CreateIdentityDto, 'permissionIds'>,
+    { permissionsToPrisma }: SetIdentityPermissionDto,
   ) {
     await this.dataService.tx.permissionsOnIdentities.deleteMany({
       where: {
@@ -242,9 +243,7 @@ export class IdentityService {
       where: { id },
       data: {
         permissionsOnIdentities: {
-          create: permissionIds.map((id) => ({
-            permissionId: id,
-          })),
+          create: permissionsToPrisma,
         },
       },
     });
@@ -273,27 +272,27 @@ export class IdentityService {
       ]);
     }
 
-    return await this.updatePassword(id, { password });
+    return await this.updatePassword(
+      id,
+      new SetIdentityPasswordDto({ password }),
+    );
   }
 
-  async updatePassword(
-    id: string,
-    { password }: Omit<UpdateIdentityCredentialDto, 'username'>,
-  ) {
+  async updatePassword(id: string, { hashPassword }: SetIdentityPasswordDto) {
     return await this.dataService.tx.identity.update({
       where: { id },
       data: {
-        password: await Hash.make(password),
+        password: await hashPassword,
       },
     });
   }
 
-  async updateStatus(id: string, enabled: boolean) {
+  async updateStatus(id: string, { status, disabledAt }: SetIdentityStatusDto) {
     return await this.dataService.tx.identity.update({
       where: { id },
       data: {
-        status: enabled ? AccountStatus.Active : AccountStatus.Inactive,
-        disabledAt: enabled ? null : DateTime.now().toISO(),
+        status,
+        disabledAt,
       },
     });
   }

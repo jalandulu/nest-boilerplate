@@ -19,6 +19,7 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { ProfileEntity } from 'src/cores/entities';
+import { CreateIdentityDto } from 'src/cores/dtos';
 
 @Injectable()
 export class AccountUseCase {
@@ -112,13 +113,15 @@ export class AccountUseCase {
 
       const created = await this.identityService.upsert<
         Prisma.IdentityGetPayload<Prisma.IdentityDefaultArgs>
-      >({
-        userId: payload.userId,
-        roleId: role.id,
-        username: user.email,
-        password: payload.password,
-        permissionIds: payload.permissions,
-      });
+      >(
+        new CreateIdentityDto({
+          userId: payload.userId,
+          roleId: role.id,
+          username: user.email,
+          password: payload.password,
+          permissionIds: payload.permissions,
+        }),
+      );
 
       const account: Prisma.IdentityGetPayload<{
         include: {
