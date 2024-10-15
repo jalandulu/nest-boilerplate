@@ -18,18 +18,32 @@ export class UserService {
     perPage,
     page,
     account,
-  }: { account?: boolean } & PaginationDto) {
+    currentUserId,
+  }: { account?: boolean; currentUserId?: string } & PaginationDto) {
     return await this.dataService.tx.user
       .paginate({
-        where:
-          account === false
-            ? {
-                OR: [
-                  { identity: null },
-                  { identity: { deletedAt: { not: null } } },
-                ],
-              }
-            : undefined,
+        where: {
+          AND: [
+            {
+              id: {
+                not: currentUserId,
+              },
+              identity: {
+                roleId: {
+                  not: 1,
+                },
+              },
+            },
+            account === false
+              ? {
+                  OR: [
+                    { identity: null },
+                    { identity: { deletedAt: { not: null } } },
+                  ],
+                }
+              : {},
+          ],
+        },
         include: {
           picture: true,
         },

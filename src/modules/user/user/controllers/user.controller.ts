@@ -23,7 +23,8 @@ import { MultipartInterceptor } from 'src/infrastructures/storage/interceptors';
 import { Files } from 'src/infrastructures/storage/decorators';
 import { UserPictureUseCase, UserUseCase } from '../use-cases';
 import { FileMapper, UserMapper } from 'src/middlewares/interceptors';
-import { Permissions } from 'src/common/decorators';
+import { AuthPayload, Permissions } from 'src/common/decorators';
+import { ProfileEntity } from 'src/cores/entities';
 
 @ApiTags('User')
 @UseGuards(AccessAuthGuard, PermissionGuard)
@@ -41,8 +42,11 @@ export class UserController {
 
   @Get()
   @Permissions(['user:view'])
-  async findAll(@Query() query: QueryUserRequest) {
-    const [users, meta] = await this.userUseCase.findAll(query);
+  async findAll(
+    @Query() query: QueryUserRequest,
+    @AuthPayload() profile: ProfileEntity,
+  ) {
+    const [users, meta] = await this.userUseCase.findAll(query, profile);
 
     return await this.userMapper.toPaginate(users, meta);
   }

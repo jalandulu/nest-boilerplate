@@ -6,7 +6,7 @@ import {
 } from '../requests';
 import { FileDirectoryService, UserService } from 'src/services';
 import { Transactional } from '@nestjs-cls/transactional';
-import { UserMap } from 'src/cores/entities';
+import { ProfileEntity, UserMap } from 'src/cores/entities';
 import { UserType } from 'src/cores/enums';
 
 @Injectable()
@@ -16,8 +16,11 @@ export class UserUseCase {
     private readonly fileDirectoryService: FileDirectoryService,
   ) {}
 
-  async findAll(query: QueryUserRequest) {
-    return await this.userService.findAll(query);
+  async findAll(query: QueryUserRequest, profile: ProfileEntity) {
+    return await this.userService.findAll({
+      ...query,
+      currentUserId: profile.id,
+    });
   }
 
   async findOne(userId: string) {
