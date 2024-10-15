@@ -2,8 +2,6 @@ import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { createHash } from 'crypto';
-import { Generate } from 'src/common/helpers';
 import {
   CreateNotificationTokenDto,
   UpdateNotificationTokenDto,
@@ -46,36 +44,30 @@ export class NotificationTokenService {
     })) as T;
   }
 
-  createToken() {
-    return createHash('sha256').update(Generate.randomString()).digest('hex');
-  }
-
-  async createTokenAndSave<T>(
-    notifiationDto: Omit<CreateNotificationTokenDto, 'token'>,
+  async upsert<T>(
+    notificationDto: CreateNotificationTokenDto,
     include?: Prisma.NotificationTokenInclude,
   ) {
     const exist = await this.findOne<
       Prisma.NotificationTokenGetPayload<Prisma.NotificationDefaultArgs>
     >({
-      userId: notifiationDto.userId,
-      type: notifiationDto.type,
+      userId: notificationDto.userId,
+      type: notificationDto.type,
     });
-
-    const token = this.createToken();
 
     if (exist) {
       return await this.update(
         exist.id,
         {
-          userId: notifiationDto.userId,
-          type: notifiationDto.type,
-          token: token,
+          userId: notificationDto.userId,
+          type: notificationDto.type,
+          token: notificationDto.token,
         },
         include,
       );
     }
 
-    return await this.create<T>({ ...notifiationDto, token }, include);
+    return await this.create<T>(notificationDto, include);
   }
 
   async update<T>(
