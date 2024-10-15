@@ -65,10 +65,10 @@ export class RegisterUseCase {
       Prisma.IdentityGetPayload<Prisma.IdentityDefaultArgs>
     >(
       new CreateIdentityDto({
-      userId: user.id,
-      roleId: role.id,
-      username: payload.email,
-      password: payload.password,
+        userId: user.id,
+        roleId: role.id,
+        username: payload.email,
+        password: payload.password,
         permissionIds: role.permissionsOnRoles.map((p) => p.permissionId),
       }),
     );
@@ -89,7 +89,7 @@ export class RegisterUseCase {
     const abilities = role.permissionsOnRoles.map((p) => p.permission.slug);
 
     const emailVerificationUrl = await this.authService.verifyEmailStrategy(
-      `${origin}/verification-email/verify`,
+      `${origin}/auth/verification-email/verify`,
       identity.id,
     );
 
