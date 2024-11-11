@@ -41,8 +41,7 @@ export default [
 
       parserOptions: {
         project: 'tsconfig.json',
-        tsconfigRootDir:
-          '/Users/Airmas/Documents/Projects/Self/nest-boilerplate',
+        tsconfigRootDir: '.',
       },
     },
 
