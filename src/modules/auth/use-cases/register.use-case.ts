@@ -89,8 +89,8 @@ export class RegisterUseCase {
     const abilities = role.permissionsOnRoles.map((p) => p.permission.slug);
 
     const emailVerificationUrl = await this.authService.verifyEmailStrategy(
-      `${origin}/auth/verification-email/verify`,
       identity.id,
+      `${origin}/auth/verification-email/verify`,
     );
 
     return { user, role, authenticated, abilities, emailVerificationUrl };
