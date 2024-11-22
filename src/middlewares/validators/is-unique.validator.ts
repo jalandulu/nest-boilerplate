@@ -15,9 +15,7 @@ import {
 export class IsUniqueValidator implements ValidatorConstraintInterface {
   private readonly logger: Logger = new Logger(IsUniqueValidator.name);
 
-  constructor(
-    private readonly database: TransactionHost<TransactionalAdapterPrisma>,
-  ) {}
+  constructor(private readonly database: TransactionHost<TransactionalAdapterPrisma>) {}
 
   async validate(value: string, args?: ValidationArguments) {
     const params = args.constraints;
@@ -30,9 +28,7 @@ export class IsUniqueValidator implements ValidatorConstraintInterface {
       });
 
       if (!unique) {
-        this.logger.verbose(
-          `${args.property} with ${args.value} must be unique.`,
-        );
+        this.logger.verbose(`${args.property} with ${args.value} must be unique.`);
 
         return false;
       } else {

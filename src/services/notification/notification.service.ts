@@ -14,9 +14,7 @@ import { ExtendedPrismaClient } from 'src/infrastructures/database';
 @Injectable()
 export class NotificationService {
   constructor(
-    private readonly dataService: TransactionHost<
-      TransactionalAdapterPrisma<ExtendedPrismaClient>
-    >,
+    private readonly dataService: TransactionHost<TransactionalAdapterPrisma<ExtendedPrismaClient>>,
   ) {}
 
   async statistic(params?: NotifiableNotificationDto) {
@@ -72,7 +70,9 @@ export class NotificationService {
     })) as T;
   }
 
-  async create<T, U>(notifiactionDto: CreateNotificationDto<U>) {
+  async create<T extends Prisma.NotificationGetPayload<Prisma.NotificationDefaultArgs>, U>(
+    notifiactionDto: CreateNotificationDto<U>,
+  ) {
     return (await this.dataService.tx.notification.create({
       data: {
         service: notifiactionDto.service,
@@ -83,10 +83,10 @@ export class NotificationService {
         sentAt: notifiactionDto.sentAt,
         readAt: notifiactionDto.readAt,
       },
-    })) as T;
+    })) as unknown as T;
   }
 
-  async createMany<T, U>(notifiactionDto: CreateNotificationDto<U>[]) {
+  async createMany<T extends Prisma.BatchPayload, U>(notifiactionDto: CreateNotificationDto<U>[]) {
     return (await this.dataService.tx.notification.createMany({
       data: notifiactionDto.map((n) => ({
         service: n.service,
@@ -97,10 +97,13 @@ export class NotificationService {
         sentAt: n.sentAt,
         readAt: n.readAt,
       })),
-    })) as T;
+    })) as unknown as T;
   }
 
-  async update<T, U>(id: number, notifiactionDto: UpdateNotificationDto<U>) {
+  async update<T extends Prisma.NotificationGetPayload<Prisma.NotificationDefaultArgs>, U>(
+    id: number,
+    notifiactionDto: UpdateNotificationDto<U>,
+  ) {
     return (await this.dataService.tx.notification.update({
       where: { id },
       data: {
@@ -112,7 +115,7 @@ export class NotificationService {
         sentAt: notifiactionDto.sentAt,
         readAt: notifiactionDto.readAt,
       },
-    })) as T;
+    })) as unknown as T;
   }
 
   async sent(id: number) {
@@ -133,10 +136,7 @@ export class NotificationService {
     });
   }
 
-  async readByNotifiable({
-    notifiableType,
-    notifiableId,
-  }: NotifiableNotificationDto) {
+  async readByNotifiable({ notifiableType, notifiableId }: NotifiableNotificationDto) {
     return await this.dataService.tx.notification.updateMany({
       where: { notifiableId, notifiableType },
       data: {
@@ -151,10 +151,7 @@ export class NotificationService {
     });
   }
 
-  async removeByNotifiable({
-    notifiableType,
-    notifiableId,
-  }: NotifiableNotificationDto) {
+  async removeByNotifiable({ notifiableType, notifiableId }: NotifiableNotificationDto) {
     return await this.dataService.tx.notification.softDeleteMany({
       notifiableType,
       notifiableId,
@@ -167,10 +164,7 @@ export class NotificationService {
     });
   }
 
-  async removeForceByNotifiable({
-    notifiableType,
-    notifiableId,
-  }: NotifiableNotificationDto) {
+  async removeForceByNotifiable({ notifiableType, notifiableId }: NotifiableNotificationDto) {
     return await this.dataService.tx.notification.deleteMany({
       where: { notifiableType, notifiableId },
     });

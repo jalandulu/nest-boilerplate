@@ -12,50 +12,38 @@ import {
 export class RoleMapper {
   constructor(private readonly permissionMapper: PermissionMapper) {}
 
-  toResource(role: RoleResourceMap) {
-    const permissions = this.permissionMapper.toCollection(
-      role.permissionsOnRoles.map(({ permission }) => permission),
-    ).data;
+  toResource(role: RoleResourceMap): RoleEntity {
+    const permissions = role.permissionsOnRoles.map(({ permission }) => permission);
 
     return {
-      data: {
-        id: role.id,
-        name: role.name,
-        slug: role.slug,
-        visible: role.visible,
-        permissions: permissions,
-        createdAt: role.createdAt,
-        updatedAt: role.updatedAt,
-      },
+      id: role.id,
+      name: role.name,
+      slug: role.slug,
+      visible: role.visible,
+      createdAt: role.createdAt,
+      updatedAt: role.updatedAt,
+      permissions: this.permissionMapper.toCollection(permissions),
     };
   }
 
-  toMap(role: RoleMap): { data: RoleEntity } {
+  toMap(role: RoleMap): RoleEntity {
     return {
-      data: {
-        id: role.id,
-        name: role.name,
-        slug: role.slug,
-        visible: role.visible,
-        createdAt: role.createdAt,
-        updatedAt: role.updatedAt,
-      },
+      id: role.id,
+      name: role.name,
+      slug: role.slug,
+      visible: role.visible,
+      createdAt: role.createdAt,
+      updatedAt: role.updatedAt,
     };
   }
 
-  toCollection(roles: RolesMap) {
-    return {
-      data: roles.map((status) => {
-        return this.toMap(status).data;
-      }),
-    };
+  toCollection(roles: RolesMap): RoleEntity[] {
+    return roles.map((i) => this.toMap(i));
   }
 
-  toPaginate(data: RoleMap[], meta: IPaginationMetaEntity) {
+  toPaginate(data: RolesMap, meta: IPaginationMetaEntity) {
     return {
-      data: data.map((role) => {
-        return this.toMap(role).data;
-      }),
+      data: this.toCollection(data),
       meta,
     };
   }

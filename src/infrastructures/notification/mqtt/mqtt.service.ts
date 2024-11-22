@@ -2,10 +2,7 @@ import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { Injectable } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import {
-  BatchResponse,
-  SendResponse,
-} from 'firebase-admin/lib/messaging/messaging-api';
+import { BatchResponse, SendResponse } from 'firebase-admin/lib/messaging/messaging-api';
 import { DateTime } from 'luxon';
 import { IPublishPacket, ISubscriptionMap } from 'mqtt';
 import { INotificationServiceProvider } from 'src/cores/contracts';
@@ -19,20 +16,17 @@ export class MqttService implements INotificationServiceProvider {
   constructor(
     private readonly notificationMapper: NotificationMapper,
     private readonly mqttService: NestMqttService,
-    private readonly dataService: TransactionHost<
-      TransactionalAdapterPrisma<ExtendedPrismaClient>
-    >,
+    private readonly dataService: TransactionHost<TransactionalAdapterPrisma<ExtendedPrismaClient>>,
   ) {}
 
   async send({ token, type, ...message }: ITokenMessage): Promise<string> {
     try {
-      const notificationToken =
-        await this.dataService.tx.notificationToken.findFirstOrThrow({
-          where: { token },
-          include: {
-            user: true,
-          },
-        });
+      const notificationToken = await this.dataService.tx.notificationToken.findFirstOrThrow({
+        where: { token },
+        include: {
+          user: true,
+        },
+      });
 
       const created = await this.dataService.tx.notification.create({
         data: {
@@ -99,10 +93,7 @@ export class MqttService implements INotificationServiceProvider {
     await this.mqttService.subscribe(topicObject);
   }
 
-  listen<T>(
-    topic: string,
-    callback: (payload: T, packet: IPublishPacket) => void,
-  ) {
+  listen<T>(topic: string, callback: (payload: T, packet: IPublishPacket) => void) {
     this.mqttService.listen<T>(topic, callback);
   }
 }

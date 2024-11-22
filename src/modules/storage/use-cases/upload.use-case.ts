@@ -3,6 +3,7 @@ import { MultipleUploadRequest, UploadRequest } from '../requests';
 import { StorageCode } from 'src/cores/enums';
 import { FileDirectoryService, StorageService } from 'src/services/storage';
 import { IStorageServiceProvider } from 'src/cores/contracts';
+import { Storage } from 'src/common/helpers';
 
 @Injectable()
 export class UploadUseCase {
@@ -31,7 +32,7 @@ export class UploadUseCase {
 
     if (uploadRequest.code === StorageCode.FileManager && uploadRequest.dir) {
       await this.fileDirectoryService.save({
-        dirname: uploadRequest.dir,
+        dirname: uploadRequest.dir as Storage.DirpathType,
         fileId: uploaded.id,
       });
     }
@@ -49,10 +50,7 @@ export class UploadUseCase {
     };
   }
 
-  async uploadMultiple(
-    uploadRequest: MultipleUploadRequest,
-    files: S3.MultipartFile[],
-  ) {
+  async uploadMultiple(uploadRequest: MultipleUploadRequest, files: S3.MultipartFile[]) {
     const uploads = [];
 
     files.forEach((file) => {
@@ -72,7 +70,7 @@ export class UploadUseCase {
       for (const upload of uploaded) {
         saved.push(
           this.fileDirectoryService.save({
-            dirname: uploadRequest.dir,
+            dirname: uploadRequest.dir as Storage.DirpathType,
             fileId: upload.id,
           }),
         );

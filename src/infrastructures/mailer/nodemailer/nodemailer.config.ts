@@ -36,10 +36,7 @@ export class NodemailerConfigService implements MailerOptionsFactory {
         },
       },
       template: {
-        dir: path.join(
-          process.env.PWD,
-          'dist/src/infrastructures/mailer/templates',
-        ),
+        dir: path.join(process.env.PWD, 'dist/src/infrastructures/mailer/templates'),
         adapter: new HandlebarsAdapter(),
         options: {
           strict: true,

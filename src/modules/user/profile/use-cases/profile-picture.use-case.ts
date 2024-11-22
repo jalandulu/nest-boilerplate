@@ -30,7 +30,7 @@ export class ProfilePictureUseCase {
       pictureId: saved.id,
     });
 
-    const mapped = (await this.fileMapper.toMap(saved)).data;
+    const mapped = await this.fileMapper.toMap(saved);
 
     profile.picture = mapped;
     await this.authService.setUser(profile.id, profile);

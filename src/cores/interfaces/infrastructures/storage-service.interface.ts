@@ -6,3 +6,7 @@ export interface IStorageUpload {
   fullPath: string;
   stored: PutObjectCommandOutput;
 }
+
+export interface IStorageSignedOption {
+  expiresIn?: number;
+}

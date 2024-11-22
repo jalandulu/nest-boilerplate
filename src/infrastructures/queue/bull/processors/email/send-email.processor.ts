@@ -12,13 +12,13 @@ export class SendEmailProcessor {
 
   constructor(private readonly mailer: IMailerServiceProvider) {}
 
-  @Process(QueueMailerProcessor.SendEmail)
+  @Process(QueueMailerProcessor.sendEmail)
   async handle({ data }: Job<MailMessage>) {
-    this.logger.verbose(`Queue Start: ${QueueMailerProcessor.SendEmail}`);
+    this.logger.verbose(`Queue Start: ${QueueMailerProcessor.sendEmail}`);
 
     this.logger.verbose(`Queue Data: ${JSON.stringify(data)}`);
     await this.mailer.send(data);
 
-    this.logger.verbose(`Queue Completed: ${QueueMailerProcessor.SendEmail}`);
+    this.logger.verbose(`Queue Completed: ${QueueMailerProcessor.sendEmail}`);
   }
 }

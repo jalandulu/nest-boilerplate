@@ -10,10 +10,7 @@ import { IJwtServiceEnv } from 'src/cores/interfaces';
 import { ICacheServiceProvider } from 'src/cores/contracts';
 
 @Injectable()
-export class AccessStrategy extends PassportStrategy(
-  Strategy,
-  AuthStrategy.Access,
-) {
+export class AccessStrategy extends PassportStrategy(Strategy, AuthStrategy.Access) {
   private jwtConfig: IJwtServiceEnv;
 
   constructor(
@@ -41,9 +38,7 @@ export class AccessStrategy extends PassportStrategy(
       if (!isValidAccess) return false;
     }
 
-    return await this.cacheServiceProvider.get<ProfileEntity>(
-      `${payload.sub}:user`,
-    );
+    return await this.cacheServiceProvider.get<ProfileEntity>(`${payload.sub}:user`);
   }
 
   async cacheStrategy(req: FastifyRequest, payload: JwtEntity) {

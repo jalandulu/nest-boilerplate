@@ -16,7 +16,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { AccessAuthGuard, PermissionGuard } from 'src/middlewares/guards';
 import {
   CreateAccountRequest,
-  QueryUserRequest,
+  QueryAccountRequest,
   UpdateAccountAccessRequest,
   UpdateAccountPasswordRequest,
   UpdateAccountRequest,
@@ -34,6 +34,7 @@ import { FastifyRequest } from 'fastify';
 import { AuthPayload, Permissions } from 'src/common/decorators';
 import { ProfileEntity } from 'src/cores/entities';
 import { AccountStatus } from 'src/cores/enums';
+import { ExistedIdValidationPipe } from 'src/middlewares/pipes';
 
 @ApiTags('Account')
 @UseGuards(AccessAuthGuard, PermissionGuard)
@@ -53,10 +54,7 @@ export class AccountController {
 
   @Get()
   @Permissions(['account:view'])
-  async findAll(
-    @Query() query: QueryUserRequest,
-    @AuthPayload() profile: ProfileEntity,
-  ) {
+  async findAll(@Query() query: QueryAccountRequest, @AuthPayload() profile: ProfileEntity) {
     const [accounts, meta] = await this.accountUseCase.findAll(query, profile);
 
     return await this.accountMapper.toPaginate(accounts, meta);
@@ -73,13 +71,10 @@ export class AccountController {
   @Post()
   @Permissions(['account:create'])
   @HttpCode(HttpStatus.NO_CONTENT)
-  async create(
-    @Req() request: FastifyRequest,
-    @Body() payload: CreateAccountRequest,
-  ) {
+  async create(@Req() request: FastifyRequest, @Body() payload: CreateAccountRequest) {
     const { account, credential } = await this.accountUseCase.create(payload);
 
-    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.sendEmail, {
       to: credential.username,
       template: 'account-credential',
       context: {
@@ -94,7 +89,10 @@ export class AccountController {
   @Patch(':id')
   @Permissions(['account:update'])
   @HttpCode(HttpStatus.NO_CONTENT)
-  async update(@Param('id') id: string, @Body() payload: UpdateAccountRequest) {
+  async update(
+    @Param('id', ExistedIdValidationPipe.option('Identity', 'id')) id: string,
+    @Body() payload: UpdateAccountRequest,
+  ) {
     return await this.accountUseCase.update(id, payload);
   }
 
@@ -102,15 +100,12 @@ export class AccountController {
   @Permissions(['account:update-username'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateUsername(
-    @Param('id') id: string,
+    @Param('id', ExistedIdValidationPipe.option('Identity', 'id')) id: string,
     @Body() payload: UpdateAccountRequest,
   ) {
-    const account = await this.accountCredentialUseCase.updateUsername(
-      id,
-      payload,
-    );
+    const account = await this.accountCredentialUseCase.updateUsername(id, payload);
 
-    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.sendEmail, {
       to: account.before,
       template: 'account-username',
       context: {
@@ -124,11 +119,11 @@ export class AccountController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateResetPassword(
     @Req() request: FastifyRequest,
-    @Param('id') id: string,
+    @Param('id', ExistedIdValidationPipe.option('Identity', 'id')) id: string,
   ) {
     const account = await this.accountCredentialUseCase.resetPassword(id);
 
-    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.sendEmail, {
       to: account.credential.username,
       template: 'account-credential',
       context: {
@@ -143,15 +138,12 @@ export class AccountController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePassword(
     @Req() request: FastifyRequest,
-    @Param('id') id: string,
+    @Param('id', ExistedIdValidationPipe.option('Identity', 'id')) id: string,
     @Body() payload: UpdateAccountPasswordRequest,
   ) {
-    const account = await this.accountCredentialUseCase.updatePassword(
-      id,
-      payload,
-    );
+    const account = await this.accountCredentialUseCase.updatePassword(id, payload);
 
-    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.sendEmail, {
       to: account.credential.username,
       template: 'account-credential',
       context: {
@@ -165,7 +157,7 @@ export class AccountController {
   @Permissions(['account:access-control'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateAccess(
-    @Param('id') id: string,
+    @Param('id', ExistedIdValidationPipe.option('Identity', 'id')) id: string,
     @Body() payload: UpdateAccountAccessRequest,
   ) {
     await this.accountAccessUseCase.access(id, payload);
@@ -174,10 +166,10 @@ export class AccountController {
   @Patch(':id/disable')
   @Permissions(['account:update-status'])
   @HttpCode(HttpStatus.NO_CONTENT)
-  async disable(@Param('id') id: string) {
+  async disable(@Param('id', ExistedIdValidationPipe.option('Identity', 'id')) id: string) {
     const account = await this.accountStatusUseCase.disable(id);
 
-    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.sendEmail, {
       to: account.username,
       template: 'account-disable',
     });
@@ -186,10 +178,10 @@ export class AccountController {
   @Patch(':id/enable')
   @Permissions(['account:update-status'])
   @HttpCode(HttpStatus.NO_CONTENT)
-  async enable(@Param('id') id: string) {
+  async enable(@Param('id', ExistedIdValidationPipe.option('Identity', 'id')) id: string) {
     const account = await this.accountStatusUseCase.enable(id);
 
-    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.sendEmail, {
       to: account.username,
       template: 'account-enable',
     });
@@ -198,25 +190,22 @@ export class AccountController {
   @Patch(':id/status')
   @Permissions(['account:update-status'])
   @HttpCode(HttpStatus.NO_CONTENT)
-  async status(@Param('id') id: string) {
+  async status(@Param('id', ExistedIdValidationPipe.option('Identity', 'id')) id: string) {
     const account = await this.accountStatusUseCase.status(id);
 
-    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.sendEmail, {
       to: account.username,
-      template:
-        account.status === AccountStatus.Active
-          ? 'account-enable'
-          : 'account-disable',
+      template: account.status === AccountStatus.Active ? 'account-enable' : 'account-disable',
     });
   }
 
   @Delete(':id/destroy')
   @Permissions(['account:delete'])
   @HttpCode(HttpStatus.NO_CONTENT)
-  async destroy(@Param('id') id: string) {
+  async destroy(@Param('id', ExistedIdValidationPipe.option('Identity', 'id')) id: string) {
     const account = await this.accountUseCase.destroy(id);
 
-    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.sendEmail, {
       to: account.username,
       template: 'account-destroy',
     });

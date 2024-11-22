@@ -5,7 +5,6 @@ export class UpdateIdentityProfileDto implements IUpdateIdentityProfileDto {
   pictureId?: number;
 
   constructor(payload: IUpdateIdentityProfileDto) {
-    this.name = payload.name;
-    this.pictureId = payload.pictureId;
+    Object.assign(this, payload);
   }
 }

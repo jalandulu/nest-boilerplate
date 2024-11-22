@@ -25,26 +25,3 @@ export class UploadRequest {
   @ApiProperty({ type: 'string', format: 'binary', required: true })
   file: S3.MultipartFile;
 }
-
-export class MultipleUploadRequest {
-  @ApiProperty({
-    description: 'The file code',
-    enum: StorageCode,
-  })
-  @IsString()
-  @IsEnum(StorageCode)
-  public code!: StorageCode;
-
-  @ApiProperty({
-    description: 'The directory path',
-    type: String,
-  })
-  @IsNotEmpty()
-  @IsString()
-  @IsExists('StgDirectory', 'path')
-  @ValidateIf((o) => o.code === StorageCode.FileManager)
-  public dir?: string;
-
-  @ApiProperty({ type: [String], format: 'binary', required: true })
-  files: S3.MultipartFile[];
-}

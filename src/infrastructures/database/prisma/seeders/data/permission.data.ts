@@ -148,9 +148,4 @@ export const account = [
   },
 ] as const;
 
-export const permissions = [
-  ...profile,
-  ...access,
-  ...user,
-  ...account,
-] as const;
+export const permissions = [...profile, ...access, ...user, ...account] as const;

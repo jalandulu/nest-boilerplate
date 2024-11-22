@@ -5,31 +5,13 @@ import {
   NotificationTokenController,
 } from './controllers';
 import {
-  GetNotifiationUseCase,
-  ReadNotifiationUseCase,
-  ReadManyNotifiationUseCase,
-  RemoveNotifiationUseCase,
-  RemoveManyNotifiationUseCase,
-  UpsertNotifiationTokenUseCase,
-  GenerateNotifiationTokenUseCase,
-  StatisticNotifiationUseCase,
+  NotificationTokenUseCase,
+  NotificationUseCase,
+  StatisticNotificationUseCase,
 } from './use-cases';
 
 @Module({
-  controllers: [
-    NotificationTokenController,
-    NotificationSelfController,
-    NotificationController,
-  ],
-  providers: [
-    GetNotifiationUseCase,
-    StatisticNotifiationUseCase,
-    ReadNotifiationUseCase,
-    ReadManyNotifiationUseCase,
-    RemoveNotifiationUseCase,
-    RemoveManyNotifiationUseCase,
-    UpsertNotifiationTokenUseCase,
-    GenerateNotifiationTokenUseCase,
-  ],
+  controllers: [NotificationTokenController, NotificationSelfController, NotificationController],
+  providers: [StatisticNotificationUseCase, NotificationUseCase, NotificationTokenUseCase],
 })
 export class NotificationModule {}

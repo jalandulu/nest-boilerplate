@@ -1,7 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { AuthMapper } from './auth';
 import { FileMapper } from './storage';
-import { NotificationMapper } from './notification';
+import { NotificationMapper, NotificationTokenMapper } from './notification';
 import { PermissionMapper, RoleMapper } from './access';
 import { ProfileMapper } from './profile';
 import { AccountMapper, UserMapper } from './user';
@@ -15,6 +15,7 @@ import { AccountMapper, UserMapper } from './user';
     AccountMapper,
     FileMapper,
     NotificationMapper,
+    NotificationTokenMapper,
     RoleMapper,
     PermissionMapper,
   ],
@@ -25,6 +26,7 @@ import { AccountMapper, UserMapper } from './user';
     AccountMapper,
     FileMapper,
     NotificationMapper,
+    NotificationTokenMapper,
     RoleMapper,
     PermissionMapper,
   ],

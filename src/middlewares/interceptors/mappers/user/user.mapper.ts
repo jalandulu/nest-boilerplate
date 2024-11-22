@@ -13,38 +13,32 @@ import { FileMapper } from '../storage';
 export class UserMapper {
   constructor(private readonly fileMapper: FileMapper) {}
 
-  private async pictureMap(picture: FileMap | null): Promise<FileEntity> {
+  private async pictureMap(picture: FileMap | null): Promise<FileEntity | null> {
     if (!picture) return null;
 
-    return (await this.fileMapper.toMap(picture)).data;
+    return await this.fileMapper.toMap(picture, { public: true });
   }
 
-  async toMap(user: UserMap): Promise<{ data: UserEntity }> {
+  async toMap(user: UserMap): Promise<UserEntity> {
     return {
-      data: {
-        id: user.id,
-        type: user.type,
-        name: user.name,
-        email: user.email,
-        emailVerifiedAt: user.emailVerifiedAt?.toISOString() || null,
-        picture: await this.pictureMap(user?.picture),
-        createdAt: user.createdAt.toISOString(),
-        updatedAt: user.updatedAt.toISOString(),
-      },
+      id: user.id,
+      type: user.type,
+      name: user.name,
+      email: user.email,
+      emailVerifiedAt: user.emailVerifiedAt?.toISOString() || null,
+      picture: await this.pictureMap(user.picture),
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString(),
     };
   }
 
-  async toCollection(users: UsersMap) {
-    const mapper = await Promise.all(users.map((user) => this.toMap(user)));
-
-    return {
-      data: mapper.map(({ data }) => data),
-    };
+  async toCollection(users: UsersMap): Promise<UserEntity[]> {
+    return await Promise.all(users.map((user) => this.toMap(user)));
   }
 
   async toPaginate(data: UsersMap, meta: IPaginationMetaEntity) {
     return {
-      data: (await this.toCollection(data)).data,
+      data: await this.toCollection(data),
       meta,
     };
   }

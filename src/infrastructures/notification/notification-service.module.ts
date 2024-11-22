@@ -6,9 +6,6 @@ import { INotificationServiceProvider } from 'src/cores/contracts';
 @Module({
   imports: [MqttModule],
   providers: [{ provide: INotificationServiceProvider, useClass: MqttService }],
-  exports: [
-    MqttModule,
-    { provide: INotificationServiceProvider, useClass: MqttService },
-  ],
+  exports: [MqttModule, { provide: INotificationServiceProvider, useClass: MqttService }],
 })
 export class NotificationServiceModule {}

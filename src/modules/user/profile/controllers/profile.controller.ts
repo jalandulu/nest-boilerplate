@@ -13,11 +13,7 @@ import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AuthPayload, Permissions } from 'src/common/decorators';
 import { ProfileEntity } from 'src/cores/entities';
 import { AccessAuthGuard, PermissionGuard } from 'src/middlewares/guards';
-import {
-  UpdatePasswordRequest,
-  UpdateProfileRequest,
-  UpdateUsernameRequest,
-} from '../requests';
+import { UpdatePasswordRequest, UpdateProfileRequest, UpdateUsernameRequest } from '../requests';
 import { MultipartInterceptor } from 'src/infrastructures/storage/interceptors';
 import { Files } from 'src/infrastructures/storage/decorators';
 import { IQueueServiceProvider } from 'src/cores/contracts';
@@ -70,10 +66,7 @@ export class ProfileController {
     @AuthPayload() profile: ProfileEntity,
   ) {
     const [file] = files.file;
-    const updated = await this.profilePictureUseCase.updatePicture(
-      profile,
-      file,
-    );
+    const updated = await this.profilePictureUseCase.updatePicture(profile, file);
 
     return { data: updated };
   }
@@ -104,7 +97,7 @@ export class ProfileController {
   async destroy(@AuthPayload() profile: ProfileEntity) {
     await this.profileUseCase.destroy(profile);
 
-    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.sendEmail, {
       to: profile.email,
       template: 'account-destroy',
     });

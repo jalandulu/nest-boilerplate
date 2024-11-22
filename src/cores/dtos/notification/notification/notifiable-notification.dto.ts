@@ -5,7 +5,6 @@ export class NotifiableNotificationDto implements INotifiableNotificationDto {
   notifiableId?: string;
 
   constructor(payload: INotifiableNotificationDto) {
-    this.notifiableType = payload.notifiableType;
-    this.notifiableId = payload.notifiableId;
+    Object.assign(this, payload);
   }
 }

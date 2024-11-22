@@ -25,12 +25,7 @@ export class EmailVerificationUseCase {
       throw new UnprocessableEntityException('undefined origin hostname');
     }
 
-    const signatureUrl = this.authService.verifyEmailStrategy(
-      userId,
-      this.signatureUrl(origin),
-    );
-
-    return signatureUrl;
+    return await this.authService.verifyEmailStrategy(userId, this.signatureUrl(origin));
   }
 
   async verify(request: FastifyRequest, payload: SignedVerifyRequest) {

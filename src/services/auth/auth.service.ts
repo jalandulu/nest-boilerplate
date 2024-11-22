@@ -1,16 +1,9 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { TransactionHost } from '@nestjs-cls/transactional';
 import { ConfigService } from '@nestjs/config';
 import { IJwtServiceEnv, IVerificationEnv } from 'src/cores/interfaces';
-import {
-  ICacheServiceProvider,
-  ISignedUrlServiceProvider,
-} from 'src/cores/contracts';
+import { ICacheServiceProvider, ISignedUrlServiceProvider } from 'src/cores/contracts';
 import { Generate, Hash, String } from 'src/common/helpers';
 import { LocalAuthEntity, ProfileEntity } from 'src/cores/entities';
 import { AccountStatus, TokenScope } from 'src/cores/enums';
@@ -29,13 +22,10 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly cacheService: ICacheServiceProvider,
     private readonly signedUrlService: ISignedUrlServiceProvider,
-    private readonly dataService: TransactionHost<
-      TransactionalAdapterPrisma<ExtendedPrismaClient>
-    >,
+    private readonly dataService: TransactionHost<TransactionalAdapterPrisma<ExtendedPrismaClient>>,
   ) {
     this.jwtConfig = this.configService.get<IJwtServiceEnv>('jwt');
-    this.verificationConfig =
-      this.configService.get<IVerificationEnv>('verification');
+    this.verificationConfig = this.configService.get<IVerificationEnv>('verification');
   }
 
   async validate(username: string, password: string) {
@@ -115,30 +105,25 @@ export class AuthService {
       refreshTokenExpAt: undefined,
     };
 
-    const { exp: accessTokenExpAt, token: accessToken } =
-      await this.jwtService.accessToken({
-        userId: localAuth.id,
-        username: localAuth.username,
-      });
+    const { exp: accessTokenExpAt, token: accessToken } = await this.jwtService.accessToken({
+      userId: localAuth.id,
+      username: localAuth.username,
+    });
 
     token.accessToken = accessToken;
     token.accessTokenExpAt = accessTokenExpAt;
 
     if (this.isRefreshStrategy()) {
-      const { exp: refreshTokenExpAt, token: refreshToken } =
-        await this.jwtService.refreshToken({
-          userId: localAuth.id,
-          username: localAuth.username,
-        });
+      const { exp: refreshTokenExpAt, token: refreshToken } = await this.jwtService.refreshToken({
+        userId: localAuth.id,
+        username: localAuth.username,
+      });
 
       token.refreshToken = refreshToken;
       token.refreshTokenExpAt = refreshTokenExpAt;
     }
 
-    const user: ProfileEntity = await this.profileMapper.toMap(
-      localAuth.user,
-      localAuth.role,
-    );
+    const user: ProfileEntity = await this.profileMapper.toMap(localAuth.user, localAuth.role);
 
     await Promise.all([
       this.destroy(localAuth.id),
@@ -153,10 +138,7 @@ export class AuthService {
   }
 
   async revalidateToken(userId: string) {
-    const [user, permissions] = await Promise.all([
-      this.user(userId),
-      this.permissions(userId),
-    ]);
+    const [user, permissions] = await Promise.all([this.user(userId), this.permissions(userId)]);
 
     const token: {
       accessToken: string;
@@ -223,19 +205,14 @@ export class AuthService {
   }
 
   async cacheStrategy(userId: string, token: string) {
-    const caching = await this.cacheService.get<number | undefined>(
-      `${userId}:caching`,
-    );
+    const caching = await this.cacheService.get<number | undefined>(`${userId}:caching`);
 
     if (!caching) {
       const accessToken = await this.accessToken(userId);
       if (!accessToken) return false;
       if (accessToken !== token) return false;
 
-      const [permissions, user] = await Promise.all([
-        this.permissions(userId),
-        this.user(userId),
-      ]);
+      const [permissions, user] = await Promise.all([this.permissions(userId), this.user(userId)]);
 
       await Promise.all([
         this.setAccessToken(userId, accessToken),
@@ -312,9 +289,7 @@ export class AuthService {
   }
 
   async resetPasswordToken(userId: string) {
-    return await this.cacheService.get<string>(
-      `${userId}:reset-password:token`,
-    );
+    return await this.cacheService.get<string>(`${userId}:reset-password:token`);
   }
 
   async resetPasswordCode(userId: string) {
@@ -322,21 +297,15 @@ export class AuthService {
   }
 
   async resetPasswordRefresh(userId: string) {
-    return await this.cacheService.get<string>(
-      `${userId}:reset-password:refresh`,
-    );
+    return await this.cacheService.get<string>(`${userId}:reset-password:refresh`);
   }
 
   async emailVerificationToken(userId: string) {
-    return await this.cacheService.get<string>(
-      `${userId}:verification-email:token`,
-    );
+    return await this.cacheService.get<string>(`${userId}:verification-email:token`);
   }
 
   async emailVerificationRefresh(userId: string) {
-    return await this.cacheService.get<string>(
-      `${userId}:verification-email:refresh`,
-    );
+    return await this.cacheService.get<string>(`${userId}:verification-email:refresh`);
   }
 
   async setAccessToken(userId: string, accessToken: string) {
@@ -344,9 +313,7 @@ export class AuthService {
       `${userId}:accessToken`,
       accessToken,
       this.jwtService.expiration({
-        scope: this.isRefreshStrategy()
-          ? TokenScope.Access
-          : TokenScope.Refresh,
+        scope: this.isRefreshStrategy() ? TokenScope.Access : TokenScope.Refresh,
       }),
     );
   }
@@ -441,9 +408,7 @@ export class AuthService {
 
   async hasPermission(userId: string, reqPermissions: string[]) {
     const permissions = await this.permissions(userId);
-    return reqPermissions.some((permission) =>
-      permissions.includes(permission),
-    );
+    return reqPermissions.some((permission) => permissions.includes(permission));
   }
 
   createSignedUrl(url: string, data?: string) {

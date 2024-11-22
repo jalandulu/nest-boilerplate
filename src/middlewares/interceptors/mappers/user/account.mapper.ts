@@ -8,6 +8,9 @@ import {
   RoleMap,
   PermissionsMap,
   AccountResourceMap,
+  UserEntity,
+  RoleEntity,
+  PermissionEntity,
 } from 'src/cores/entities';
 import { UserMapper } from './user.mapper';
 import { PermissionMapper, RoleMapper } from '../access';
@@ -20,66 +23,46 @@ export class AccountMapper {
     private readonly permissionMapper: PermissionMapper,
   ) {}
 
-  async userMap(user: UserMap) {
-    return (await this.userMapper.toMap(user)).data;
+  async userMap(user: UserMap): Promise<UserEntity> {
+    return await this.userMapper.toMap(user);
   }
 
-  roleMap(role: RoleMap) {
-    return this.roleMapper.toMap(role).data;
+  roleMap(role: RoleMap): RoleEntity {
+    return this.roleMapper.toMap(role);
   }
 
-  permissionMap(permission: PermissionsMap) {
-    return this.permissionMapper.toCollection(permission).data;
+  permissionMap(permission: PermissionsMap): PermissionEntity[] {
+    return this.permissionMapper.toCollection(permission);
   }
 
-  async toMap(account: AccountMap): Promise<{ data: AccountEntity }> {
+  async toMap(account: AccountMap): Promise<AccountEntity> {
     return {
-      data: {
-        id: account.id,
-        name: account.user.name,
-        username: account.username,
-        status: account.status,
-        role: account?.role ? await this.roleMap(account.role) : undefined,
-        user: account?.user ? await this.userMap(account.user) : undefined,
-        disabledAt: account.disabledAt?.toISOString(),
-        createdAt: account.createdAt.toISOString(),
-        updatedAt: account.updatedAt.toISOString(),
-      },
+      id: account.id,
+      name: account.user.name,
+      username: account.username,
+      status: account.status,
+      role: account?.role ? this.roleMap(account.role) : undefined,
+      user: account?.user ? await this.userMap(account.user) : undefined,
+      disabledAt: account.disabledAt?.toISOString() || null,
+      createdAt: account.createdAt.toISOString(),
+      updatedAt: account.updatedAt.toISOString(),
     };
   }
 
-  async toResource(
-    account: AccountResourceMap,
-  ): Promise<{ data: AccountEntity }> {
+  async toResource(account: AccountResourceMap): Promise<AccountEntity> {
     return {
-      data: {
-        id: account.id,
-        name: account.user.name,
-        username: account.username,
-        status: account.status,
-        role: account?.role ? await this.roleMap(account.role) : undefined,
-        user: account?.user ? await this.userMap(account.user) : undefined,
-        permissions: this.permissionMap(
-          account?.permissionsOnIdentities.map((p) => p.permission),
-        ),
-        disabledAt: account.disabledAt?.toISOString(),
-        createdAt: account.createdAt.toISOString(),
-        updatedAt: account.updatedAt.toISOString(),
-      },
+      ...(await this.toMap(account)),
+      permissions: this.permissionMap(account?.permissionsOnIdentities.map((p) => p.permission)),
     };
   }
 
-  async toCollection(users: AccountsMap) {
-    const mapper = await Promise.all(users.map((user) => this.toMap(user)));
-
-    return {
-      data: mapper.map(({ data }) => data),
-    };
+  async toCollection(users: AccountsMap): Promise<AccountEntity[]> {
+    return await Promise.all(users.map((i) => this.toMap(i)));
   }
 
   async toPaginate(data: AccountsMap, meta: IPaginationMetaEntity) {
     return {
-      data: (await this.toCollection(data)).data,
+      data: await this.toCollection(data),
       meta,
     };
   }

@@ -7,9 +7,6 @@ import { BullQueueService } from './bull';
 @Module({
   imports: [BullModule],
   providers: [{ provide: IQueueServiceProvider, useClass: BullQueueService }],
-  exports: [
-    BullModule,
-    { provide: IQueueServiceProvider, useClass: BullQueueService },
-  ],
+  exports: [BullModule, { provide: IQueueServiceProvider, useClass: BullQueueService }],
 })
 export class QueueServiceModule {}

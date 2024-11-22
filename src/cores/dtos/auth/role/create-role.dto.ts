@@ -7,8 +7,7 @@ export class CreateRoleDto implements ICreateRoleDto {
   permissions: number[];
 
   constructor(payload: ICreateRoleDto) {
-    this.name = payload.name;
-    this.permissions = payload.permissions;
+    Object.assign(this, payload);
   }
 
   get slug() {

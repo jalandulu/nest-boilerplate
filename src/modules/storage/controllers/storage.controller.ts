@@ -1,10 +1,4 @@
-import {
-  Body,
-  Controller,
-  Post,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, UseInterceptors } from '@nestjs/common';
 import { MultipleUploadRequest, UploadRequest } from '../requests';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AccessAuthGuard } from 'src/middlewares/guards';

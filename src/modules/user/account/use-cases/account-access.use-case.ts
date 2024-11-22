@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Transactional } from '@nestjs-cls/transactional';
 import { AuthService, IdentityService, PermissionService } from 'src/services';
-import { Prisma } from '@prisma/client';
 import { UpdateAccountAccessRequest } from '../requests';
 import { SetIdentityStatusDto, SetIdentityPermissionDto } from 'src/cores/dtos';
+import { AccountMap } from 'src/cores/entities';
 
 @Injectable()
 export class AccountAccessUseCase {
@@ -15,24 +15,17 @@ export class AccountAccessUseCase {
 
   @Transactional()
   async access(userId: string, payload: UpdateAccountAccessRequest) {
-    const account = await this.identityService.findOne<
-      Prisma.IdentityGetPayload<{ include: { role: true } }>
-    >(userId, {
+    const account = await this.identityService.findOne<AccountMap>(userId, {
       role: true,
     });
-    if (!account) {
-      throw new NotFoundException(`account does not found.`);
-    }
 
     const parallel = [];
 
     if (account.role.id !== payload.roleId) {
-      parallel.push(
-        this.identityService.updateRole(userId, { roleId: payload.roleId }),
-      );
+      parallel.push(() => this.identityService.updateRole(userId, { roleId: payload.roleId }));
     }
 
-    parallel.push(
+    parallel.push(() =>
       this.identityService.updatePermission(
         userId,
         new SetIdentityPermissionDto({
@@ -43,7 +36,7 @@ export class AccountAccessUseCase {
 
     const [permissions] = await Promise.all([
       this.permissionService.findIn(payload.permissions),
-      ...parallel,
+      ...parallel.map((fn) => fn()),
     ]);
 
     await this.authService.setPermissions(

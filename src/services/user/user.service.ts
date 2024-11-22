@@ -3,49 +3,27 @@ import { DateTime } from 'luxon';
 import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { Prisma } from '@prisma/client';
-import { CreateUserDto, PaginationDto, UpdateUserDto } from 'src/cores/dtos';
+import { CreateUserDto, QueryUserDto, UpdateUserDto } from 'src/cores/dtos';
 import { ExtendedPrismaClient } from 'src/infrastructures/database';
 
 @Injectable()
 export class UserService {
   constructor(
-    private readonly dataService: TransactionHost<
-      TransactionalAdapterPrisma<ExtendedPrismaClient>
-    >,
+    private readonly dataService: TransactionHost<TransactionalAdapterPrisma<ExtendedPrismaClient>>,
   ) {}
 
-  async findAll({
-    perPage,
-    page,
-    account,
-    currentUserId,
-  }: { account?: boolean; currentUserId?: string } & PaginationDto) {
+  async findAll({ toWhere, toOrder, perPage, page }: QueryUserDto) {
     return await this.dataService.tx.user
       .paginate({
         where: {
-          AND: [
-            {
-              id: {
-                not: currentUserId,
-              },
-              identity: {
-                roleId: {
-                  not: 1,
-                },
-              },
-            },
-            account === false
-              ? {
-                  OR: [
-                    { identity: null },
-                    { identity: { deletedAt: { not: null } } },
-                  ],
-                }
-              : {},
-          ],
+          ...toWhere,
+          deletedAt: null,
         },
         include: {
           picture: true,
+        },
+        orderBy: toOrder ?? {
+          createdAt: 'desc',
         },
       })
       .withPages({
@@ -73,11 +51,7 @@ export class UserService {
     })) as T;
   }
 
-  async update<T>(
-    id: string,
-    updateUserDto: UpdateUserDto,
-    include?: Prisma.UserInclude,
-  ) {
+  async update<T>(id: string, updateUserDto: UpdateUserDto, include?: Prisma.UserInclude) {
     return (await this.dataService.tx.user.update({
       where: { id },
       data: {

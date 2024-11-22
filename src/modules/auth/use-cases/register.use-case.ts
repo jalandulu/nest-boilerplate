@@ -4,9 +4,9 @@ import { Transactional } from '@nestjs-cls/transactional';
 import { UserService } from 'src/services/user/user.service';
 import { RegisterRequest } from '../requests';
 import { UserType } from 'src/cores/enums';
-import { Prisma } from '@prisma/client';
 import { FastifyRequest } from 'fastify';
 import { CreateIdentityDto } from 'src/cores/dtos';
+import { AuthUserMap, RoleResourceMap } from 'src/cores/entities';
 
 @Injectable()
 export class RegisterUseCase {
@@ -24,17 +24,7 @@ export class RegisterUseCase {
       throw new UnprocessableEntityException('undefined origin hostname');
     }
 
-    const role = await this.roleService.findBySlug<
-      Prisma.RoleGetPayload<{
-        include: {
-          permissionsOnRoles: {
-            include: {
-              permission: true;
-            };
-          };
-        };
-      }>
-    >('admin', {
+    const role = await this.roleService.findBySlug<RoleResourceMap>('admin', {
       permissionsOnRoles: {
         include: {
           permission: true,
@@ -42,14 +32,7 @@ export class RegisterUseCase {
       },
     });
 
-    const user = await this.userService.create<
-      Prisma.UserGetPayload<{
-        include: {
-          picture: true;
-          notificationTokens: true;
-        };
-      }>
-    >(
+    const user = await this.userService.create<AuthUserMap>(
       {
         type: UserType.Operator,
         name: payload.name,
@@ -61,9 +44,7 @@ export class RegisterUseCase {
       },
     );
 
-    const identity = await this.identityService.create<
-      Prisma.IdentityGetPayload<Prisma.IdentityDefaultArgs>
-    >(
+    const identity = await this.identityService.create(
       new CreateIdentityDto({
         userId: user.id,
         roleId: role.id,

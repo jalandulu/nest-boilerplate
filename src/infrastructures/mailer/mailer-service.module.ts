@@ -7,9 +7,6 @@ import { NodemailerService } from './nodemailer';
 @Module({
   imports: [NodemailerModule],
   providers: [{ provide: IMailerServiceProvider, useClass: NodemailerService }],
-  exports: [
-    NodemailerModule,
-    { provide: IMailerServiceProvider, useClass: NodemailerService },
-  ],
+  exports: [NodemailerModule, { provide: IMailerServiceProvider, useClass: NodemailerService }],
 })
 export class MailerServiceModule {}

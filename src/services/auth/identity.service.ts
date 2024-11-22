@@ -1,17 +1,12 @@
 import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { DateTime } from 'luxon';
 import { Hash } from 'src/common/helpers';
 import {
   CreateIdentityDto,
-  PaginationDto,
   UpdateIdentityPasswordDto,
   UpdateIdentityProfileDto,
   UpdateIdentityDto,
@@ -19,6 +14,7 @@ import {
   SetIdentityPermissionDto,
   SetIdentityUsernameDto,
   SetIdentityRoleDto,
+  QueryIdentityDto,
 } from 'src/cores/dtos';
 import { SetIdentityStatusDto } from 'src/cores/dtos/auth/identity/set-identity-status.dto';
 import { AccountStatus } from 'src/cores/enums';
@@ -27,22 +23,14 @@ import { ExtendedPrismaClient } from 'src/infrastructures/database';
 @Injectable()
 export class IdentityService {
   constructor(
-    private readonly dataService: TransactionHost<
-      TransactionalAdapterPrisma<ExtendedPrismaClient>
-    >,
+    private readonly dataService: TransactionHost<TransactionalAdapterPrisma<ExtendedPrismaClient>>,
   ) {}
 
-  async findAll({
-    page,
-    perPage,
-    currentUserId,
-  }: {
-    q?: string;
-    currentUserId?: string;
-  } & PaginationDto) {
+  async findAll({ currentUserId, toWhere, toOrder, page, perPage }: QueryIdentityDto) {
     return await this.dataService.tx.identity
       .paginate({
         where: {
+          ...toWhere,
           id: {
             not: currentUserId,
           },
@@ -59,6 +47,9 @@ export class IdentityService {
           },
           role: true,
         },
+        orderBy: toOrder ?? {
+          createdAt: 'desc',
+        },
       })
       .withPages({
         limit: perPage,
@@ -66,11 +57,14 @@ export class IdentityService {
       });
   }
 
-  async findOne<T>(id: string, include?: Prisma.IdentityInclude) {
+  async findOne<T extends Prisma.IdentityGetPayload<Prisma.IdentityDefaultArgs>>(
+    id: string,
+    include?: Prisma.IdentityInclude,
+  ) {
     return (await this.dataService.tx.identity.findFirst({
       where: { id, deletedAt: null },
       include: include,
-    })) as T;
+    })) as unknown as T;
   }
 
   async findUsername(
@@ -123,7 +117,7 @@ export class IdentityService {
     return !!isVerified;
   }
 
-  async create<T>(
+  async create<T extends Prisma.IdentityGetPayload<Prisma.IdentityDefaultArgs>>(
     createIdentityDto: CreateIdentityDto,
     include?: Prisma.IdentityInclude,
   ) {
@@ -141,10 +135,10 @@ export class IdentityService {
           : undefined,
       },
       include,
-    })) as T;
+    })) as unknown as T;
   }
 
-  async update<T>(
+  async update<T extends Prisma.IdentityGetPayload<Prisma.IdentityDefaultArgs>>(
     id: string,
     updateIdentityDto: UpdateIdentityDto,
     include?: Prisma.IdentityInclude,
@@ -169,10 +163,10 @@ export class IdentityService {
           : undefined,
       },
       include,
-    })) as T;
+    })) as unknown as T;
   }
 
-  async upsert<T>(
+  async upsert<T extends Prisma.IdentityGetPayload<Prisma.IdentityDefaultArgs>>(
     identityDto: CreateIdentityDto,
     include?: Prisma.IdentityInclude,
   ) {
@@ -229,10 +223,7 @@ export class IdentityService {
     });
   }
 
-  async updatePermission(
-    id: string,
-    { permissionsToPrisma }: SetIdentityPermissionDto,
-  ) {
+  async updatePermission(id: string, { permissionsToPrisma }: SetIdentityPermissionDto) {
     await this.dataService.tx.permissionsOnIdentities.deleteMany({
       where: {
         identityId: id,
@@ -249,10 +240,7 @@ export class IdentityService {
     });
   }
 
-  async changePassword(
-    id: string,
-    { currentPassword, password }: UpdateIdentityPasswordDto,
-  ) {
+  async changePassword(id: string, { currentPassword, password }: UpdateIdentityPasswordDto) {
     const exist = await this.dataService.tx.identity.findFirst({
       where: {
         id: id,
@@ -272,10 +260,7 @@ export class IdentityService {
       ]);
     }
 
-    return await this.updatePassword(
-      id,
-      new SetIdentityPasswordDto({ password }),
-    );
+    return await this.updatePassword(id, new SetIdentityPasswordDto({ password }));
   }
 
   async updatePassword(id: string, { hashPassword }: SetIdentityPasswordDto) {

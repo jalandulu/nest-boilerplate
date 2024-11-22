@@ -3,9 +3,7 @@ import * as Joi from 'joi';
 export const configSchema = Joi.object({
   APP_NAME: Joi.string().optional(),
   APP_PORT: Joi.number().port().default(3000),
-  APP_MODE: Joi.string()
-    .valid('local', 'development', 'production', 'test')
-    .default('local'),
+  APP_MODE: Joi.string().valid('local', 'development', 'production', 'test').default('local'),
   APP_KEY: Joi.string(),
 
   SIGNATURE_KEY: Joi.string(),

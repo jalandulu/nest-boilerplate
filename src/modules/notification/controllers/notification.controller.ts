@@ -21,14 +21,7 @@ import {
   RemoveNotificationRequest,
   SendNotificationRequest,
 } from '../requests';
-import {
-  GetNotifiationUseCase,
-  ReadManyNotifiationUseCase,
-  ReadNotifiationUseCase,
-  RemoveManyNotifiationUseCase,
-  RemoveNotifiationUseCase,
-  StatisticNotifiationUseCase,
-} from '../use-cases';
+import { NotificationUseCase, StatisticNotificationUseCase } from '../use-cases';
 import { NotificationMapper } from 'src/middlewares/interceptors';
 import { NotificationType } from 'src/cores/enums';
 
@@ -41,12 +34,8 @@ import { NotificationType } from 'src/cores/enums';
 export class NotificationController {
   constructor(
     private readonly mapper: NotificationMapper,
-    private readonly statisticUseCase: StatisticNotifiationUseCase,
-    private readonly getUseCase: GetNotifiationUseCase,
-    private readonly readUseCase: ReadNotifiationUseCase,
-    private readonly readManyUseCase: ReadManyNotifiationUseCase,
-    private readonly removeUseCase: RemoveNotifiationUseCase,
-    private readonly removeManyUseCase: RemoveManyNotifiationUseCase,
+    private readonly statisticUseCase: StatisticNotificationUseCase,
+    private readonly notificationUseCase: NotificationUseCase,
     private readonly notificationProvider: INotificationServiceProvider,
   ) {}
 
@@ -57,20 +46,20 @@ export class NotificationController {
 
   @Get()
   async findAll(@Query() request: QueryNotificationRequest) {
-    const [data, meta] = await this.getUseCase.findAll(request);
+    const [data, meta] = await this.notificationUseCase.findAll(request);
     return this.mapper.toPaginate(data, meta);
   }
 
   @Patch(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async read(@Param('id', ParseIntPipe) id: number) {
-    await this.readUseCase.read(id);
+    await this.notificationUseCase.read(id);
   }
 
   @Patch()
   @HttpCode(HttpStatus.NO_CONTENT)
   async readMany(@Body() request: ReadNotificationRequest) {
-    await this.readManyUseCase.readMany(request);
+    await this.notificationUseCase.readMany(request);
   }
 
   @Post()
@@ -88,12 +77,12 @@ export class NotificationController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id', ParseIntPipe) id: number) {
-    await this.removeUseCase.remove(id);
+    await this.notificationUseCase.remove(id);
   }
 
   @Delete()
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeMany(@Body() request: RemoveNotificationRequest) {
-    await this.removeManyUseCase.removeMany(request);
+    await this.notificationUseCase.removeMany(request);
   }
 }

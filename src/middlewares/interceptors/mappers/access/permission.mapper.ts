@@ -8,25 +8,19 @@ import {
 
 @Injectable()
 export class PermissionMapper {
-  toMap(permission: PermissionMap): { data: PermissionEntity } {
+  toMap(permission: PermissionMap): PermissionEntity {
     return {
-      data: {
-        id: permission.id,
-        module: permission.module,
-        action: permission.action,
-        slug: permission.slug,
-        createdAt: permission.createdAt,
-        updatedAt: permission.updatedAt,
-      },
+      id: permission.id,
+      module: permission.module,
+      action: permission.action,
+      slug: permission.slug,
+      createdAt: permission.createdAt,
+      updatedAt: permission.updatedAt,
     };
   }
 
-  toCollection(permissions: PermissionsMap) {
-    return {
-      data: permissions.map((status) => {
-        return this.toMap(status).data;
-      }),
-    };
+  toCollection(permissions: PermissionsMap): PermissionEntity[] {
+    return permissions.map((i) => this.toMap(i));
   }
 
   toGroup(permissions: PermissionGroupMap) {

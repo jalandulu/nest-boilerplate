@@ -4,64 +4,90 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import {
   ValidationArguments,
-  ValidationOptions,
   ValidatorConstraint,
   ValidatorConstraintInterface,
   registerDecorator,
 } from 'class-validator';
+import { ValidationOptions } from 'src/cores/interfaces';
 import { ExtendedPrismaClient } from 'src/infrastructures/database';
+
+export type IsExistValidationOption = ValidationOptions & {
+  invert?: boolean;
+  exclude?: {
+    targetColumn: string;
+    targetValue: ['param' | 'body', string];
+  };
+};
 
 @ValidatorConstraint({ name: 'IsExists', async: true })
 @Injectable()
 export class IsExistsValidator implements ValidatorConstraintInterface {
   private readonly logger: Logger = new Logger(IsExistsValidator.name);
 
+  private options: Map<string, IsExistValidationOption> = new Map();
+
   constructor(
-    private readonly database: TransactionHost<
-      TransactionalAdapterPrisma<ExtendedPrismaClient>
-    >,
+    private readonly database: TransactionHost<TransactionalAdapterPrisma<ExtendedPrismaClient>>,
   ) {}
 
-  async validate(value: string, args?: ValidationArguments) {
-    const params = args.constraints;
-    const table: string = params[0];
-    const column: string = params[1];
+  async validate(value: string, args: ValidationArguments) {
+    const [table, column, options] = args.constraints;
+    const request = args.object as any;
+
+    if (!this.options?.get(args.property)) {
+      this.options.set(args.property, options);
+    }
 
     try {
-      const exist = await this.database.tx[table].isExists({
-        [column]: value,
-      });
+      let query = {
+        [column as string]: value,
+      };
+
+      if (options.exclude) {
+        const [tProp, tValue] = options.exclude.targetValue;
+        const target = tProp == 'param' ? request['_params'] : request;
+
+        query = {
+          [column as string]: value,
+          [options.exclude.targetColumn]: {
+            not: target[tValue],
+          },
+        };
+      }
+
+      const exist = await this.database.tx[table as string].isExists(query);
 
       if (!exist) {
-        this.logger.verbose(
-          `${args.property} ${args.value} is doesn't exists.`,
-        );
-
-        return false;
+        return options?.invert ? true : false;
       } else {
-        return true;
+        return options?.invert ? false : true;
       }
     } catch (e) {
       this.logger.error(e);
+      return false;
     }
   }
 
-  defaultMessage() {
-    return `$property is doesn't exists.`;
+  defaultMessage(args: ValidationArguments) {
+    if (this.options?.get(args.property)?.invert) {
+      return `$property is already exists`;
+    }
+
+    return `$property doesn't exist`;
   }
 }
 
 export const IsExists = (
   table: Prisma.ModelName,
   column: string,
-  validationOptions?: ValidationOptions,
+  validationOptions?: IsExistValidationOption,
 ) => {
   return (object: unknown, propertyName: string) => {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
-      constraints: [table, column],
+      constraints: [table, column, validationOptions],
       validator: IsExistsValidator,
     });
   };

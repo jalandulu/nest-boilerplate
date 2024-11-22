@@ -11,11 +11,9 @@ export class SendNotificationProcessor {
 
   constructor(private readonly notification: INotificationServiceProvider) {}
 
-  @Process(QueueNotificationProcessor.SendNotification)
+  @Process(QueueNotificationProcessor.sendNotification)
   handle({ data }: Job<ITokenMessage>) {
-    this.logger.verbose(
-      `Notification Send: ${QueueNotificationProcessor.SendNotification}`,
-    );
+    this.logger.verbose(`Notification Send: ${QueueNotificationProcessor.sendNotification}`);
     this.logger.verbose(`Notification Data: ${data}`);
 
     this.notification.send(data);

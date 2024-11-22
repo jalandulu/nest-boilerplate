@@ -9,8 +9,6 @@ export class UpdateNotificationTokenDto implements IUpdateNotificationTokenDto {
   token?: ICreateNotificationTokenDto['token'];
 
   constructor(payload: IUpdateNotificationTokenDto) {
-    this.userId = payload.userId;
-    this.type = payload.type;
-    this.token = payload.token;
+    Object.assign(this, payload);
   }
 }

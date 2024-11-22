@@ -19,10 +19,7 @@ export default [
   {
     ignores: ['**/.eslintrc.js', '**/*.d.ts', '**/*.config.js'],
   },
-  ...compat.extends(
-    'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
-  ),
+  ...compat.extends('plugin:@typescript-eslint/recommended', 'plugin:prettier/recommended'),
   {
     plugins: {
       '@typescript-eslint': typescriptEslintEslintPlugin,
@@ -54,12 +51,56 @@ export default [
       '@typescript-eslint/no-empty-object-type': 'off',
       'no-unused-vars': 'off',
 
+      // '@typescript-eslint/camelcase': 'off',
+      // camelcase: 'off',
+      '@typescript-eslint/naming-convention': [
+        'error',
+        {
+          selector: 'default',
+          format: null,
+          leadingUnderscore: 'allow',
+          trailingUnderscore: 'allow',
+        },
+        {
+          selector: 'variable',
+          format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+          leadingUnderscore: 'allow',
+          trailingUnderscore: 'allow',
+          filter: {
+            regex: '^(__.*|[A-Za-z][a-zA-Z0-9]*)$',
+            match: false,
+          },
+        },
+        {
+          selector: [
+            'classProperty',
+            'objectLiteralProperty',
+            'typeProperty',
+            'parameterProperty',
+            'property',
+          ],
+          format: null,
+          leadingUnderscore: 'allow',
+          trailingUnderscore: 'allow',
+        },
+        // Object Literal - Khusus untuk object literals (seperti options di decorator)
+        {
+          selector: 'objectLiteralProperty',
+          format: null,
+          leadingUnderscore: 'allow',
+          trailingUnderscore: 'allow',
+        },
+      ],
+
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
           vars: 'all',
           args: 'after-used',
           ignoreRestSiblings: false,
+          varsIgnorePattern: '^_',
+          argsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
         },
       ],
 
@@ -68,9 +109,17 @@ export default [
         'warn',
         {
           vars: 'all',
-          varsIgnorePattern: '^_',
           args: 'after-used',
+          varsIgnorePattern: '^_',
           argsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+      'prettier/prettier': [
+        'error',
+        {
+          endOfLine: 'auto',
+          printWidth: 100,
         },
       ],
     },

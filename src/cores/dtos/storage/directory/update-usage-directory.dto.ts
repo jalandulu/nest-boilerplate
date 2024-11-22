@@ -5,7 +5,6 @@ export class UpdateUsageDirectoryDto implements IUpdateUsageDirectoryDto {
   totalFiles: number;
 
   constructor(payload: IUpdateUsageDirectoryDto) {
-    this.totalSize = payload.totalSize;
-    this.totalFiles = payload.totalFiles;
+    Object.assign(this, payload);
   }
 }

@@ -10,9 +10,7 @@ import { StorageCode } from 'src/cores/enums';
 export class StorageService {
   constructor(
     private readonly storageRepository: IStorageRepository,
-    private readonly dataService: TransactionHost<
-      TransactionalAdapterPrisma<ExtendedPrismaClient>
-    >,
+    private readonly dataService: TransactionHost<TransactionalAdapterPrisma<ExtendedPrismaClient>>,
   ) {}
 
   async upload({

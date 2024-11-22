@@ -1,15 +1,12 @@
 import { Hash } from 'src/common/helpers';
 import { IUpdateIdentityCredentialDto } from 'src/cores/interfaces/dtos';
 
-export class UpdateIdentityCredentialDto
-  implements IUpdateIdentityCredentialDto
-{
+export class UpdateIdentityCredentialDto implements IUpdateIdentityCredentialDto {
   username?: string;
   password?: string;
 
   constructor(payload: IUpdateIdentityCredentialDto) {
-    this.username = payload.username;
-    this.password = payload.password;
+    Object.assign(this, payload);
   }
 
   async hashPassword() {

@@ -12,21 +12,11 @@ import {
   ParseIntPipe,
   UseGuards,
 } from '@nestjs/common';
-import {
-  CreateRoleRequest,
-  QueryRoleRequest,
-  UpdateRoleRequest,
-} from '../requests';
+import { CreateRoleRequest, QueryRoleRequest, UpdateRoleRequest } from '../requests';
 import { ApiTags } from '@nestjs/swagger';
 import { AccessAuthGuard, PermissionGuard } from 'src/middlewares/guards';
 import { Permissions } from 'src/common/decorators';
-import {
-  CreateRoleUseCase,
-  FindRoleUseCase,
-  GetRoleUseCase,
-  RemoveRoleUseCase,
-  UpdateRoleUseCase,
-} from '../use-cases';
+import { RoleUseCase } from '../use-cases';
 import { RoleMapper } from 'src/middlewares/interceptors';
 
 @ApiTags('Roles')
@@ -38,23 +28,19 @@ import { RoleMapper } from 'src/middlewares/interceptors';
 export class RoleController {
   constructor(
     private readonly mapper: RoleMapper,
-    private readonly getUseCase: GetRoleUseCase,
-    private readonly findUseCase: FindRoleUseCase,
-    private readonly createUseCase: CreateRoleUseCase,
-    private readonly updateUseCase: UpdateRoleUseCase,
-    private readonly removeUseCase: RemoveRoleUseCase,
+    private readonly useCase: RoleUseCase,
   ) {}
 
   @Get()
   @Permissions(['access:view'])
   async findAll(@Query() query: QueryRoleRequest) {
-    return this.mapper.toCollection(await this.getUseCase.findAll(query));
+    return this.mapper.toCollection(await this.useCase.findAll(query));
   }
 
   @Get(':id')
   @Permissions(['access:view'])
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    const role = await this.findUseCase.findOne(id);
+    const role = await this.useCase.findOne(id);
 
     return this.mapper.toResource(role);
   }
@@ -62,7 +48,7 @@ export class RoleController {
   @Post()
   @Permissions(['access:create'])
   async create(@Body() createRoleRequest: CreateRoleRequest) {
-    const created = await this.createUseCase.create(createRoleRequest);
+    const created = await this.useCase.create(createRoleRequest);
 
     return this.mapper.toResource(created);
   }
@@ -73,7 +59,7 @@ export class RoleController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateRoleRequest: UpdateRoleRequest,
   ) {
-    const updated = await this.updateUseCase.update(id, updateRoleRequest);
+    const updated = await this.useCase.update(id, updateRoleRequest);
 
     return this.mapper.toResource(updated);
   }
@@ -82,6 +68,6 @@ export class RoleController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Permissions(['access:delete'])
   async remove(@Param('id', ParseIntPipe) id: number) {
-    await this.removeUseCase.remove(id);
+    await this.useCase.remove(id);
   }
 }

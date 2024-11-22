@@ -9,11 +9,6 @@ import {
 
 @Module({
   controllers: [AccountController],
-  providers: [
-    AccountUseCase,
-    AccountCredentialUseCase,
-    AccountStatusUseCase,
-    AccountAccessUseCase,
-  ],
+  providers: [AccountUseCase, AccountCredentialUseCase, AccountStatusUseCase, AccountAccessUseCase],
 })
 export class AccountModule {}

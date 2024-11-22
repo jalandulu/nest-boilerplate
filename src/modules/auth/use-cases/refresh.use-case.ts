@@ -9,9 +9,7 @@ export class RefreshUseCase {
 
   @Transactional()
   async refresh(payload: ProfileEntity) {
-    const { user, permissions, token } = await this.authService.revalidateToken(
-      payload.id,
-    );
+    const { user, permissions, token } = await this.authService.revalidateToken(payload.id);
 
     return {
       user: user,

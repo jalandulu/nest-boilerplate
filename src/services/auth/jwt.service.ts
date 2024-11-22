@@ -11,7 +11,7 @@ export class JwtService {
   async verify(token: string): Promise<JwtEntity> {
     try {
       return await this.jwtRepository.verify({ token });
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -92,27 +92,24 @@ export class JwtService {
     rememberMeToken?: string;
     rememberMeTokenExpAt?: number;
   }> {
-    const { exp: accessTokenExpAt, token: accessToken } =
-      await this.accessToken({
-        userId: payload.sub,
-        username: payload.username,
-        permissions: payload.permissions,
-      });
+    const { exp: accessTokenExpAt, token: accessToken } = await this.accessToken({
+      userId: payload.sub,
+      username: payload.username,
+      permissions: payload.permissions,
+    });
 
-    const { exp: refreshTokenExpAt, token: refreshToken } =
-      await this.refreshToken({
-        userId: payload.sub,
-        username: payload.username,
-        permissions: payload.permissions,
-      });
+    const { exp: refreshTokenExpAt, token: refreshToken } = await this.refreshToken({
+      userId: payload.sub,
+      username: payload.username,
+      permissions: payload.permissions,
+    });
 
     if (rememberMe) {
-      const { exp: rememberMeTokenExpAt, token: rememberMeToken } =
-        await this.rememberMeToken({
-          userId: payload.sub,
-          username: payload.username,
-          permissions: payload.permissions,
-        });
+      const { exp: rememberMeTokenExpAt, token: rememberMeToken } = await this.rememberMeToken({
+        userId: payload.sub,
+        username: payload.username,
+        permissions: payload.permissions,
+      });
 
       return {
         accessToken,

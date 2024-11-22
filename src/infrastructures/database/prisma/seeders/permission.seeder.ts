@@ -1,11 +1,7 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 import { permissions } from './data/permission.data';
 
-export default async function permissionSeeder({
-  prisma,
-}: {
-  prisma: PrismaClient;
-}) {
+export default async function permissionSeeder({ prisma }: { prisma: PrismaClient }) {
   const newPermissions: Prisma.PermissionUncheckedCreateInput[] = [];
 
   for (const permission of permissions) {
@@ -15,7 +11,7 @@ export default async function permissionSeeder({
           slug: permission.slug,
         },
       });
-    } catch (error) {
+    } catch (_error) {
       newPermissions.push({
         module: permission.module,
         action: permission.action,

@@ -9,29 +9,26 @@ import {
 } from 'src/cores/entities';
 import { FileMapper } from '../storage';
 import { RoleMapper } from '../access';
+import { NotificationTokenMapper } from '../notification';
 
 @Injectable()
 export class ProfileMapper {
   constructor(
     private readonly fileMapper: FileMapper,
     private readonly roleMapper: RoleMapper,
+    private readonly tokenMapper: NotificationTokenMapper,
   ) {}
 
   async pictureMap(picture: FileMap | null): Promise<FileEntity> {
     if (!picture) return null;
 
-    return (await this.fileMapper.toMap(picture)).data;
+    return await this.fileMapper.toMap(picture, { public: true });
   }
 
-  notificationTokenMap(
-    tokens: NotificationTokenEntity[] | undefined,
-  ): NotificationTokenEntity[] {
+  notificationTokenMap(tokens: NotificationTokenEntity[] | undefined): NotificationTokenEntity[] {
     if (!tokens || tokens.length < 1) return [];
 
-    return tokens.map((token) => ({
-      type: token.type,
-      token: token.token,
-    }));
+    return this.tokenMapper.toCollection(tokens);
   }
 
   async toMap(user: AuthUserMap, role?: RoleMap): Promise<ProfileEntity> {
@@ -42,7 +39,7 @@ export class ProfileMapper {
       email: user.email,
       emailVerifiedAt: user.emailVerifiedAt?.toISOString() || null,
       picture: await this.pictureMap(user?.picture),
-      role: this.roleMapper.toMap(role).data,
+      role: this.roleMapper.toMap(role),
       notificationTokens: this.notificationTokenMap(user.notificationTokens),
       createdAt: user.createdAt.toISOString(),
       updatedAt: user.updatedAt.toISOString(),

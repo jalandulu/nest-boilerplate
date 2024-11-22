@@ -4,8 +4,5 @@ import { ITokenMessage } from 'src/cores/interfaces';
 export abstract class INotificationServiceProvider {
   abstract send(options: ITokenMessage, dryRun?: boolean): Promise<string>;
 
-  abstract sendEach(
-    options: ITokenMessage[],
-    dryRun?: boolean,
-  ): Promise<BatchResponse>;
+  abstract sendEach(options: ITokenMessage[], dryRun?: boolean): Promise<BatchResponse>;
 }

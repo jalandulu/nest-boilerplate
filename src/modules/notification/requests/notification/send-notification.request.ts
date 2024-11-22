@@ -1,12 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import {
-  IsEnum,
-  IsOptional,
-  IsString,
-  IsUrl,
-  ValidateNested,
-} from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsUrl, ValidateNested } from 'class-validator';
 import _ from 'lodash';
 import { NotificationType } from 'src/cores/enums';
 import { IsExists } from 'src/middlewares/validators';

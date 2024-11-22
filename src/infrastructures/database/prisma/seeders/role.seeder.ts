@@ -48,7 +48,7 @@ export default async function roleSeeder({ prisma }: { prisma: PrismaClient }) {
           },
         });
       }
-    } catch (error) {
+    } catch (_error) {
       await prisma.role.create({
         data: {
           ...role,

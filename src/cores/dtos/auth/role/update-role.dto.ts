@@ -16,9 +16,7 @@ export class UpdateRoleDto implements IUpdateRoleDto {
     return _.kebabCase(this.name);
   }
 
-  get permissionsToPrisma():
-    | Prisma.PermissionsOnRolesCreateWithoutRoleInput[]
-    | undefined {
+  get permissionsToPrisma(): Prisma.PermissionsOnRolesCreateWithoutRoleInput[] | undefined {
     if (!this.permissions) return undefined;
 
     return this.permissions.map((id) => ({

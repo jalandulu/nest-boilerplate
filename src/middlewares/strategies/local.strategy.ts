@@ -5,10 +5,7 @@ import { AuthService } from 'src/services';
 import { AuthStrategy } from 'src/cores/enums';
 
 @Injectable()
-export class LocalStrategy extends PassportStrategy(
-  Strategy,
-  AuthStrategy.Local,
-) {
+export class LocalStrategy extends PassportStrategy(Strategy, AuthStrategy.Local) {
   constructor(private authService: AuthService) {
     super();
   }

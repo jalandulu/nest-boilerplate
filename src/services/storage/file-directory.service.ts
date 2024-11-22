@@ -4,7 +4,7 @@ import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { DateTime } from 'luxon';
 import { DirectoryService } from './directory.service';
-import { IStorageRepository } from 'src/cores/interfaces';
+import { IStorageRepository, IStorageSignedOption } from 'src/cores/interfaces';
 import { StorageCode } from 'src/cores/enums';
 import { Storage } from 'src/common/helpers';
 import { CreateFileDirectoryDto } from 'src/cores/dtos';
@@ -14,9 +14,7 @@ import { ExtendedPrismaClient } from 'src/infrastructures/database';
 @Injectable()
 export class FileDirectoryService {
   constructor(
-    private readonly dataService: TransactionHost<
-      TransactionalAdapterPrisma<ExtendedPrismaClient>
-    >,
+    private readonly dataService: TransactionHost<TransactionalAdapterPrisma<ExtendedPrismaClient>>,
     private readonly fileService: FileService,
     private readonly directoryService: DirectoryService,
     private readonly storageRepository: IStorageRepository,
@@ -99,12 +97,10 @@ export class FileDirectoryService {
     dirname,
     fileId,
   }: {
+    dirname: Storage.DirnameType | Storage.DirpathType;
     fileId: number;
-    dirname: Storage.DirpathType | string;
   }) {
-    const directory = await this.directoryService.findOne<
-      Prisma.StgDirectoryGetPayload<Prisma.StgDirectoryDefaultArgs>
-    >(Storage.dirpath(dirname));
+    const directory = await this.directoryService.findOne(Storage.dirpath(dirname));
 
     return await this.upload({
       fileId: fileId,
@@ -118,8 +114,33 @@ export class FileDirectoryService {
     });
   }
 
-  async signedUrl({ path }: { path: string }) {
-    return await this.storageRepository.signedUrl({ path });
+  async saveMany({
+    dirname,
+    fileIds,
+  }: {
+    dirname: Storage.DirnameType | Storage.DirpathType;
+    fileIds: number[];
+  }) {
+    const directory = await this.directoryService.findOne(Storage.dirpath(dirname));
+
+    return await Promise.all(
+      fileIds.map((fileId) =>
+        this.upload({
+          fileId: fileId,
+          directory: {
+            id: directory.id,
+            name: directory.name,
+            path: directory.path,
+            totalSize: directory.totalSize.toNumber(),
+            totalFiles: directory.totalFiles,
+          },
+        }),
+      ),
+    );
+  }
+
+  async signedUrl({ path, options }: { path: string; options?: IStorageSignedOption }) {
+    return await this.storageRepository.signedUrl({ path, options });
   }
 
   async remove(id: number) {
@@ -135,27 +156,30 @@ export class FileDirectoryService {
 
   async removeForce(id: number) {
     return await this.dataService.tx.stgFileOnDirectory.delete({
-      where: {
-        id,
-      },
+      where: { id },
     });
   }
 
   async removeMany(ids: number[]) {
-    return await this.dataService.tx.stgFileOnDirectory.softDeleteMany({
-      id: {
-        in: ids,
+    return await Promise.all(ids.map(this.remove));
+  }
+
+  async removeForceMany(ids: number[]) {
+    return await Promise.all(ids.map(this.removeForce));
+  }
+
+  async removeManyBy(where: Prisma.StgFileOnDirectoryWhereInput) {
+    return await this.dataService.tx.stgFileOnDirectory.updateMany({
+      where: where,
+      data: {
+        deletedAt: DateTime.now().toISO(),
       },
     });
   }
 
-  async removeForceMany(ids: number[]) {
+  async removeForceManyBy(where: Prisma.StgFileOnDirectoryWhereInput) {
     return await this.dataService.tx.stgFileOnDirectory.deleteMany({
-      where: {
-        id: {
-          in: ids,
-        },
-      },
+      where: where,
     });
   }
 }

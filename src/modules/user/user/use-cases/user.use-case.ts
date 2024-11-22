@@ -1,13 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import {
-  CreateUserRequest,
-  QueryUserRequest,
-  UpdateUserRequest,
-} from '../requests';
+import { CreateUserRequest, QueryUserRequest, UpdateUserRequest } from '../requests';
 import { FileDirectoryService, UserService } from 'src/services';
 import { Transactional } from '@nestjs-cls/transactional';
 import { ProfileEntity, UserMap } from 'src/cores/entities';
 import { UserType } from 'src/cores/enums';
+import { QueryUserDto } from 'src/cores/dtos';
 
 @Injectable()
 export class UserUseCase {
@@ -17,10 +14,7 @@ export class UserUseCase {
   ) {}
 
   async findAll(query: QueryUserRequest, profile: ProfileEntity) {
-    return await this.userService.findAll({
-      ...query,
-      currentUserId: profile.id,
-    });
+    return await this.userService.findAll(new QueryUserDto(profile.id, query));
   }
 
   async findOne(userId: string) {

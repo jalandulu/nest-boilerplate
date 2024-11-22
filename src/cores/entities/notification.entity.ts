@@ -7,8 +7,7 @@ export type NotificationStatisticMap = Prisma.GetNotificationAggregateType<{
   };
 }>;
 
-export type NotificationMap =
-  Prisma.NotificationGetPayload<Prisma.NotificationDefaultArgs>;
+export type NotificationMap = Prisma.NotificationGetPayload<Prisma.NotificationDefaultArgs>;
 
 export type NotificationResourceMap = NotificationMap;
 

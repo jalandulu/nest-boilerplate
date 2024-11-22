@@ -13,21 +13,13 @@ import { MultipartValue } from '@fastify/multipart';
 import { MultipartOptions } from '../interfaces';
 import { getFileFromPart, validateFile } from '../utils';
 
-export function MultipartInterceptor(
-  options: MultipartOptions = {},
-): Type<NestInterceptor> {
+export function MultipartInterceptor(options: MultipartOptions = {}): Type<NestInterceptor> {
   class MixinInterceptor implements NestInterceptor {
-    async intercept(
-      context: ExecutionContext,
-      next: CallHandler,
-    ): Promise<Observable<any>> {
+    async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
       const req = context.switchToHttp().getRequest() as fastify.FastifyRequest;
 
       if (!req.isMultipart()) {
-        throw new HttpException(
-          'The request should be a form-data',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new HttpException('The request should be a form-data', HttpStatus.BAD_REQUEST);
       }
 
       const files = {};
@@ -43,10 +35,7 @@ export function MultipartInterceptor(
         const validationResult = validateFile(file, options);
 
         if (validationResult) {
-          throw new HttpException(
-            validationResult,
-            HttpStatus.UNPROCESSABLE_ENTITY,
-          );
+          throw new HttpException(validationResult, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         files[part.fieldname] = files[part.fieldname] || [];

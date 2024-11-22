@@ -8,9 +8,7 @@ import { ExtendedPrismaClient } from 'src/infrastructures/database';
 @Injectable()
 export class FileService {
   constructor(
-    private readonly dataService: TransactionHost<
-      TransactionalAdapterPrisma<ExtendedPrismaClient>
-    >,
+    private readonly dataService: TransactionHost<TransactionalAdapterPrisma<ExtendedPrismaClient>>,
   ) {}
 
   async findAll() {
@@ -75,9 +73,21 @@ export class FileService {
     });
   }
 
+  async removeMany(ids: number[]) {
+    return await this.dataService.tx.stgFile.softDeleteMany({
+      id: { in: ids },
+    });
+  }
+
   async removeForce(id: number) {
     return await this.dataService.tx.stgFile.delete({
       where: { id },
+    });
+  }
+
+  async removeForceMany(ids: number[]) {
+    return await this.dataService.tx.stgFile.deleteMany({
+      where: { id: { in: ids } },
     });
   }
 }

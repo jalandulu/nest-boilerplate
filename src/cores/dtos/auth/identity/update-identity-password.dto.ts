@@ -6,8 +6,7 @@ export class UpdateIdentityPasswordDto implements IUpdateIdentityPasswordDto {
   password: string;
 
   constructor(payload: IUpdateIdentityPasswordDto) {
-    this.currentPassword = payload.currentPassword;
-    this.password = payload.password;
+    Object.assign(this, payload);
   }
 
   get hashPassword(): Promise<string> {

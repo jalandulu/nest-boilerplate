@@ -16,10 +16,7 @@ export const extendedPrismaClient = new PrismaClient<
   .$extends({
     model: {
       $allModels: {
-        async isExists<T>(
-          this: T,
-          where: Prisma.Args<T, 'findFirst'>['where'],
-        ): Promise<boolean> {
+        async isExists<T>(this: T, where: Prisma.Args<T, 'findFirst'>['where']): Promise<boolean> {
           // Get the current model at runtime
           const context = Prisma.getExtensionContext(this);
 

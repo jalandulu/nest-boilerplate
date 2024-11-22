@@ -14,11 +14,12 @@ export class ProfileUseCase {
 
   @Transactional()
   async update(profile: ProfileEntity, payload: UpdateProfileRequest) {
-    const updated = await this.userService.update<
-      Prisma.UserGetPayload<Prisma.UserDefaultArgs>
-    >(profile.id, {
-      name: payload.name,
-    });
+    const updated = await this.userService.update<Prisma.UserGetPayload<Prisma.UserDefaultArgs>>(
+      profile.id,
+      {
+        name: payload.name,
+      },
+    );
 
     profile.name = payload.name;
     await this.authService.setUser(profile.id, profile);

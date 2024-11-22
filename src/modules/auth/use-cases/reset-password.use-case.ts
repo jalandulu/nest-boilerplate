@@ -7,10 +7,7 @@ import {
 } from '@nestjs/common';
 import { AuthService, IdentityService } from 'src/services';
 import { FastifyRequest } from 'fastify';
-import {
-  ResetPasswordResetRequest,
-  ResetPasswordRequestRequest,
-} from '../requests';
+import { ResetPasswordResetRequest, ResetPasswordRequestRequest } from '../requests';
 import { SignatureError } from 'signed';
 import { SetIdentityPasswordDto } from 'src/cores/dtos';
 
@@ -36,11 +33,10 @@ export class ResetPasswordUseCase {
       throw new NotFoundException(`email or username does not found`);
     }
 
-    const { signatureUrl, verificationCode } =
-      await this.authService.resetPasswordStrategy(
-        identity.id,
-        this.signatureUrl(origin),
-      );
+    const { signatureUrl, verificationCode } = await this.authService.resetPasswordStrategy(
+      identity.id,
+      this.signatureUrl(origin),
+    );
 
     return { url: signatureUrl, code: verificationCode, identity };
   }
@@ -56,9 +52,7 @@ export class ResetPasswordUseCase {
       signatureUrl.searchParams.append('signed', payload.signed);
       signatureUrl.searchParams.append('token', payload.token);
 
-      const { data: userId } = this.authService.verifySignedUrl(
-        signatureUrl.href,
-      );
+      const { data: userId } = this.authService.verifySignedUrl(signatureUrl.href);
 
       const isValidToken = await this.authService.resetPasswordToken(userId);
       if (!isValidToken) {

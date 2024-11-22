@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { PermissionEntity } from './permission.entity';
 
 export type RoleMap = Prisma.RoleGetPayload<Prisma.RoleDefaultArgs>;
 
@@ -21,4 +22,5 @@ export type RoleEntity = {
   visible: boolean;
   createdAt: string | Date;
   updatedAt: string | Date;
+  permissions?: PermissionEntity[];
 };

@@ -4,10 +4,7 @@ import { ValidationPipe as NestValidationPipe } from '@nestjs/common';
 import { HttpErrorByCode } from '@nestjs/common/utils/http-error-by-code.util';
 
 @Injectable()
-export class ValidationPipe
-  extends NestValidationPipe
-  implements PipeTransform<any>
-{
+export class ValidationPipe extends NestValidationPipe implements PipeTransform<any> {
   public createExceptionFactory() {
     return (validationErrors: ValidationError[] = []) => {
       if (this.isDetailedOutputDisabled) {

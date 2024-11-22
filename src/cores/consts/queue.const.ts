@@ -1,7 +1,7 @@
 export const QueueMailerProcessor = {
-  SendEmail: 'send-mail',
+  sendEmail: 'send-mail',
 };
 
 export const QueueNotificationProcessor = {
-  SendNotification: 'send-notification',
+  sendNotification: 'send-notification',
 };

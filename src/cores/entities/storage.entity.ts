@@ -1,8 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { PutObjectCommandOutput } from '@aws-sdk/client-s3';
 
-export type FileMap =
-  Prisma.StgFileOnDirectoryGetPayload<Prisma.StgFileOnDirectoryDefaultArgs>;
+export type FileMap = Prisma.StgFileOnDirectoryGetPayload<Prisma.StgFileOnDirectoryDefaultArgs>;
 
 export type FilesMap = FileMap[];
 

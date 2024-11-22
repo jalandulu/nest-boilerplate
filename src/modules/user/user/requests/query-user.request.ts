@@ -1,12 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsBoolean, IsOptional } from 'class-validator';
-import { PaginationRequest } from 'src/middlewares/request';
+import { QueryableUser } from 'src/cores/dtos';
+import { QueryRequest } from 'src/middlewares/request/query/query.request';
 
-export class QueryUserRequest extends PaginationRequest {
-  @IsOptional()
-  @IsBoolean()
-  @ApiProperty()
-  @Transform(({ value }) => value === 'true')
-  account?: boolean;
+export class QueryUserRequest extends QueryRequest<'User'> {
+  constructor() {
+    super('User', QueryableUser);
+  }
 }

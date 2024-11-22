@@ -49,6 +49,7 @@ export interface IFirebaseServiceEnv {
 
 export interface IStorageServiceEnv {
   host: IEnvironment['host'];
+  url?: string;
   region: string;
   bucket: string;
   baseDir: string;

@@ -9,10 +9,7 @@ export class UpdateIdentityDto implements IUpdateIdentityDto {
   permissionIds?: number[];
 
   constructor(payload: IUpdateIdentityDto) {
-    this.roleId = payload.roleId;
-    this.username = payload.username;
-    this.password = payload.password;
-    this.permissionIds = payload.permissionIds;
+    Object.assign(this, payload);
   }
 
   get permissionsToPrisma():

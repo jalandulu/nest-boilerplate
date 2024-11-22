@@ -1,11 +1,6 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { Transactional } from '@nestjs-cls/transactional';
 import { AuthService, IdentityService } from 'src/services';
-import { Prisma } from '@prisma/client';
 import { SetIdentityStatusDto } from 'src/cores/dtos/auth/identity/set-identity-status.dto';
 
 @Injectable()
@@ -43,21 +38,15 @@ export class AccountStatusUseCase {
 
   @Transactional()
   async status(userId: string) {
-    const identity = await this.identityService.findOne<
-      Prisma.IdentityGetPayload<Prisma.IdentityDefaultArgs>
-    >(userId);
-    if (!identity) {
-      throw new NotFoundException('Account not found.');
-    }
+    const currentStatus = await this.identityService.isActive(userId);
 
-    const currentStatus = identity.disabledAt === null ? false : true;
     const updated = await this.identityService.updateStatus(
       userId,
-      new SetIdentityStatusDto({ enable: currentStatus }),
+      new SetIdentityStatusDto({ enable: !currentStatus }),
     );
 
     if (!currentStatus) {
-      await this.authService.destroy(identity.id);
+      await this.authService.destroy(userId);
     }
 
     return updated;

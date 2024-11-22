@@ -1,21 +1,8 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AccessAuthGuard } from 'src/middlewares/guards';
-import {
-  GenerateNotificationTokenRequest,
-  UpsertNotificationTokenRequest,
-} from '../requests';
-import {
-  UpsertNotifiationTokenUseCase,
-  GenerateNotifiationTokenUseCase,
-} from '../use-cases';
+import { GenerateNotificationTokenRequest, UpsertNotificationTokenRequest } from '../requests';
+import { NotificationTokenUseCase } from '../use-cases';
 
 @ApiTags('Notification Token')
 @UseGuards(AccessAuthGuard)
@@ -24,20 +11,17 @@ import {
   version: '1.0',
 })
 export class NotificationTokenController {
-  constructor(
-    private readonly upsertUseCase: UpsertNotifiationTokenUseCase,
-    private readonly generateUseCase: GenerateNotifiationTokenUseCase,
-  ) {}
+  constructor(private readonly useCase: NotificationTokenUseCase) {}
 
   @Post('upsert')
   @HttpCode(HttpStatus.NO_CONTENT)
   async upsert(@Body() request: UpsertNotificationTokenRequest) {
-    await this.upsertUseCase.upsert(request);
+    await this.useCase.upsert(request);
   }
 
   @Post('generate')
   @HttpCode(HttpStatus.NO_CONTENT)
   async generate(@Body() request: GenerateNotificationTokenRequest) {
-    await this.generateUseCase.generate(request);
+    await this.useCase.generate(request);
   }
 }

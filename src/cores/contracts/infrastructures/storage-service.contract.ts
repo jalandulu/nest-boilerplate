@@ -1,5 +1,5 @@
 import { S3ReadStream } from 's3-readstream/dist/S3Readstream';
-import { IStorageUpload } from 'src/cores/interfaces';
+import { IStorageSignedOption, IStorageUpload } from 'src/cores/interfaces';
 
 export abstract class IStorageServiceProvider {
   abstract upload(
@@ -9,7 +9,9 @@ export abstract class IStorageServiceProvider {
 
   abstract download(path: string): Promise<Buffer>;
 
-  abstract signedUrl(path: string): Promise<string>;
+  abstract publicUrl(path: string): string;
+
+  abstract signedUrl(path: string, options?: IStorageSignedOption): Promise<string>;
 
   abstract readStream(path: string): Promise<S3ReadStream>;
 }

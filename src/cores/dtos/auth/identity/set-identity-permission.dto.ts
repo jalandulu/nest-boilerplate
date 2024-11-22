@@ -1,9 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { ICreateIdentityDto } from 'src/cores/interfaces/dtos';
 
-export class SetIdentityPermissionDto
-  implements Pick<ICreateIdentityDto, 'permissionIds'>
-{
+export class SetIdentityPermissionDto implements Pick<ICreateIdentityDto, 'permissionIds'> {
   permissionIds: number[];
 
   constructor(payload: Pick<ICreateIdentityDto, 'permissionIds'>) {

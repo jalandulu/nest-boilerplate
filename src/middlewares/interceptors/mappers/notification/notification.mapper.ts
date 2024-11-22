@@ -10,46 +10,32 @@ import {
 
 @Injectable()
 export class NotificationMapper {
-  constructor() {}
-
-  toResource(notification: NotificationResourceMap): {
-    data: NotificationEntity;
-  } {
+  toResource(notification: NotificationResourceMap): NotificationEntity {
     return {
-      data: {
-        id: notification.id,
-        service: notification.service,
-        type: notification.type,
-        notifiableType: notification.notifiableType,
-        notifiableId: notification.notifiableId,
-        data: notification.data,
-        sentAt: notification.sentAt,
-        readAt: notification.readAt,
-        createdAt: notification.createdAt,
-        updatedAt: notification.updatedAt,
-      },
+      id: notification.id,
+      service: notification.service,
+      type: notification.type,
+      notifiableType: notification.notifiableType,
+      notifiableId: notification.notifiableId,
+      data: notification.data,
+      sentAt: notification.sentAt,
+      readAt: notification.readAt,
+      createdAt: notification.createdAt,
+      updatedAt: notification.updatedAt,
     };
   }
 
-  toMap(notification: NotificationMap) {
-    return {
-      data: this.toResource(notification).data,
-    };
+  toMap(notification: NotificationMap): NotificationEntity {
+    return this.toResource(notification);
   }
 
-  toCollection(notifications: NotificationsMap) {
-    return {
-      data: notifications.map((notification) => {
-        return this.toMap(notification).data;
-      }),
-    };
+  toCollection(notifications: NotificationsMap): NotificationEntity[] {
+    return notifications.map((i) => this.toMap(i));
   }
 
-  toPaginate(data: NotificationMap[], meta: IPaginationMetaEntity) {
+  toPaginate(data: NotificationsMap, meta: IPaginationMetaEntity) {
     return {
-      data: data.map((notification) => {
-        return this.toMap(notification).data;
-      }),
+      data: this.toCollection(data),
       meta,
     };
   }

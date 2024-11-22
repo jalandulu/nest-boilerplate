@@ -1,7 +1,6 @@
 import { Prisma } from '@prisma/client';
 
-export type PermissionMap =
-  Prisma.PermissionGetPayload<Prisma.PermissionDefaultArgs>;
+export type PermissionMap = Prisma.PermissionGetPayload<Prisma.PermissionDefaultArgs>;
 
 export type PermissionsMap = PermissionMap[];
 

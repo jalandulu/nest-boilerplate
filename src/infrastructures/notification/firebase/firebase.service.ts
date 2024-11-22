@@ -13,22 +13,19 @@ import { ExtendedPrismaClient } from 'src/infrastructures/database';
 export class FirebaseService implements INotificationServiceProvider {
   constructor(
     @InjectFirebaseAdmin() private readonly firebase: FirebaseAdmin,
-    private readonly dataService: TransactionHost<
-      TransactionalAdapterPrisma<ExtendedPrismaClient>
-    >,
+    private readonly dataService: TransactionHost<TransactionalAdapterPrisma<ExtendedPrismaClient>>,
   ) {}
 
   async send(options: ITokenMessage, dryRun?: boolean): Promise<string> {
     try {
       const { token, type, ...message } = options;
 
-      const notificationToken =
-        await this.dataService.tx.notificationToken.findFirstOrThrow({
-          where: { token },
-          include: {
-            user: true,
-          },
-        });
+      const notificationToken = await this.dataService.tx.notificationToken.findFirstOrThrow({
+        where: { token },
+        include: {
+          user: true,
+        },
+      });
 
       const [messaging] = await Promise.all([
         this.firebase.messaging.send(options, dryRun),
@@ -56,10 +53,7 @@ export class FirebaseService implements INotificationServiceProvider {
     }
   }
 
-  async sendEach(
-    options: ITokenMessage[],
-    dryRun?: boolean,
-  ): Promise<BatchResponse> {
+  async sendEach(options: ITokenMessage[], dryRun?: boolean): Promise<BatchResponse> {
     const response = await this.firebase.messaging.sendEach(options, dryRun);
 
     const notifiables = await this.dataService.tx.notificationToken.findMany({

@@ -10,11 +10,7 @@ export class CreateIdentityDto implements ICreateIdentityDto {
   permissionIds?: number[];
 
   constructor(payload: ICreateIdentityDto) {
-    this.userId = payload.userId;
-    this.roleId = payload.roleId;
-    this.username = payload.username;
-    this.password = payload.password;
-    this.permissionIds = payload.permissionIds;
+    Object.assign(this, payload);
   }
 
   get permissionsToPrisma():

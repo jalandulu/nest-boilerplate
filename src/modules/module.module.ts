@@ -7,13 +7,6 @@ import { EmailModule } from './email';
 import { UserModule } from './user';
 
 @Module({
-  imports: [
-    AuthModule,
-    UserModule,
-    AccessModule,
-    StorageModule,
-    NotificationModule,
-    EmailModule,
-  ],
+  imports: [AuthModule, UserModule, AccessModule, StorageModule, NotificationModule, EmailModule],
 })
 export class ModulesModule {}

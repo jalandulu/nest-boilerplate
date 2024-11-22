@@ -26,11 +26,7 @@ import {
 } from '../use-cases';
 import { LogoutUseCase } from '../use-cases/logout.use-case';
 import { LocalAuthEntity, ProfileEntity } from 'src/cores/entities';
-import {
-  AccessAuthGuard,
-  LocalAuthGuard,
-  RefreshAuthGuard,
-} from 'src/middlewares/guards';
+import { AccessAuthGuard, LocalAuthGuard, RefreshAuthGuard } from 'src/middlewares/guards';
 import { AuthPayload } from 'src/common/decorators';
 import { FastifyRequest } from 'fastify';
 import { IQueueServiceProvider } from 'src/cores/contracts';
@@ -77,14 +73,11 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(
-    @Req() request: FastifyRequest,
-    @Body() payload: RegisterRequest,
-  ) {
+  async register(@Req() request: FastifyRequest, @Body() payload: RegisterRequest) {
     const { user, role, authenticated, abilities, emailVerificationUrl } =
       await this.registerUseCase.register(request, payload);
 
-    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.sendEmail, {
       to: user.email,
       template: 'email-verification',
       context: {
@@ -111,7 +104,7 @@ export class AuthController {
   ) {
     const url = await this.emailVerificationUseCase.send(request, payload.id);
 
-    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.sendEmail, {
       to: payload.email,
       template: 'email-verification',
       context: {
@@ -135,12 +128,9 @@ export class AuthController {
     @Req() request: FastifyRequest,
     @Body() payload: ResetPasswordRequestRequest,
   ) {
-    const { url, code, identity } = await this.resetPasswordUseCase.request(
-      request,
-      payload,
-    );
+    const { url, code, identity } = await this.resetPasswordUseCase.request(request, payload);
 
-    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.sendEmail, {
       to: identity.username,
       template: 'reset-password-request',
       context: {
@@ -152,13 +142,10 @@ export class AuthController {
 
   @Post('reset-password/reset')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async resetPassword(
-    @Req() request: FastifyRequest,
-    @Body() payload: ResetPasswordResetRequest,
-  ) {
+  async resetPassword(@Req() request: FastifyRequest, @Body() payload: ResetPasswordResetRequest) {
     const identity = await this.resetPasswordUseCase.reset(request, payload);
 
-    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.SendEmail, {
+    await this.queueServiceProvider.mailer.add(QueueMailerProcessor.sendEmail, {
       to: identity.username,
       template: 'reset-password-success',
       context: {
@@ -170,8 +157,7 @@ export class AuthController {
   @Post('refresh')
   @UseGuards(RefreshAuthGuard)
   async refresh(@AuthPayload() payload: ProfileEntity) {
-    const { user, authenticated, abilities } =
-      await this.refreshUseCase.refresh(payload);
+    const { user, authenticated, abilities } = await this.refreshUseCase.refresh(payload);
 
     return this.authMapper.toMap({
       profile: user,

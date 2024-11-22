@@ -2,39 +2,33 @@ import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import {
-  CreateDirectoryDto,
-  UpdateDirectoryDto,
-  UpdateUsageDirectoryDto,
-} from 'src/cores/dtos';
+import { CreateDirectoryDto, UpdateDirectoryDto, UpdateUsageDirectoryDto } from 'src/cores/dtos';
 import { ExtendedPrismaClient } from 'src/infrastructures/database';
 
 @Injectable()
 export class DirectoryService {
   constructor(
-    private readonly dataService: TransactionHost<
-      TransactionalAdapterPrisma<ExtendedPrismaClient>
-    >,
+    private readonly dataService: TransactionHost<TransactionalAdapterPrisma<ExtendedPrismaClient>>,
   ) {}
 
-  async findAll(
-    where?: Prisma.StgDirectoryWhereInput,
-    include?: Prisma.StgDirectoryInclude,
-  ) {
+  async findAll(where?: Prisma.StgDirectoryWhereInput, include?: Prisma.StgDirectoryInclude) {
     return await this.dataService.tx.stgDirectory.findMany({
       where,
       include,
     });
   }
 
-  async findOne<T>(path: string, include?: Prisma.StgDirectoryInclude) {
+  async findOne<T extends Prisma.StgDirectoryGetPayload<Prisma.StgDirectoryDefaultArgs>>(
+    path: string,
+    include?: Prisma.StgDirectoryInclude,
+  ) {
     return (await this.dataService.tx.stgDirectory.findFirst({
       where: { path },
       include,
-    })) as T;
+    })) as unknown as T;
   }
 
-  async create<T>(
+  async create<T extends Prisma.StgDirectoryGetPayload<Prisma.StgDirectoryDefaultArgs>>(
     createDirectory: CreateDirectoryDto,
     include?: Prisma.StgDirectoryInclude,
   ) {
@@ -51,10 +45,10 @@ export class DirectoryService {
         description: createDirectory.description,
       },
       include,
-    })) as T;
+    })) as unknown as T;
   }
 
-  async update<T>(
+  async update<T extends Prisma.StgDirectoryGetPayload<Prisma.StgDirectoryDefaultArgs>>(
     id: number,
     updateDirectory: UpdateDirectoryDto,
     include?: Prisma.StgDirectoryInclude,
@@ -77,10 +71,10 @@ export class DirectoryService {
         description: updateDirectory.description,
       },
       include,
-    })) as T;
+    })) as unknown as T;
   }
 
-  async updateUsage<T>(
+  async updateUsage<T extends Prisma.StgDirectoryGetPayload<Prisma.StgDirectoryDefaultArgs>>(
     id: number,
     updateDirectory: UpdateUsageDirectoryDto,
     include?: Prisma.StgDirectoryInclude,
@@ -94,7 +88,7 @@ export class DirectoryService {
         totalSize: updateDirectory.totalSize,
       },
       include,
-    })) as T;
+    })) as unknown as T;
   }
 
   async remove(id: number) {

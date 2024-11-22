@@ -1,17 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import {
-  BullRootModuleOptions,
-  SharedBullConfigurationFactory,
-} from '@nestjs/bull';
+import { BullRootModuleOptions, SharedBullConfigurationFactory } from '@nestjs/bull';
 import { ConfigService } from '@nestjs/config';
 import { ICacheServiceEnv } from 'src/cores/interfaces';
 
 @Injectable()
 export class BullConfigService implements SharedBullConfigurationFactory {
   constructor(private readonly configService: ConfigService) {}
-  createSharedConfiguration():
-    | BullRootModuleOptions
-    | Promise<BullRootModuleOptions> {
+  createSharedConfiguration(): BullRootModuleOptions | Promise<BullRootModuleOptions> {
     const redis = this.configService.get<ICacheServiceEnv>('redis');
 
     return {

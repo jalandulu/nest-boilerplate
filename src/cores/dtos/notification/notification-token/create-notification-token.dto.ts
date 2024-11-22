@@ -12,8 +12,9 @@ export class CreateNotificationTokenDto implements ICreateNotificationTokenDto {
       token?: string;
     },
   ) {
-    this.userId = payload.userId;
-    this.type = payload.type;
-    this.token = payload.token ? payload.token : Generate.notificationToken();
+    Object.assign(this, {
+      ...payload,
+      token: payload.token ? payload.token : Generate.notificationToken(),
+    });
   }
 }

@@ -1,24 +1,14 @@
-import {
-  Inject,
-  Injectable,
-  OnModuleDestroy,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { MODULE_OPTIONS_TOKEN } from './mqtt.module-definition';
 import { ITokenMessage, MqttModuleOptions } from './mqtt.interface';
 import { connect, IPublishPacket, ISubscriptionMap, MqttClient } from 'mqtt';
-import {
-  BatchResponse,
-  SendResponse,
-} from 'firebase-admin/lib/messaging/messaging-api';
+import { BatchResponse, SendResponse } from 'firebase-admin/lib/messaging/messaging-api';
 
 @Injectable()
 export class MqttService implements OnModuleInit, OnModuleDestroy {
   private mqtt: MqttClient;
 
-  constructor(
-    @Inject(MODULE_OPTIONS_TOKEN) private readonly options: MqttModuleOptions,
-  ) {}
+  constructor(@Inject(MODULE_OPTIONS_TOKEN) private readonly options: MqttModuleOptions) {}
 
   async onModuleInit() {
     const { brokerUrl, options } = this.options;
@@ -37,7 +27,7 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
     this.mqtt.end();
   }
 
-  async send({ token, type, ...message }: ITokenMessage): Promise<string> {
+  async send({ token, ...message }: ITokenMessage): Promise<string> {
     await this.mqtt.publishAsync(token, JSON.stringify(message));
     return Promise.resolve(JSON.stringify(message));
   }
@@ -81,10 +71,7 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
     return await this.mqtt.subscribeAsync(topicObject);
   }
 
-  listen<T>(
-    topic: string,
-    callback: (payload: T, packet: IPublishPacket) => void,
-  ) {
+  listen<T>(topic: string, callback: (payload: T, packet: IPublishPacket) => void) {
     this.mqtt.on('message', (_topic, _payload, _packet) => {
       if (topic === _topic) {
         callback(JSON.parse(_payload.toString('utf8')) as T, _packet);

@@ -4,9 +4,7 @@ import { Queue } from 'bullmq';
 import { IQueueServiceProvider } from 'src/cores/contracts';
 
 @Injectable()
-export class BullQueueService
-  implements IQueueServiceProvider, OnApplicationBootstrap
-{
+export class BullQueueService implements IQueueServiceProvider, OnApplicationBootstrap {
   notification: Queue<any>;
   mailer: Queue<any>;
 

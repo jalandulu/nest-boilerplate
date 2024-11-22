@@ -1,14 +1,8 @@
-import {
-  FileTypeValidator,
-  FileValidator,
-  MaxFileSizeValidator,
-} from '@nestjs/common';
+import { FileTypeValidator, FileValidator, MaxFileSizeValidator } from '@nestjs/common';
 import { MultipartOptions } from '../interfaces';
 import { MultipartFile } from '@fastify/multipart';
 
-export const getFileFromPart = async (
-  part: MultipartFile,
-): Promise<S3.MultipartFile> => {
+export const getFileFromPart = async (part: MultipartFile): Promise<S3.MultipartFile> => {
   const buffer = await part.toBuffer();
   return {
     buffer,
@@ -19,10 +13,7 @@ export const getFileFromPart = async (
   };
 };
 
-export const validateFile = (
-  file: S3.MultipartFile,
-  options: MultipartOptions,
-): string | void => {
+export const validateFile = (file: S3.MultipartFile, options: MultipartOptions): string | void => {
   const validators: FileValidator[] = [];
 
   if (options.maxFileSize) {

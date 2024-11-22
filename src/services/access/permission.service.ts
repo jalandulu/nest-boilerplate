@@ -6,9 +6,7 @@ import { ExtendedPrismaClient } from 'src/infrastructures/database';
 @Injectable()
 export class PermissionService {
   constructor(
-    private readonly dataService: TransactionHost<
-      TransactionalAdapterPrisma<ExtendedPrismaClient>
-    >,
+    private readonly dataService: TransactionHost<TransactionalAdapterPrisma<ExtendedPrismaClient>>,
   ) {}
 
   async findAll() {

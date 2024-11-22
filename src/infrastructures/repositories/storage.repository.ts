@@ -2,15 +2,25 @@ import { Injectable } from '@nestjs/common';
 import { Generate } from 'src/common/helpers';
 import { IStorageServiceProvider } from 'src/cores/contracts';
 import { IStorageUploadEntity } from 'src/cores/entities';
-import { IStorageRepository } from 'src/cores/interfaces';
+import { IStorageRepository, IStorageSignedOption } from 'src/cores/interfaces';
 import * as mime from 'mime-types';
 
 @Injectable()
 export class StorageRepository implements IStorageRepository {
   constructor(private readonly S3Service: IStorageServiceProvider) {}
 
-  async signedUrl({ path }: { path: string }): Promise<string> {
-    return this.S3Service.signedUrl(path);
+  publicUrl(path: string): string {
+    return this.S3Service.publicUrl(path);
+  }
+
+  async signedUrl({
+    path,
+    options,
+  }: {
+    path: string;
+    options?: IStorageSignedOption;
+  }): Promise<string> {
+    return this.S3Service.signedUrl(path, options);
   }
 
   async readStream({ path }: { path: string }) {

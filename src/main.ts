@@ -1,15 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import {
-  FastifyAdapter,
-  NestFastifyApplication,
-} from '@nestjs/platform-fastify';
+import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { VersioningType } from '@nestjs/common';
 import { useContainer } from 'class-validator';
 import { ValidationPipe } from './middlewares/pipes';
-import { LoggingInterceptor } from './middlewares/interceptors';
+import {
+  LoggingInterceptor,
+  RequestInterceptor,
+  ResponseInterceptor,
+} from './middlewares/interceptors';
 import fastifyMultipart from '@fastify/multipart';
+import * as qs from 'qs';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -17,6 +19,7 @@ async function bootstrap() {
     new FastifyAdapter({
       logger: true,
       trustProxy: true,
+      querystringParser: (str) => qs.parse(str),
     }),
   );
 
@@ -33,12 +36,20 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+        exposeDefaultValues: true,
+      },
       validateCustomDecorators: true,
     }),
   );
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
-  app.useGlobalInterceptors(new LoggingInterceptor());
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(),
+    new RequestInterceptor(),
+    new ResponseInterceptor(),
+  );
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Nest Biolerplate API')

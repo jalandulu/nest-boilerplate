@@ -10,10 +10,7 @@ export class ProfileUsernameUseCase {
     private readonly identityService: IdentityService,
   ) {}
 
-  async updateUsername(
-    profile: ProfileEntity,
-    { username }: UpdateUsernameRequest,
-  ) {
+  async updateUsername(profile: ProfileEntity, { username }: UpdateUsernameRequest) {
     const exist = await this.identityService.findUsername(username, {
       column: 'id',
       value: profile.id,

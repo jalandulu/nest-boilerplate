@@ -2,6 +2,7 @@ import { dirpaths, paths } from 'src/cores/consts';
 import { StorageCode } from 'src/cores/enums';
 
 export namespace Storage {
+  export type DirnameType = (typeof dirpaths)[number]['type'];
   export type DirpathType = (typeof dirpaths)[number]['type'];
 
   export function path(code: StorageCode): string {

@@ -11,7 +11,7 @@ export default async function codeSeeder({ prisma }: { prisma: PrismaClient }) {
           code: code.code,
         },
       });
-    } catch (error) {
+    } catch (_error) {
       newCodes.push({
         type: code.type,
         name: code.name,

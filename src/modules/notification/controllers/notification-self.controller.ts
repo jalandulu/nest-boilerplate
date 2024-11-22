@@ -15,18 +15,8 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { AccessAuthGuard } from 'src/middlewares/guards';
 import { INotificationServiceProvider } from 'src/cores/contracts';
-import {
-  QueryNotificationSelfRequest,
-  SendNotificationRequest,
-} from '../requests';
-import {
-  GetNotifiationUseCase,
-  ReadManyNotifiationUseCase,
-  ReadNotifiationUseCase,
-  RemoveManyNotifiationUseCase,
-  RemoveNotifiationUseCase,
-  StatisticNotifiationUseCase,
-} from '../use-cases';
+import { QueryNotificationSelfRequest, SendNotificationRequest } from '../requests';
+import { NotificationUseCase, StatisticNotificationUseCase } from '../use-cases';
 import { NotificationMapper } from 'src/middlewares/interceptors';
 import { AuthPayload } from 'src/common/decorators';
 import { ProfileEntity } from 'src/cores/entities';
@@ -40,12 +30,8 @@ import { ProfileEntity } from 'src/cores/entities';
 export class NotificationSelfController {
   constructor(
     private readonly mapper: NotificationMapper,
-    private readonly getUseCase: GetNotifiationUseCase,
-    private readonly statisticUseCase: StatisticNotifiationUseCase,
-    private readonly readUseCase: ReadNotifiationUseCase,
-    private readonly readManyUseCase: ReadManyNotifiationUseCase,
-    private readonly removeUseCase: RemoveNotifiationUseCase,
-    private readonly removeManyUseCase: RemoveManyNotifiationUseCase,
+    private readonly statisticUseCase: StatisticNotificationUseCase,
+    private readonly notificationUseCase: NotificationUseCase,
     private readonly notificationProvider: INotificationServiceProvider,
   ) {}
 
@@ -64,7 +50,7 @@ export class NotificationSelfController {
     @Query() request: QueryNotificationSelfRequest,
     @AuthPayload() profile: ProfileEntity,
   ) {
-    const [data, meta] = await this.getUseCase.findAll({
+    const [data, meta] = await this.notificationUseCase.findAll({
       ...request,
       notifiableType: 'users',
       notifiableId: profile.id,
@@ -75,13 +61,13 @@ export class NotificationSelfController {
   @Patch(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async read(@Param('id', ParseIntPipe) id: number) {
-    await this.readUseCase.read(id);
+    await this.notificationUseCase.read(id);
   }
 
   @Patch()
   @HttpCode(HttpStatus.NO_CONTENT)
   async readMany(@AuthPayload() profile: ProfileEntity) {
-    await this.readManyUseCase.readMany({
+    await this.notificationUseCase.readMany({
       notifiableType: 'users',
       notifiableId: profile.id,
     });
@@ -102,13 +88,13 @@ export class NotificationSelfController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id', ParseIntPipe) id: number) {
-    await this.removeUseCase.remove(id);
+    await this.notificationUseCase.remove(id);
   }
 
   @Delete()
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeMany(@AuthPayload() profile: ProfileEntity) {
-    await this.removeManyUseCase.removeMany({
+    await this.notificationUseCase.removeMany({
       notifiableType: 'users',
       notifiableId: profile.id,
     });

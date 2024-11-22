@@ -9,14 +9,8 @@ import {
   IQueueServiceProvider,
 } from 'src/cores/contracts';
 import { SendEmailProcessor, SendNotificationProcessor } from './processors';
-import {
-  MailerServiceModule,
-  NodemailerService,
-} from 'src/infrastructures/mailer';
-import {
-  NotificationServiceModule,
-  MqttService,
-} from 'src/infrastructures/notification';
+import { MailerServiceModule, NodemailerService } from 'src/infrastructures/mailer';
+import { NotificationServiceModule, MqttService } from 'src/infrastructures/notification';
 
 @Module({
   imports: [

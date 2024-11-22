@@ -10,10 +10,7 @@ import { IJwtServiceEnv } from 'src/cores/interfaces';
 import { ICacheServiceProvider } from 'src/cores/contracts';
 
 @Injectable()
-export class RefreshStrategy extends PassportStrategy(
-  Strategy,
-  AuthStrategy.Refresh,
-) {
+export class RefreshStrategy extends PassportStrategy(Strategy, AuthStrategy.Refresh) {
   constructor(
     private readonly configService: ConfigService,
     private readonly authService: AuthService,
@@ -33,9 +30,7 @@ export class RefreshStrategy extends PassportStrategy(
     const isValidRefresh = await this.refreshStrategy(req, payload);
     if (!isValidRefresh) return false;
 
-    return await this.cacheServiceProvider.get<ProfileEntity>(
-      `${payload.sub}:user`,
-    );
+    return await this.cacheServiceProvider.get<ProfileEntity>(`${payload.sub}:user`);
   }
 
   async refreshStrategy(req: FastifyRequest, payload: JwtEntity) {

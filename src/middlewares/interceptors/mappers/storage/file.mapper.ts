@@ -1,45 +1,40 @@
 import { Injectable } from '@nestjs/common';
 import { IStorageServiceProvider } from 'src/cores/contracts';
-import {
-  FileEntity,
-  FileMap,
-  FilesMap,
-  IPaginationMetaEntity,
-} from 'src/cores/entities';
+import { FileEntity, FileMap, FilesMap, IPaginationMetaEntity } from 'src/cores/entities';
+import { FilePrivateMapper } from './file-private.mapper';
+import { FilePublicMapper } from './file-public.mapper';
 
 @Injectable()
 export class FileMapper {
-  constructor(private readonly storageProvider: IStorageServiceProvider) {}
+  private privateMapper: FilePrivateMapper;
+  private publicMapper: FilePublicMapper;
 
-  async toMap(file: FileMap): Promise<{ data: FileEntity }> {
-    return {
-      data: {
-        id: file.fileId,
-        fileDirectoryId: file.id,
-        name: file.fileOriginalName,
-        extension: file?.ext,
-        size: file?.size,
-        url: await this.storageProvider.signedUrl(file.filePath),
-        createdAt: file.createdAt,
-        updatedAt: file.updatedAt,
-      },
-    };
+  constructor(storageProvider: IStorageServiceProvider) {
+    this.privateMapper = new FilePrivateMapper(storageProvider);
+    this.publicMapper = new FilePublicMapper(storageProvider);
   }
 
-  async toCollection(files: FilesMap) {
-    const mapped = await Promise.all(files.map((file) => this.toMap(file)));
+  async toMap(file: FileMap, options?: { public: boolean }): Promise<FileEntity> {
+    if (options?.public) {
+      return this.publicMapper.toMap(file);
+    }
 
-    return {
-      data: mapped.map((file) => file.data),
-    };
+    return await this.privateMapper.toMap(file);
   }
 
-  async toPaginator(data: FileMap[], meta: IPaginationMetaEntity) {
-    const mapped = await Promise.all(data.map((file) => this.toMap(file)));
+  async toCollection(files: FilesMap, options?: { public: boolean }) {
+    if (options?.public) {
+      return this.publicMapper.toCollection(files);
+    }
 
-    return {
-      data: mapped.map((file) => file.data),
-      meta: meta,
-    };
+    return await this.privateMapper.toCollection(files);
+  }
+
+  async toPaginator(data: FileMap[], meta: IPaginationMetaEntity, options?: { public: boolean }) {
+    if (options?.public) {
+      return this.publicMapper.toPaginator(data, meta);
+    }
+
+    return await this.privateMapper.toPaginator(data, meta);
   }
 }

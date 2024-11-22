@@ -5,19 +5,23 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  OnApplicationBootstrap,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3ReadStream } from 's3-readstream/dist/S3Readstream';
 import { IStorageServiceProvider } from 'src/cores/contracts';
-import { IAppEnv, IStorageServiceEnv } from 'src/cores/interfaces';
+import { IAppEnv, IStorageServiceEnv, IStorageSignedOption } from 'src/cores/interfaces';
 
 @Injectable()
-export class S3Service
-  implements IStorageServiceProvider, OnApplicationBootstrap
-{
+export class S3Service implements IStorageServiceProvider, OnApplicationBootstrap {
   private storage: S3Client;
   private bucket: string;
   private basePath: string;
+  private config: IStorageServiceEnv;
 
   private readonly logger = new Logger(S3Service.name);
 
@@ -25,16 +29,16 @@ export class S3Service
 
   onApplicationBootstrap() {
     const configApp = this.configService.get<IAppEnv>('app');
-    const configS3 = this.configService.get<IStorageServiceEnv>('s3');
+    this.config = this.configService.get<IStorageServiceEnv>('s3');
 
-    this.basePath = `${configS3.baseDir}/${configApp.mode}`;
-    this.bucket = configS3.bucket;
+    this.basePath = `${this.config.baseDir}/${configApp.mode}`;
+    this.bucket = this.config.bucket;
     this.storage = new S3Client({
-      endpoint: configS3.host,
-      region: configS3.region ?? 'jkt-1',
+      endpoint: this.config.host,
+      region: this.config.region ?? 'jkt-1',
       credentials: {
-        accessKeyId: configS3.accessKeyId,
-        secretAccessKey: configS3.accessKeySecret,
+        accessKeyId: this.config.accessKeyId,
+        secretAccessKey: this.config.accessKeySecret,
       },
     });
   }
@@ -66,13 +70,23 @@ export class S3Service
     }
   }
 
-  async signedUrl(path: string) {
+  publicUrl(path: string) {
+    if (!this.config.url) {
+      throw new InternalServerErrorException('Please provide S3_URL for public url');
+    }
+
+    return `${this.config.url}/${this.basePath}/${path}`;
+  }
+
+  async signedUrl(path: string, options?: IStorageSignedOption) {
     const command = new GetObjectCommand({
       Bucket: this.bucket,
       Key: `${this.basePath}/${path}`,
     });
 
-    return await getSignedUrl(this.storage, command, { expiresIn: 3600 });
+    return await getSignedUrl(this.storage, command, {
+      expiresIn: options?.expiresIn,
+    });
   }
 
   async readStream(path: string) {

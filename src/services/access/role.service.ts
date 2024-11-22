@@ -9,9 +9,7 @@ import { ExtendedPrismaClient } from 'src/infrastructures/database';
 @Injectable()
 export class RoleService {
   constructor(
-    private readonly dataService: TransactionHost<
-      TransactionalAdapterPrisma<ExtendedPrismaClient>
-    >,
+    private readonly dataService: TransactionHost<TransactionalAdapterPrisma<ExtendedPrismaClient>>,
   ) {}
 
   async findAll({ name }: { name?: string }) {
@@ -26,21 +24,30 @@ export class RoleService {
     });
   }
 
-  async findOne<T>(id: number, include?: Prisma.RoleInclude) {
+  async findOne<T extends Prisma.RoleGetPayload<Prisma.RoleDefaultArgs>>(
+    id: number,
+    include?: Prisma.RoleInclude,
+  ) {
     return (await this.dataService.tx.role.findFirst({
       where: { id, visible: true, deletedAt: null },
       include,
-    })) as T;
+    })) as unknown as T;
   }
 
-  async findBySlug<T>(slug: string, include?: Prisma.RoleInclude) {
+  async findBySlug<T extends Prisma.RoleGetPayload<Prisma.RoleDefaultArgs>>(
+    slug: string,
+    include?: Prisma.RoleInclude,
+  ) {
     return (await this.dataService.tx.role.findFirst({
       where: { slug, visible: true, deletedAt: null },
       include,
-    })) as T;
+    })) as unknown as T;
   }
 
-  async create<T>(createRoleDto: CreateRoleDto, include?: Prisma.RoleInclude) {
+  async create<T extends Prisma.RoleGetPayload<Prisma.RoleDefaultArgs>>(
+    createRoleDto: CreateRoleDto,
+    include?: Prisma.RoleInclude,
+  ) {
     return (await this.dataService.tx.role.create({
       data: {
         name: createRoleDto.name,
@@ -50,10 +57,10 @@ export class RoleService {
         },
       },
       include,
-    })) as T;
+    })) as unknown as T;
   }
 
-  async update<T>(
+  async update<T extends Prisma.RoleGetPayload<Prisma.RoleDefaultArgs>>(
     id: number,
     updateRoleDto: UpdateRoleDto,
     include?: Prisma.RoleInclude,
@@ -74,7 +81,7 @@ export class RoleService {
         },
       },
       include,
-    })) as T;
+    })) as unknown as T;
   }
 
   async remove(id: number) {

@@ -1,9 +1,5 @@
 import { Global, Module } from '@nestjs/common';
-import {
-  AccessStrategy,
-  LocalStrategy,
-  RefreshStrategy,
-} from 'src/middlewares/strategies';
+import { AccessStrategy, LocalStrategy, RefreshStrategy } from 'src/middlewares/strategies';
 
 @Global()
 @Module({

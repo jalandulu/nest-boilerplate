@@ -3,7 +3,7 @@ import { NotificationService } from 'src/services';
 import { QueryNotifiableRequest } from '../../requests';
 
 @Injectable()
-export class StatisticNotifiationUseCase {
+export class StatisticNotificationUseCase {
   constructor(private readonly notificationService: NotificationService) {}
 
   async get(notificationRequest: QueryNotifiableRequest) {

@@ -1,12 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import {
-  UpdateAccountPasswordRequest,
-  UpdateAccountRequest,
-} from '../requests';
+import { Injectable } from '@nestjs/common';
+import { UpdateAccountPasswordRequest, UpdateAccountRequest } from '../requests';
 import { Transactional } from '@nestjs-cls/transactional';
 import { Generate } from 'src/common/helpers';
 import { AuthService, IdentityService } from 'src/services';
-import { Prisma } from '@prisma/client';
 import { SetIdentityPasswordDto } from 'src/cores/dtos';
 
 @Injectable()
@@ -18,22 +14,7 @@ export class AccountCredentialUseCase {
 
   @Transactional()
   async updateUsername(userId: string, payload: UpdateAccountRequest) {
-    const exist = await this.identityService.findUsername(payload.username, {
-      column: 'id',
-      value: userId,
-    });
-    if (exist) {
-      throw new BadRequestException([
-        {
-          field: 'username',
-          errors: [`username is already exists.`],
-        },
-      ]);
-    }
-
-    const before = await this.identityService.findOne<
-      Prisma.IdentityGetPayload<Prisma.IdentityDefaultArgs>
-    >(userId);
+    const before = await this.identityService.findOne(userId);
 
     const after = await this.identityService.updateUsername(userId, {
       username: payload.username,
@@ -69,10 +50,7 @@ export class AccountCredentialUseCase {
   }
 
   @Transactional()
-  async updatePassword(
-    userId: string,
-    { password }: UpdateAccountPasswordRequest,
-  ) {
+  async updatePassword(userId: string, { password }: UpdateAccountPasswordRequest) {
     const updated = await this.identityService.updatePassword(
       userId,
       new SetIdentityPasswordDto({

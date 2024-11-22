@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PermissionService } from 'src/services';
 
 @Injectable()
-export class GetPermissionUseCase {
+export class PermissionUseCase {
   constructor(private readonly permissionService: PermissionService) {}
 
   async findAll() {

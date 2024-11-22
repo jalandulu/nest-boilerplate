@@ -1,14 +1,8 @@
-import {
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Permissions } from 'src/common/decorators';
 import { AccessAuthGuard, PermissionGuard } from 'src/middlewares/guards';
-import { GetPermissionUseCase } from '../use-cases';
+import { PermissionUseCase } from '../use-cases';
 import { PermissionMapper } from 'src/middlewares/interceptors';
 
 @ApiTags('Permissions')
@@ -19,7 +13,7 @@ import { PermissionMapper } from 'src/middlewares/interceptors';
 })
 export class PermissionController {
   constructor(
-    private readonly getUseCase: GetPermissionUseCase,
+    private readonly getUseCase: PermissionUseCase,
     private readonly mapper: PermissionMapper,
   ) {}
 

@@ -39,6 +39,7 @@ export default () => {
     },
     s3: {
       host: process.env.S3_HOST,
+      url: process.env.S3_URL,
       region: process.env.S3_DEFAULT_REGION,
       bucket: process.env.S3_BUCKET,
       baseDir: process.env.S3_BASE_DIR,
@@ -58,13 +59,9 @@ export default () => {
     },
     verification: {
       emailTtl: parseInt(process.env.EMAIL_VERIFICATION_TTL || '300'),
-      emailRefreshTtl: parseInt(
-        process.env.EMAIL_VERIFICATION_REFRESH_TTL || '60',
-      ),
+      emailRefreshTtl: parseInt(process.env.EMAIL_VERIFICATION_REFRESH_TTL || '60'),
       resetTtl: parseInt(process.env.RESET_VERIFICATION_TTL || '300'),
-      resetRefreshTtl: parseInt(
-        process.env.RESET_VERIFICATION_REFRESH_TTL || '60',
-      ),
+      resetRefreshTtl: parseInt(process.env.RESET_VERIFICATION_REFRESH_TTL || '60'),
     },
     mqtt: {
       host: process.env.MQTT_HOST,

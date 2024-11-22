@@ -6,8 +6,6 @@ export class UpdateUserDto implements IUpdateUserDto {
   pictureId?: number;
 
   constructor(payload: IUpdateUserDto) {
-    this.name = payload.name;
-    this.email = payload.email;
-    this.pictureId = payload.pictureId;
+    Object.assign(this, payload);
   }
 }

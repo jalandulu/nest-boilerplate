@@ -7,9 +7,6 @@ export class CreateUserDto implements ICreateUserDto {
   pictureId?: number;
 
   constructor(payload: ICreateUserDto) {
-    this.type = payload.type;
-    this.name = payload.name;
-    this.email = payload.email;
-    this.pictureId = payload.pictureId;
+    Object.assign(this, payload);
   }
 }
